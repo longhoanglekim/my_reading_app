@@ -1,0 +1,27 @@
+{
+  "auth.title.login": "Đăng nhập",
+  "auth.title.register": "Đăng ký",
+  "auth.title.email": "Email",
+  "auth.title.password": "Mật khẩu",
+  "auth.title.confirmPassword": "Xác nhận mật khẩu",
+  "auth.title.name": "Họ và tên",
+  "auth.title.rememberLogin": "Ghi nhớ đăng nhập",
+  "auth.title.forgotPassword": "Quên mật khẩu",
+  "auth.title.or": "Hoặc",
+
+  "auth.button.login": "Đăng nhập",
+  "auth.button.register": "Đăng ký",
+  "auth.button.loginWithGoogle": "Đăng nhập bằng Google",
+  "auth.button.registerWithGoogle": "Đăng ký bằng Google",
+
+  "auth.link.hasAccount.false": "Chưa có tài khoản?",
+  "auth.link.hasAccount.true": "Đã có tài khoản?",
+  "auth.link.terms": "Xem điều khoản",
+
+  "auth.checkbox.agreeTerms": "Tôi đồng ý với điều khoản và điều kiện",
+  "auth.placeholder.email": "Nhập email của bạn",
+  "auth.placeholder.password": "Nhập mật khẩu",
+  "auth.placeholder.confirmPassword": "Nhập lại mật khẩu",
+  "auth.placeholder.name": "Nhập họ và tên",
+  "auth.placeholder.fullName": "Nhập họ và tên đầy đủ"
+}

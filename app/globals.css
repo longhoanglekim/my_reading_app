@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Các phần khác nếu có, ví dụ font, reset, etc. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nếu dùng Tailwind v4 với @theme hoặc custom colors, thêm ở đây */
