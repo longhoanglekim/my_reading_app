@@ -74,13 +74,10 @@ export default function CInput({
       {/* input wrapper */}
       <div
         className={clsx(
-          "flex items-center rounded-md transition-colors duration-200 py-0",
+          "flex items-center rounded-md transition-colors duration-200 overflow-hidden",  // thêm overflow-hidden
           variant !== "link" && "focus-within:ring-2",
           variantStyles[variant],
-          error && `
-            border-red-500 focus-within:ring-red-500/30
-            dark:border-red-400 dark:focus-within:ring-red-400/30
-          `,
+          error && "...",
           className
         )}
       >
@@ -99,13 +96,8 @@ export default function CInput({
         {/* input */}
         <input
           className={clsx(
-            "flex-1 bg-transparent outline-none",
-            variant !== "link" && [
-              "px-2 py-2 text-sm",
-              "md:py-2 md:text-base",
-              "lg:py-2",
-            ],
-            // Thêm placeholder dark mode (nếu chưa có trong variant)
+            "flex-1 bg-transparent outline-none h-full px-3",  // ← thêm h-full + px-3 cho đẹp
+            "text-sm",
             "placeholder:text-gray-400 dark:placeholder:text-gray-500"
           )}
           {...props}

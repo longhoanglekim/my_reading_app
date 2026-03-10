@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation'
 import { BookOpen, Users, Calendar, Settings } from 'lucide-react' // Cài: npm i lucide-react
-import CInput from '@/app/components/common/CInput'
 import { BookOverview } from './type'
 
 export default function Dashboard() {
@@ -52,7 +51,6 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
-            <CInput variant='outline' className='w-2/3' placeholder='Nhập tên sách,tác giả, thể loại,...' />
             {/* Main content */}
             <main className="max-w-7xl mx-auto px-0 py-8">
                 {/* Stats grid */}
@@ -80,8 +78,8 @@ export default function Dashboard() {
                 {/* Recent books */}
                 <section className="mb-10">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold">Sách gần đây</h2>
-                        <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                        <h2 className="text-2xl font-bold">Sách đọc gần đây</h2>
+                        <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm" onClick={() => router.push("/books?type=recent")}>
                             Xem tất cả →
                         </button>
                     </div>
@@ -109,7 +107,38 @@ export default function Dashboard() {
                     </div>
                 </section>
 
-                {/* Quick actions */}
+                {/* Favorite books  */}
+                <section className="mb-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold">Yêu thích</h2>
+                        <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm" onClick={() => router.push("/books?type=favorite")}>
+                            Xem tất cả →
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {recentBooks.map((book, index) => (
+                            <div
+                                key={index}
+                                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                            >
+                                <div className="aspect-[1] relative">
+                                    <img
+                                        src={book.cover}
+                                        alt={book.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+
+                                    />
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-semibold line-clamp-1">{book.title}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{book.author}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+                ` {/* Quick actions
                 <section>
                     <h2 className="text-2xl font-bold mb-6">Hành động nhanh</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -126,7 +155,7 @@ export default function Dashboard() {
                             <p className="text-sm text-gray-600 dark:text-gray-400">Cập nhật thông tin</p>
                         </button>
                     </div>
-                </section>
+                </section>` */}
             </main>
         </div>
     )
