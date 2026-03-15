@@ -1,9 +1,10 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 type BookOverview = {
+    id: string;
     title: string
     author: string
     cover: string
@@ -12,27 +13,27 @@ type BookOverview = {
 const PAGE_SIZE = 8
 
 const ALL_BOOKS: BookOverview[] = [
-    { title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
-    { title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
-    { title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
-    { title: 'Deep Work', author: 'Cal Newport', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800' },
-    { title: 'Clean Code', author: 'Robert C. Martin', cover: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=800' },
-    { title: 'The Pragmatic Programmer', author: 'Andrew Hunt', cover: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800' },
-    { title: 'Thinking Fast and Slow', author: 'Daniel Kahneman', cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800' },
-    { title: 'Zero to One', author: 'Peter Thiel', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800' },
-    { title: 'Start With Why', author: 'Simon Sinek', cover: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800' },
-    { title: 'Hooked', author: 'Nir Eyal', cover: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800' },
-    { title: 'The Lean Startup', author: 'Eric Ries', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800' },
-    { title: 'The Power of Habit', author: 'Charles Duhigg', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
-    { title: 'Sapiens', author: 'Yuval Noah Harari', cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800' },
-    { title: 'Educated', author: 'Tara Westover', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
+    { id: "123", title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
+    { id: "124", title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
+    { id: "125", title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
+    { id: "126", title: 'Deep Work', author: 'Cal Newport', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800' },
+    { id: "127", title: 'Clean Code', author: 'Robert C. Martin', cover: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=800' },
+    { id: "128", title: 'The Pragmatic Programmer', author: 'Andrew Hunt', cover: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800' },
+    { id: "129", title: 'Thinking Fast and Slow', author: 'Daniel Kahneman', cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800' },
+    { id: "130", title: 'Zero to One', author: 'Peter Thiel', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800' },
+    { id: "131", title: 'Start With Why', author: 'Simon Sinek', cover: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800' },
+    { id: "132", title: 'Hooked', author: 'Nir Eyal', cover: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800' },
+    { id: "133", title: 'The Lean Startup', author: 'Eric Ries', cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800' },
+    { id: "134", title: 'The Power of Habit', author: 'Charles Duhigg', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
+    { id: "135", title: 'Sapiens', author: 'Yuval Noah Harari', cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800' },
+    { id: "136", title: 'Educated', author: 'Tara Westover', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
 ]
 
 export default function BooksPage() {
     const searchParams = useSearchParams()
     const type = searchParams.get('type') || 'recent'
     const searchQuery = searchParams.get('query') || ''
-
+    const router = useRouter();
     const [books, setBooks] = useState<BookOverview[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [page, setPage] = useState(1)
@@ -118,7 +119,8 @@ export default function BooksPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {paginatedBooks.map((book) => (
                             <div
-                                key={`${book.title}-${book.author}`}
+                                key={`${book.id}`}
+                                onClick={() => { router.push("/books/" + book.id) }}
                                 className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                             >
                                 <div className="aspect-[1] relative">
@@ -153,8 +155,8 @@ export default function BooksPage() {
                                         key={pageNumber}
                                         onClick={() => setPage(pageNumber)}
                                         className={`px-4 py-2 rounded-lg border transition ${page === pageNumber
-                                                ? 'bg-blue-600 text-white border-blue-600'
-                                                : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                            ? 'bg-blue-600 text-white border-blue-600'
+                                            : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
                                             }`}
                                     >
                                         {pageNumber}

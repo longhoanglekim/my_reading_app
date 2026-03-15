@@ -1,4 +1,3 @@
-
 export type BookOverview = {
     id: string;
     title: string

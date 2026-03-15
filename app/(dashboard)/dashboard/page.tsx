@@ -1,13 +1,19 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { BookOpen, Users, Calendar, Settings } from 'lucide-react' // Cài: npm i lucide-react
-import { BookOverview } from './type'
+import { BookOpen, Users, Calendar, Settings } from 'lucide-react'
+import { useRecentBooks } from './queryHooks'
+import { IBooksParams } from './service'
+// Định nghĩa type cho sách (thêm id để route /books/[id])
 
 export default function Dashboard() {
+    const params = { page: 0, size: 3 } as IBooksParams;
     const router = useRouter()
-
-    // Dữ liệu giả lập (sau này thay bằng API)
+    const { data: recentBooksData, isLoading: recentLoading, isError: recentError } = useRecentBooks(params);
+    if (recentLoading) {
+        return <div className="text-center py-10">Đang tải sách gần đây...</div>;
+    }
+    // Dữ liệu giả lập stats
     const stats = [
         {
             title: 'Sách đã đọc',
@@ -43,11 +49,11 @@ export default function Dashboard() {
         },
     ]
 
-    const recentBooks: BookOverview[] = [
-        { title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
-        { title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
-        { title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
-    ]
+    // Sách đọc gần đây (thêm id)
+    const recentBooks = recentBooksData;
+
+    // Yêu thích (có thể dùng dữ liệu khác, hiện tại dùng chung)
+    const favoriteBooks = recentBooks
 
     return (
         <div className="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -85,17 +91,17 @@ export default function Dashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {recentBooks.map((book, index) => (
+                        {recentBooks.map((book) => (
                             <div
-                                key={index}
-                                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                key={book.id}
+                                onClick={() => router.push(`/books/${book.id}`)} // ← Click để đi đến trang chi tiết sách
+                                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer"
                             >
                                 <div className="aspect-[1] relative">
                                     <img
                                         src={book.cover}
                                         alt={book.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-
                                     />
                                 </div>
                                 <div className="p-4">
@@ -107,7 +113,7 @@ export default function Dashboard() {
                     </div>
                 </section>
 
-                {/* Favorite books  */}
+                {/* Favorite books */}
                 <section className="mb-10">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold">Yêu thích</h2>
@@ -117,17 +123,17 @@ export default function Dashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {recentBooks.map((book, index) => (
+                        {favoriteBooks.map((book) => (
                             <div
-                                key={index}
-                                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                key={book.id}
+                                onClick={() => router.push(`/books/${book.id}`)} // ← Click để đi đến trang chi tiết sách
+                                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer"
                             >
                                 <div className="aspect-[1] relative">
                                     <img
                                         src={book.cover}
                                         alt={book.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-
                                     />
                                 </div>
                                 <div className="p-4">
@@ -138,24 +144,27 @@ export default function Dashboard() {
                         ))}
                     </div>
                 </section>
-                ` {/* Quick actions
-                <section>
-                    <h2 className="text-2xl font-bold mb-6">Hành động nhanh</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <button className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left">
-                            <h3 className="text-lg font-semibold mb-2">Thêm sách mới</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Thêm vào thư viện cá nhân</p>
-                        </button>
-                        <button className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-colors text-left">
-                            <h3 className="text-lg font-semibold mb-2">Tạo sự kiện đọc sách</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Mời bạn bè cùng đọc</p>
-                        </button>
-                        <button className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 transition-colors text-left">
-                            <h3 className="text-lg font-semibold mb-2">Cài đặt tài khoản</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Cập nhật thông tin</p>
-                        </button>
-                    </div>
-                </section>` */}
+
+                {/* Quick actions (phần bạn comment, giữ nguyên nếu muốn mở lại) */}
+                {/*
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Hành động nhanh</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <button className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left">
+              <h3 className="text-lg font-semibold mb-2">Thêm sách mới</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Thêm vào thư viện cá nhân</p>
+            </button>
+            <button className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-colors text-left">
+              <h3 className="text-lg font-semibold mb-2">Tạo sự kiện đọc sách</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Mời bạn bè cùng đọc</p>
+            </button>
+            <button className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 transition-colors text-left">
+              <h3 className="text-lg font-semibold mb-2">Cài đặt tài khoản</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Cập nhật thông tin</p>
+            </button>
+          </div>
+        </section>
+        */}
             </main>
         </div>
     )

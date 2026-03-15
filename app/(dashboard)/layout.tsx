@@ -40,19 +40,22 @@ export default function DashboardLayout({
 
         {/* Main content - scroll độc lập */}
         <main className="flex flex-1 overflow-y-auto bg-white/70 dark:bg-gray-900/70 transition-colors duration-200">
-          <div className="max-w-7xl px-6 py-8 h-fit">
-            <div className="flex flex-row gap-4 justify-start w-fit mb-6 md:mb-8">
-              <CInput
-                variant='outline'
-                className='flex-1 max-w-md min-w-[280px] h-10'  
-                placeholder='Nhập tên sách,tác giả, thể loại,...'
-                onChange={(e) => setQuery(e.target.value)}
-                value={query}
-              />
-              <CButton variant="primary" className="h-10 w-full" onClick={() => handleSearch()}>Tìm kiếm</CButton>
-            </div>
+          <div className="flex-1 flex justify-center items-start min-h-full px-4 md:px-6 lg:px-8">
+            <div className="w-full max-w-5xl">  {/* thay max-w-7xl bằng max-w-5xl hoặc bỏ hẳn */}
+              {/* Search bar nếu cần */}
+              <div className="flex flex-row gap-4 justify-center w-full mb-6 md:mb-8 max-w-md mx-auto mt-5">
+                <CInput
+                  variant='outline'
+                  className='flex-1 h-10'
+                  placeholder='Nhập tên sách,tác giả, thể loại,...'
+                  onChange={(e) => setQuery(e.target.value)}
+                  value={query}
+                />
+                <CButton variant="primary" className="h-10" onClick={handleSearch}>Tìm kiếm</CButton>
+              </div>
 
-            {children}
+              {children}
+            </div>
           </div>
         </main>
 
