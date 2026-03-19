@@ -1,27 +1,59 @@
 {
-  "auth.title.login": "Đăng nhập",
-  "auth.title.register": "Đăng ký",
-  "auth.title.email": "Email",
-  "auth.title.password": "Mật khẩu",
-  "auth.title.confirmPassword": "Xác nhận mật khẩu",
-  "auth.title.name": "Họ và tên",
-  "auth.title.rememberLogin": "Ghi nhớ đăng nhập",
-  "auth.title.forgotPassword": "Quên mật khẩu",
-  "auth.title.or": "Hoặc",
-
-  "auth.button.login": "Đăng nhập",
-  "auth.button.register": "Đăng ký",
-  "auth.button.loginWithGoogle": "Đăng nhập bằng Google",
-  "auth.button.registerWithGoogle": "Đăng ký bằng Google",
-
-  "auth.link.hasAccount.false": "Chưa có tài khoản?",
-  "auth.link.hasAccount.true": "Đã có tài khoản?",
-  "auth.link.terms": "Xem điều khoản",
-
-  "auth.checkbox.agreeTerms": "Tôi đồng ý với điều khoản và điều kiện",
-  "auth.placeholder.email": "Nhập email của bạn",
-  "auth.placeholder.password": "Nhập mật khẩu",
-  "auth.placeholder.confirmPassword": "Nhập lại mật khẩu",
-  "auth.placeholder.name": "Nhập họ và tên",
-  "auth.placeholder.fullName": "Nhập họ và tên đầy đủ"
+  "auth": {
+    "title": {
+      "login": "Đăng nhập",
+      "register": "Đăng ký",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "name": "Họ và tên",
+      "rememberLogin": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu",
+      "or": "Hoặc"
+    },
+    "button": {
+      "login": "Đăng nhập",
+      "register": "Đăng ký",
+      "loginWithGoogle": "Đăng nhập bằng Google",
+      "registerWithGoogle": "Đăng ký bằng Google"
+    },
+    "link": {
+      "hasAccount": {
+        "false": "Chưa có tài khoản?",
+        "true": "Đã có tài khoản?"
+      },
+      "terms": "Xem điều khoản"
+    },
+    "checkbox": {
+      "agreeTerms": "Tôi đồng ý với điều khoản và điều kiện"
+    },
+    "placeholder": {
+      "email": "Nhập email của bạn",
+      "password": "Nhập mật khẩu",
+      "confirmPassword": "Nhập lại mật khẩu",
+      "name": "Nhập họ và tên",
+      "fullName": "Nhập họ và tên đầy đủ"
+    }
+  },
+  "dashboard": {
+    "searchBarPlaceholder": "Nhập tên sách, tác giả, thể loại...",
+    "recentBooks": "Sách đọc gần đây",
+    "favoriteBooks": "Sách yêu thích",
+    "book": {
+      "introduction": "Giới thiệu",
+      "chapterList": "Danh sách chương",
+      "info": "Thông tin truyện"
+    }
+  },
+  "common": {
+    "search": "Tìm kiếm",
+    "seeAll": "Xem tất cả",
+    "prev": "Truớc",
+    "next": "Tiếp",
+    "chapter": "chuơng",
+    "page": "trang",
+    "pageCapital": "Trang",
+    "chapterCapital": "Chương",
+    "readFromStart": "Đọc từ đầu"
+  }
 }

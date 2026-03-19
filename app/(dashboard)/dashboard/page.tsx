@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation'
 import { BookOpen, Users, Calendar, Settings } from 'lucide-react'
 import { useRecentBooks } from './queryHooks'
 import { IBooksParams } from './service'
+import { useIntl } from 'react-intl'
 // Định nghĩa type cho sách (thêm id để route /books/[id])
 
 export default function Dashboard() {
     const params = { page: 0, size: 3 } as IBooksParams;
     const router = useRouter()
+    const intl = useIntl();
     const { data: recentBooksData, isLoading: recentLoading, isError: recentError } = useRecentBooks(params);
     if (recentLoading) {
         return <div className="text-center py-10">Đang tải sách gần đây...</div>;
@@ -48,6 +50,11 @@ export default function Dashboard() {
             hover: 'hover:bg-purple-200 dark:hover:bg-purple-900/50',
         },
     ]
+    const titleMap: Record<string, string> = {
+        recent: intl.formatMessage({ id: "dashboard.recentBooks" }),
+        favorite: intl.formatMessage({ id: "dashboard.favoriteBooks" }),
+        recommended: 'Sách đề xuất',
+    }
 
     // Sách đọc gần đây (thêm id)
     const recentBooks = recentBooksData;
@@ -84,17 +91,17 @@ export default function Dashboard() {
                 {/* Recent books */}
                 <section className="mb-10">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold">Sách đọc gần đây</h2>
+                        <h2 className="text-2xl font-bold">{titleMap.recent}</h2>
                         <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm" onClick={() => router.push("/books?type=recent")}>
-                            Xem tất cả →
+                            {intl.formatMessage({ id: "common.seeAll" })}
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {recentBooks.map((book) => (
+                        {recentBooks?.map((book) => (
                             <div
                                 key={book.id}
-                                onClick={() => router.push(`/books/${book.id}`)} // ← Click để đi đến trang chi tiết sách
+                                onClick={() => router.push(`/books/${book.id}`)}
                                 className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer"
                             >
                                 <div className="aspect-[1] relative">
@@ -116,14 +123,14 @@ export default function Dashboard() {
                 {/* Favorite books */}
                 <section className="mb-10">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold">Yêu thích</h2>
+                        <h2 className="text-2xl font-bold">{titleMap.favorite}</h2>
                         <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm" onClick={() => router.push("/books?type=favorite")}>
-                            Xem tất cả →
+                            {intl.formatMessage({ id: "common.seeAll" })}
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {favoriteBooks.map((book) => (
+                        {favoriteBooks?.map((book) => (
                             <div
                                 key={book.id}
                                 onClick={() => router.push(`/books/${book.id}`)} // ← Click để đi đến trang chi tiết sách

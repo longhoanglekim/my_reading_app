@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl';
 
 type BookOverview = {
     id: string;
@@ -37,10 +38,10 @@ export default function BooksPage() {
     const [books, setBooks] = useState<BookOverview[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [page, setPage] = useState(1)
-
+    const intl = useIntl();
     const titleMap: Record<string, string> = {
-        recent: 'Sách đọc gần đây',
-        favorite: 'Sách yêu thích',
+        recent: intl.formatMessage({ id: "dashboard.recentBooks" }),
+        favorite: intl.formatMessage({ id: "dashboard.favoriteBooks" }),
         recommended: 'Sách đề xuất',
         query: searchQuery ? `Kết quả tìm kiếm cho "${searchQuery}"` : 'Tìm kiếm sách',
     }
@@ -87,7 +88,6 @@ export default function BooksPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-0 py-8 w-full">
-            {/* Header - luôn hiển thị */}
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold">
                     {titleMap[type] || 'Danh sách sách'}
@@ -145,7 +145,7 @@ export default function BooksPage() {
                                 onClick={() => setPage(page - 1)}
                                 className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                             >
-                                Prev
+                                {intl.formatMessage({ id: "common.prev" })}
                             </button>
 
                             {Array.from({ length: totalPages }).map((_, index) => {
@@ -169,7 +169,7 @@ export default function BooksPage() {
                                 onClick={() => setPage(page + 1)}
                                 className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                             >
-                                Next
+                                {intl.formatMessage({ id: "common.next" })}
                             </button>
                         </div>
                     )}

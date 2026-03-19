@@ -3,6 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useIntl } from 'react-intl'
 
 // ──────────────────────────────────────────────
 // TYPES (giữ nguyên)
@@ -88,7 +89,7 @@ export default function ChapterPage() {
     const router = useRouter()
     const bookId = params.id as string
     const chapterNumber = parseInt(params.chapter as string, 10)
-
+    const intl = useIntl();
     const [currentPage, setCurrentPage] = useState(1)
 
     const book = MOCK_BOOKS.find((b) => b.id === bookId)
@@ -139,15 +140,15 @@ export default function ChapterPage() {
                         onClick={() => router.push("/books/" + bookId)}
                         className="flex items-center gap-2 px-4 border rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition"
                     >
-                        Thông tin truyện
+                        {intl.formatMessage({ id: "dashboard.book.info" })}
                     </button>
 
                     <div className="text-center">
                         <h2 className="text-2xl md:text-3xl font-bold">
-                            {book.title} - Chương {chapter.chapter_number}
+                            {book.title} -   {intl.formatMessage({ id: "common.chapterCapital" })} {chapter.chapter_number}
                         </h2>
                         <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            {chapter.title} • Trang {currentPage} / {totalPages}
+                            {chapter.title} • {intl.formatMessage({ id: "common.pageCapital" })} {currentPage} / {totalPages}
                         </p>
                     </div>
 
@@ -179,7 +180,7 @@ export default function ChapterPage() {
                         disabled={currentPage === 1 && !hasPrevChapter}
                         className="w-full sm:w-auto px-5 py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5 font-medium text-sm sm:text-base shadow-sm"
                     >
-                        ← Trước
+                        {intl.formatMessage({ id: "common.prev" })}
                     </button>
 
                     {/* Trang hiện tại - nhỏ hơn, gọn hơn */}
@@ -193,7 +194,7 @@ export default function ChapterPage() {
                         disabled={currentPage === totalPages && !hasNextChapter}
                         className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5 font-medium text-sm sm:text-base shadow-sm"
                     >
-                        Tiếp →
+                        {intl.formatMessage({ id: "common.next" })}
                     </button>
                 </div>
             </footer>

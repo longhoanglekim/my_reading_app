@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from "next/navigation"
+import { useIntl } from "react-intl"
 
 type Chapter = {
     id: string
@@ -48,7 +49,7 @@ export default function BookDetailPage() {
     const params = useParams()
     const bookId = params.id as string
     const router = useRouter()
-
+    const intl = useIntl();
     const book = MOCK_BOOKS.find((b) => b.id === bookId)
 
     if (!book) {
@@ -81,7 +82,7 @@ export default function BookDetailPage() {
                         {book.author}
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 mb-6">
-                        {book.chapters.length} chương
+                        {book.chapters.length} {intl.formatMessage({ id: "common.chapter" })}
                     </p>
 
                     <button
@@ -89,14 +90,14 @@ export default function BookDetailPage() {
                         disabled={book.chapters.length === 0}
                         className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Đọc từ đầu
+                        {intl.formatMessage({ id: "common.readFromStart" })}
                     </button>
                 </div>
             </div>
 
             {/* OVERVIEW */}
             <div className="mb-12">
-                <h2 className="text-2xl font-semibold mb-4">Giới thiệu</h2>
+                <h2 className="text-2xl font-semibold mb-4">{intl.formatMessage({ id: "dashboard.book.introduction" })}</h2>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                     {book.description}
                 </p>
@@ -104,7 +105,7 @@ export default function BookDetailPage() {
 
             {/* CHAPTER LIST */}
             <div>
-                <h2 className="text-2xl font-semibold mb-4">Danh sách chương</h2>
+                <h2 className="text-2xl font-semibold mb-4">{intl.formatMessage({ id: "dashboard.book.chapterList" })}</h2>
                 <div className="border rounded-xl overflow-hidden divide-y dark:divide-gray-700 bg-white dark:bg-gray-800 shadow-sm">
                     {book.chapters
                         .sort((a, b) => a.chapter_number - b.chapter_number)
@@ -115,7 +116,7 @@ export default function BookDetailPage() {
                                 className="p-5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition flex justify-between items-center"
                             >
                                 <span className="font-medium">
-                                    Chương {chapter.chapter_number}
+                                    {intl.formatMessage({ id: "common.chapterCapital" })} {chapter.chapter_number}
                                     {chapter.title ? `: ${chapter.title}` : ""}
                                 </span>
                                 <span className="text-gray-400">→</span>

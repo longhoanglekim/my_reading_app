@@ -1,3 +1,59 @@
 {
-    "title.login": "Login"
+    "auth": {
+        "title": {
+            "login": "Login",
+            "register": "Register",
+            "email": "Email",
+            "password": "Password",
+            "confirmPassword": "Confirm Password",
+            "name": "Full Name",
+            "rememberLogin": "Remember me",
+            "forgotPassword": "Forgot Password",
+            "or": "Or"
+        },
+        "button": {
+            "login": "Login",
+            "register": "Register",
+            "loginWithGoogle": "Login with Google",
+            "registerWithGoogle": "Register with Google"
+        },
+        "link": {
+            "hasAccount": {
+                "false": "Don't have an account?",
+                "true": "Already have an account?"
+            },
+            "terms": "View Terms & Conditions"
+        },
+        "checkbox": {
+            "agreeTerms": "I agree to the terms and conditions"
+        },
+        "placeholder": {
+            "email": "Enter your email",
+            "password": "Enter your password",
+            "confirmPassword": "Re-enter your password",
+            "name": "Enter your name",
+            "fullName": "Enter your full name"
+        }
+    },
+    "dashboard": {
+        "searchBarPlaceholder": "Enter book title, author, genre...",
+        "recentBooks": "Recently reading books",
+        "favoriteBooks": "Favourite books",
+        "book": {
+            "introduction": "Introduction",
+            "chapterList": "Chapter list",
+            "info": "Book info"
+        }
+    },
+    "common": {
+        "search": "Search",
+        "seeAll": "See all",
+        "prev": "Previous",
+        "next": "Next",
+        "chapter": "chapter",
+        "page" : "page",
+        "pageCapital" : "Page",
+        "chapterCapital": "Chapter",
+        "readFromStart": "Read from start"
+    }
 }
