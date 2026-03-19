@@ -127,6 +127,7 @@ export default function ChapterPage() {
         else if (hasNextChapter) router.push(`/books/${bookId}/chapter/${nextChapterNum}`)
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         setCurrentPage(1)
     }, [chapterNumber])
