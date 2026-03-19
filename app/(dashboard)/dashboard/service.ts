@@ -44,13 +44,13 @@ const stats = [
 // Sách đọc gần đây (thêm id)
 const recentBooks: BookOverview[] = [
     { id: '123', title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
-    { id: '123', title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
-    { id: '124', title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
+    { id: '124', title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
+    { id: '125', title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
 ]
 const favoriteBooks: BookOverview[] = [
-    { id: '123', title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
-    { id: '123', title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
-    { id: '124', title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
+    { id: '126', title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
+    { id: '127', title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
+    { id: '128', title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
 ]
 export function getRecentBooks(params: IBooksParams): BookOverview[] | undefined {
     try {

@@ -49,7 +49,7 @@ export default function Sidebar() {
           bg-gray-50 border-r border-gray-200 dark:bg-gray-950 dark:border-gray-800
           flex flex-col
           h-screen overflow-hidden
-        `}
+        `}  
             >
                 <div className="flex flex-col flex-1 overflow-y-auto">
                     {/* Mobile header */}

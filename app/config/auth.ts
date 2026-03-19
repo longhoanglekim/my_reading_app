@@ -1,74 +1,59 @@
-// import axios from "axios";
+import axios from "axios";
 
-// const HttpRequest = axios.create({
-//   baseURL: process.env.API_URL,
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// });
-
-
-// // request interceptor
-// HttpRequest.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("accessToken");
-
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-
-//   return config;
-// });
+const HttpRequest = axios.create({
+    baseURL: process.env.API_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
 
 
-// HttpRequest.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
+// request interceptor
+HttpRequest.interceptors.request.use((config) => {
+    const token = localStorage.getItem("accessToken");
 
-//     // Nếu là 401 và chưa thử refresh
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       const refreshToken = localStorage.getItem("refreshToken");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
 
-//       // Nếu KHÔNG có refreshToken → không cố refresh, reject ngay
-//       // Điều này ngăn chặn vòng lặp vô ích khi chưa login
-//       if (!refreshToken) {
-//         // Optional: Xóa token cũ nếu có
-//         localStorage.removeItem("accessToken");
-//         localStorage.removeItem("refreshToken");
+    return config;
+});
 
-//         // Nếu bạn muốn redirect ở đây, có thể làm, nhưng tốt hơn để page xử lý
-//         // router.push('/login');  // ← KHÔNG nên làm ở interceptor (gây loop)
-//         return Promise.reject(error);
-//       }
 
-//       originalRequest._retry = true;
+HttpRequest.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (!refreshToken) {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                return Promise.reject(error);
+            }
 
-//       try {
-//         const res = await axios.post(
-//           `${process.env.API_URL}/api/auth/refresh`,
-//           { refreshToken }
-//         );
+            originalRequest._retry = true;
 
-//         const newToken = res.data.accessToken;
+            try {
+                const res = await axios.post(
+                    `${process.env.API_URL}/api/auth/refresh`,
+                    { refreshToken }
+                );
 
-//         localStorage.setItem("accessToken", newToken);
+                const newToken = res.data.accessToken;
 
-//         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                localStorage.setItem("accessToken", newToken);
 
-//         // Retry request gốc với token mới
-//         return HttpRequest(originalRequest);
-//       } catch (refreshError) {
-//         // Refresh thất bại → xóa token và reject
-//         localStorage.removeItem("accessToken");
-//         localStorage.removeItem("refreshToken");
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return HttpRequest(originalRequest);
+            } catch (refreshError) {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                return Promise.reject(refreshError);
+            }
+        }
 
-//         // Optional: redirect ở đây nếu bạn chắc chắn muốn
-//         // Nhưng tốt nhất để component/page xử lý (tránh loop ở interceptor)
-//         return Promise.reject(refreshError);
-//       }
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-// export default HttpRequest;
+        return Promise.reject(error);
+    }
+);
+export default HttpRequest;

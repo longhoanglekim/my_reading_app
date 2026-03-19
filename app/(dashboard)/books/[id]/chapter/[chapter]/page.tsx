@@ -131,15 +131,15 @@ export default function ChapterPage() {
     }, [chapterNumber])
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <div className="min-h-screen flex flex-col">
             <div className="flex-1 flex flex-col justify-center py-8 px-4">
                 {/* Header */}
-                <div className="w-full max-w-4xl flex items-center justify-between mb-6 mx-auto">
+                <div className="w-full max-w-4xl flex items-center justify-between  mx-auto">
                     <button
-                        onClick={() => router.back()}
-                        className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition"
+                        onClick={() => router.push("/books/" + bookId)}
+                        className="flex items-center gap-2 px-4 border rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition"
                     >
-                        ← Danh sách chương
+                        Thông tin truyện
                     </button>
 
                     <div className="text-center">
@@ -153,15 +153,13 @@ export default function ChapterPage() {
 
                     <div className="w-32 hidden md:block" />
                 </div>
-
-                {/* Ảnh - giảm height, không cắt */}
                 {currentImage ? (
-                    <div className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-4xl mx-auto">
-                        <div className="bg-black/90 rounded-xl overflow-hidden shadow-2xl">
+                    <div className="w-2/3 max-w-[90vw] md:max-w-[80vw] lg:max-w-3xl mx-auto">
+                        <div className=" rounded-xl overflow-hidden mx-auto ">
                             <img
                                 src={currentImage}
                                 alt={`Trang ${currentPage} - ${chapter.title}`}
-                                className="w-full h-auto max-h-[80vh] sm:max-h-[90vh] md:max-h-[90vh] lg:max-h-[100vh] object-contain p-4 md:p-6 lg:p-8 block"
+                                className="w-full h-auto max-h-[80vh] sm:max-h-[90vh] md:max-h-[90vh] lg:max-h-[90vh] object-contain p-4 md:p-6 lg:p-8 block"
                                 loading={currentPage <= 3 ? "eager" : "lazy"}
                             />
                         </div>
@@ -172,31 +170,33 @@ export default function ChapterPage() {
                     </div>
                 )}
             </div>
+            <footer className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t dark:border-gray-700 z-50 shadow-md">
+                <div className="max-w-5xl mx-auto px-3 py-2 md:py-3 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
 
-            {/* Footer fixed */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t dark:border-gray-700 z-50">
-                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+                    {/* Nút Trước */}
                     <button
                         onClick={handlePrevPage}
                         disabled={currentPage === 1 && !hasPrevChapter}
-                        className="px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                        className="w-full sm:w-auto px-5 py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5 font-medium text-sm sm:text-base shadow-sm"
                     >
                         ← Trước
                     </button>
 
-                    <div className="text-sm font-medium">
+                    {/* Trang hiện tại - nhỏ hơn, gọn hơn */}
+                    <div className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200 order-2 sm:order-none">
                         {currentPage} / {totalPages}
                     </div>
 
+                    {/* Nút Tiếp */}
                     <button
                         onClick={handleNextPage}
                         disabled={currentPage === totalPages && !hasNextChapter}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                        className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-1.5 font-medium text-sm sm:text-base shadow-sm"
                     >
                         Tiếp →
                     </button>
                 </div>
-            </div>
+            </footer>
         </div>
     )
 }

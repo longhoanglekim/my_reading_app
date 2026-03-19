@@ -6,18 +6,18 @@ import CInput from "@/app/components/common/CInput";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useIntl } from "react-intl";
-import { useRouter } from "next/navigation";  // ← Đúng import cho App Router
+import { useRouter } from "next/navigation"; 
 
 export default function LoginPage() {
     const intl = useIntl();
-    const router = useRouter();  // ← Dùng từ next/navigation
+    const router = useRouter();  
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleNavigateToSignup = () => {
         setEmail("");
         setPassword("");
-        router.push("/signup");  // ← Dùng push bình thường
+        router.push("/signup"); 
     };
 
     return (
@@ -49,7 +49,7 @@ export default function LoginPage() {
                     autoComplete="current-password"
                 />
 
-                {/* Remember me + Forgot password */}
+            
                 <div className="flex items-center justify-between text-sm">
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                         <input
@@ -92,11 +92,6 @@ export default function LoginPage() {
                     >
                         {intl.formatMessage({ id: "auth.title.register" })}
                     </CButton>
-
-                    {/* Cách 2: Dùng Link thay thế (nếu muốn tránh push hoàn toàn) */}
-                    {/* <Link href="/signup" onClick={handleNavigateToSignup}>
-            {intl.formatMessage({ id: "auth.title.register" })}
-          </Link> */}
                 </div>
 
                 {/* Divider */}

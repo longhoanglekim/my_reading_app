@@ -23,8 +23,8 @@ export default function DashboardLayout({
 
     const newUrl = `/books?${params.toString()}`;
 
-    router.push(newUrl, { scroll: false });  // replace thay vì push để không thêm history
-    router.refresh();  // ← quan trọng: force Next.js re-fetch server components và re-apply layout
+    router.push(newUrl, { scroll: false });
+    router.refresh();
   };
   return (
     <div className="relative min-h-screen bg-[#E8E0D3] text-gray-900 dark:bg-[#2D2D2D] dark:text-gray-100 transition-colors duration-300">
@@ -41,9 +41,9 @@ export default function DashboardLayout({
         {/* Main content - scroll độc lập */}
         <main className="flex flex-1 overflow-y-auto bg-white/70 dark:bg-gray-900/70 transition-colors duration-200">
           <div className="flex-1 flex justify-center items-start min-h-full px-4 md:px-6 lg:px-8">
-            <div className="w-full max-w-5xl">  {/* thay max-w-7xl bằng max-w-5xl hoặc bỏ hẳn */}
-              {/* Search bar nếu cần */}
-              <div className="flex flex-row gap-4 justify-center w-full mb-6 md:mb-8 max-w-md mx-auto mt-5">
+            <div className="w-full max-w-5xl">
+
+              <div className="flex flex-row gap-4 justify-center w-full mb-2 md:mb-4 max-w-md mx-auto mt-2">
                 <CInput
                   variant='outline'
                   className='flex-1 h-10'
@@ -51,7 +51,7 @@ export default function DashboardLayout({
                   onChange={(e) => setQuery(e.target.value)}
                   value={query}
                 />
-                <CButton variant="primary" className="h-10" onClick={handleSearch}>Tìm kiếm</CButton>
+                <CButton variant="primary" className="h-10 whitespace-nowrap" onClick={handleSearch} ><span>Tìm kiếm</span></CButton>
               </div>
 
               {children}
