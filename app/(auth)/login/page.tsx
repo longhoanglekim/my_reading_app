@@ -6,18 +6,23 @@ import CInput from "@/app/components/common/CInput";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useIntl } from "react-intl";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+import { useLogin } from "./queryHook/queryHook";
 
 export default function LoginPage() {
     const intl = useIntl();
-    const router = useRouter();  
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    const loginMutation = useLogin();
     const handleNavigateToSignup = () => {
         setEmail("");
         setPassword("");
-        router.push("/signup"); 
+        router.push("/signup");
+    };
+    const handleLogin = () => {
+        console.log("Login thôi");
+        loginMutation.mutate({ email, password });
     };
 
     return (
@@ -49,7 +54,7 @@ export default function LoginPage() {
                     autoComplete="current-password"
                 />
 
-            
+
                 <div className="flex items-center justify-between text-sm">
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                         <input
@@ -73,9 +78,7 @@ export default function LoginPage() {
                 <CButton
                     variant="primary"
                     className="w-full font-medium"
-                    onClick={() => {
-                        console.log("Login thôi");
-                    }}
+                    onClick={handleLogin}
                 >
                     {intl.formatMessage({ id: "auth.button.login" })}
                 </CButton>

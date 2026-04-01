@@ -10,8 +10,7 @@ interface Props {
 
 export default function SidebarItem({ href, label }: Props) {
   const pathname = usePathname();
-  const isActive = includesPath(pathname, href) ||
-    (href === '/dashboard' && pathname.startsWith('/books'));
+  const isActive = includesPath(pathname, href)
 
   function includesPath(pathname: string, href: string) {
     const normalizedPathname = pathname.endsWith("/") ? pathname : pathname + "/";

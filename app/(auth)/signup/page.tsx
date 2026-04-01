@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";  // ← Import đúng cho App Route
 
 export default function SignupPage() {
     const intl = useIntl();
-    const router = useRouter();  // ← Dùng từ next/navigation
+    const router = useRouter();  
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

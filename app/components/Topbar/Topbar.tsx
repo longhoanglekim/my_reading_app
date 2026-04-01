@@ -27,11 +27,11 @@ export default function Topbar() {
         dark:bg-gray-950/80 dark:backdrop-blur-md dark:border-gray-800
         text-gray-900 dark:text-gray-100
         shadow-sm dark:shadow-gray-950/40
-        transition-colors duration-200
+        transition-colors duration-200 z-1000
       "
     >
       <h1 className="font-semibold text-lg tracking-tight">
-        Dashboard
+        {intl.formatMessage({ id: "topbar.title" })}
       </h1>
 
       <div className="flex items-center gap-4">
@@ -39,7 +39,7 @@ export default function Topbar() {
         <ThemeToggle />
 
         <TopbarItem>🔔</TopbarItem>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 z-[9999]">
           {userStore.isAuthenticated ? (
             <div className="relative group">
               <button
@@ -62,29 +62,31 @@ export default function Topbar() {
                   )}
                 </div>
               </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl py-2 z-50 
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl py-2 z-[9999]
             invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 transform origin-top-right">
 
                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                  <p className="text-xs text-gray-500">Tài khoản</p>
+                  <p className="text-xs text-gray-500">{intl.formatMessage({ id: "topbar.account" })}</p>
                   <p className="text-sm font-semibold truncate">{user?.email}</p>
                 </div>
 
                 <Link href="/profile" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                  Thông tin hồ sơ
+                  {intl.formatMessage({ id: "topbar.profile" })}
                 </Link>
 
                 <Link href="/settings" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                  Cài đặt
+                  {intl.formatMessage({ id: "topbar.settings" })}
                 </Link>
-
+                <Link href="/publish" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                  {intl.formatMessage({ id: "topbar.publish" })}
+                </Link>
                 <hr className="my-1 border-gray-100 dark:border-gray-800" />
 
                 <button
                   onClick={logout}
                   className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
                 >
-                  Đăng xuất
+                  {intl.formatMessage({ id: "topbar.logout" })}
                 </button>
               </div>
             </div>

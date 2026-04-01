@@ -7,6 +7,7 @@ import { createContext, useState, useEffect, useMemo } from "react";
 
 import en from "@/app/langs/en.json";
 import vi from "@/app/langs/vi.json";
+import { NotificationProvider } from "./NotificationProvider";
 
 export const LocaleContext = createContext<any>(null);
 
@@ -79,7 +80,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <LocaleContext.Provider value={{ locale, setLocale: handleSetLocale }}>
         <IntlProvider locale={locale} messages={flattenedMessages} onError={() => { }}>
           <QueryClientProvider client={queryClient}>
-            {children}
+            <NotificationProvider>
+              {children}
+            </NotificationProvider>
           </QueryClientProvider>
         </IntlProvider>
       </LocaleContext.Provider>

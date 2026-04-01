@@ -8,7 +8,7 @@
             "confirmPassword": "Confirm Password",
             "name": "Full Name",
             "rememberLogin": "Remember me",
-            "forgotPassword": "Forgot Password",
+            "forgotPassword": "Forgot Password?",
             "or": "Or"
         },
         "button": {
@@ -22,38 +22,98 @@
                 "false": "Don't have an account?",
                 "true": "Already have an account?"
             },
-            "terms": "View Terms & Conditions"
+            "terms": "Terms and Conditions"
         },
         "checkbox": {
-            "agreeTerms": "I agree to the terms and conditions"
+            "agreeTerms": "I agree to the Terms and Conditions"
         },
         "placeholder": {
-            "email": "Enter your email",
+            "email": "Enter your email address",
             "password": "Enter your password",
-            "confirmPassword": "Re-enter your password",
-            "name": "Enter your name",
+            "confirmPassword": "Confirm your password",
+            "name": "Enter your full name",
             "fullName": "Enter your full name"
         }
     },
     "dashboard": {
-        "searchBarPlaceholder": "Enter book title, author, genre...",
-        "recentBooks": "Recently reading books",
-        "favoriteBooks": "Favourite books",
+        "searchBarPlaceholder": "Search by book title, author, or genre...",
+        "recentBooks": "Recently Read",
+        "favoriteBooks": "Favorites",
         "book": {
             "introduction": "Introduction",
-            "chapterList": "Chapter list",
-            "info": "Book info"
+            "chapterList": "Chapter List",
+            "info": "Book Information"
         }
+    },
+    "uploadPage": {
+        "title": "Upload New Manga",
+        "bookInfo": {
+            "title": "Book Information",
+            "name": "Title",
+            "author": "Author",
+            "description": "Description",
+            "coverImage": "Cover Image",
+            "genre": "Genres",
+            "namePlaceholder": "E.g: One Piece - Pirate King",
+            "authorPlaceholder": "Author / Translation Group",
+            "descriptionPlaceholder": "Summary of the story content...",
+            "chooseCover": "Choose cover image",
+            "recommendedSize": "Recommended size: 800x1200px"
+        },
+        "chapter": {
+            "title": "Chapters",
+            "addNewChapter": "+ Add New Chapter",
+            "chapterNumber": "Chapter",
+            "chapterTitlePlaceholder": "Chapter title (e.g: Chapter 1 - The Beginning)",
+            "uploadPages": "Click or drag & drop pages",
+            "uploadPagesDesc": "Upload pages for this chapter (you can select multiple images at once)",
+            "selectedPages": "Selected Pages",
+            "removeChapter": "Remove Chapter"
+        },
+        "action": {
+            "publish": "Publish Manga"
+        },
+        "validation": {
+            "titleRequired": "Please enter the manga title!",
+            "authorRequired": "Please enter the author name!",
+            "descriptionRequired": "Please enter the manga description!",
+            "coverRequired": "Please choose a cover image for the manga!",
+            "genreRequired": "Please select at least one genre!",
+            "chapterInvalid": "Each chapter needs a title and at least 1 image page!",
+            "minChapters": "Must have at least 1 chapter!"
+        },
+        "genres": [
+            "Action",
+            "Romance",
+            "Horror",
+            "Comedy",
+            "Adventure",
+            "Fantasy",
+            "Mystery",
+            "Drama",
+            "School Life"
+        ],
+        "delete": "Delete",
+        "pageNumber": "Page {number}"
     },
     "common": {
         "search": "Search",
-        "seeAll": "See all",
+        "seeAll": "See All",
         "prev": "Previous",
         "next": "Next",
         "chapter": "chapter",
-        "page" : "page",
-        "pageCapital" : "Page",
+        "page": "page",
+        "pageCapital": "Page",
         "chapterCapital": "Chapter",
-        "readFromStart": "Read from start"
+        "readFromStart": "Read from Start",
+        "required": "*"
+    },
+    "topbar": {
+        "title": "Dashboard",
+        "account": "Account",
+        "profile": "Profile Information",
+        "settings": "Settings",
+        "publish": "Publish Manga",
+        "logout": "Logout"
     }
 }

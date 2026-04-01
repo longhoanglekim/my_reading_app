@@ -45,15 +45,75 @@
       "info": "Thông tin truyện"
     }
   },
+  "uploadPage": {
+    "title": "Đăng truyện mới",
+    "bookInfo": {
+      "title": "Thông tin truyện",
+      "name": "Tên truyện",
+      "author": "Tác giả",
+      "description": "Mô tả",
+      "coverImage": "Ảnh bìa",
+      "genre": "Thể loại",
+      "namePlaceholder": "Ví dụ: One Piece - Đảo Hải Tặc",
+      "authorPlaceholder": "Tên tác giả / nhóm dịch",
+      "descriptionPlaceholder": "Tóm tắt nội dung truyện...",
+      "chooseCover": "Chọn ảnh bìa",
+      "recommendedSize": "Kích thước đề xuất: 800x1200px"
+    },
+    "chapter": {
+      "title": "Các chương",
+      "addNewChapter": "+ Thêm chương mới",
+      "chapterNumber": "Chương",
+      "chapterTitlePlaceholder": "Tên chương (ví dụ: Chương 1 - Khởi đầu)",
+      "uploadPages": "Nhấn hoặc kéo thả ảnh trang",
+      "uploadPagesDesc": "Upload các trang của chương này (có thể chọn nhiều ảnh cùng lúc)",
+      "selectedPages": "Các trang đã chọn",
+      "removeChapter": "Xóa chương"
+    },
+    "action": {
+      "publish": "Publish Truyện"
+    },
+    "validation": {
+      "titleRequired": "Vui lòng nhập tiêu đề truyện!",
+      "authorRequired": "Vui lòng nhập tên tác giả!",
+      "descriptionRequired": "Vui lòng nhập mô tả truyện!",
+      "coverRequired": "Vui lòng chọn ảnh bìa cho truyện!",
+      "genreRequired": "Vui lòng chọn ít nhất một thể loại!",
+      "chapterInvalid": "Mỗi chương cần có tiêu đề và ít nhất 1 trang ảnh!",
+      "minChapters": "Phải có ít nhất 1 chương!"
+    },
+    "genres": [
+      "Hành động",
+      "Tình cảm",
+      "Kinh dị",
+      "Hài hước",
+      "Phiêu lưu",
+      "Fantasy",
+      "Trinh thám",
+      "Drama",
+      "Học đường"
+    ],
+    "delete": "Xóa",
+    "pageNumber": "Trang {number}"
+  },
   "common": {
     "search": "Tìm kiếm",
     "seeAll": "Xem tất cả",
-    "prev": "Truớc",
+    "prev": "Trước",
     "next": "Tiếp",
-    "chapter": "chuơng",
+    "chapter": "chương",
     "page": "trang",
     "pageCapital": "Trang",
     "chapterCapital": "Chương",
-    "readFromStart": "Đọc từ đầu"
+    "readFromStart": "Đọc từ đầu",
+    "required": "*"
+  },
+  "topbar": {
+    "title": "Bảng điều khiển",
+    "account": "Tài khoản",
+    "profile": "Thông tin hồ sơ",
+    "settings": "Cài đặt",
+    "publish": "Đăng truyện",
+    "logout": "Đăng xuất"
   }
 }
