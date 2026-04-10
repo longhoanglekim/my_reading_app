@@ -39,7 +39,7 @@ export default function Topbar() {
         <ThemeToggle />
 
         <TopbarItem>🔔</TopbarItem>
-        <div className="flex items-center gap-4 z-[9999]">
+        <div className="flex items-center gap-4 z-9999   ">
           {userStore.isAuthenticated ? (
             <div className="relative group">
               <button
