@@ -510,7 +510,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
                     },
                     {
                         "chunk_id": "7-2",
-                        "word": "！！！",
+                        "word": "！！",
                         "romaji": "!!",
                         "type": "punctuation",
                         "meaning": "Exclamation marks"
@@ -831,7 +831,7 @@ export default function ChapterPage() {
                                                     data-chunk-word
                                                     className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${
                                                         isJapanese 
-                                                            ? `inline-block leading-tight}` 
+                                                            ? `inline-block leading-tight px-[1px] hover:bg-yellow-200 hover:text-black rounded-sm}` // `hover:bg-yellow-200 hover:text-black rounded-sm` <- this block is needed to add padding/margin for some reason
                                                             : 'inline'
                                                     }`}
                                                     style={isJapanese ? {
