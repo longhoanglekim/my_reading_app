@@ -510,7 +510,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
                     },
                     {
                         "chunk_id": "7-2",
-                        "word": "！！",
+                        "word": "！！！",
                         "romaji": "!!",
                         "type": "punctuation",
                         "meaning": "Exclamation marks"
@@ -823,6 +823,7 @@ export default function ChapterPage() {
 
                                             const isTateChuYoko = isJapanese && /^[!?！？\d]{2,3}$/.test(chunk.word);
                                             const isSinglePunctuation = isJapanese && /^[!?！？]$/.test(chunk.word);
+                                            const isEllipsis = isJapanese && /^[.。．…]+$/.test(chunk.word);
 
                                             return (
                                                 <span
@@ -830,18 +831,25 @@ export default function ChapterPage() {
                                                     data-chunk-word
                                                     className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${
                                                         isJapanese 
-                                                            ? `inline-block leading-tight ${isTateChuYoko || isSinglePunctuation ? 'font-bold' : ''}` 
+                                                            ? `inline-block leading-tight}` 
                                                             : 'inline'
                                                     }`}
                                                     style={isJapanese ? {
                                                         ...(isTateChuYoko && { 
                                                             textCombineUpright: 'all', 
                                                             textOrientation: 'upright',
-                                                            letterSpacing: '-1px'
+                                                            letterSpacing: '-1px',
+                                                            transform: 'translateX(10%)', 
+                                                            fontWeight: '900',
+
                                                         }),
                                                         ...(isSinglePunctuation && {
-                                                            transform: 'translateX(-15%)', 
-                                                            display: 'inline-block' 
+                                                            transform: 'translateX(-25%)', 
+                                                            display: 'inline-block',
+                                                        }),
+                                                        ...(isEllipsis && {
+                                                            transform: 'translateX(-15%)',
+                                                            display: 'inline-block'
                                                         })
                                                     } : {}}
                                                     onMouseEnter={() => handleChunkHover(bubble.id, idx)}
