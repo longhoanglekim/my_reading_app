@@ -803,14 +803,17 @@ export default function ChapterPage() {
                                     onClick={() => handleBubbleClick(bubble)}
                                 >
                                     <div 
-                                        className="max-w-full"
-                                        style={{ 
+                                        className={isJapanese ? "max-w-full" : "w-full flex flex-wrap gap-1 justify-center"}
+                                        style={isJapanese ? { 
                                             writingMode: 'vertical-rl',
                                             textOrientation: 'mixed',
                                             textAlign: 'center',   
-                                            maxHeight: '100%',     // Rất quan trọng: Ép chữ phải rớt cột khi chạm đáy bubble
+                                            maxHeight: '100%',     
                                             wordBreak: 'break-word',
                                             textWrap: 'balance'
+                                        } : {
+                                            textAlign: 'center',
+                                            wordBreak: 'break-word'
                                         }}
                                     >
                                         {bubble.chunks.map((chunk, idx) => {
@@ -818,30 +821,29 @@ export default function ChapterPage() {
                                                 (hoveredWord?.bubbleId === bubble.id && hoveredWord?.chunkIndex === idx) ||
                                                 (activeWord?.bubbleId === bubble.id && activeWord?.chunkIndex === idx)
 
-                                            const isTateChuYoko = /^[!?！？\d]{2,3}$/.test(chunk.word);
-
-                                            const isSinglePunctuation = /^[!?！？]$/.test(chunk.word);
+                                            const isTateChuYoko = isJapanese && /^[!?！？\d]{2,3}$/.test(chunk.word);
+                                            const isSinglePunctuation = isJapanese && /^[!?！？]$/.test(chunk.word);
 
                                             return (
                                                 <span
                                                     key={idx}
                                                     data-chunk-word
-                                                    className="relative inline-block max-w-full hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none"
-                                                    style={{
+                                                    className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${
+                                                        isJapanese 
+                                                            ? `inline-block leading-tight ${isTateChuYoko || isSinglePunctuation ? 'font-bold' : ''}` 
+                                                            : 'inline'
+                                                    }`}
+                                                    style={isJapanese ? {
                                                         ...(isTateChuYoko && { 
                                                             textCombineUpright: 'all', 
                                                             textOrientation: 'upright',
-                                                            fontWeight: '700',
-                                                            letterSpacing: '-1px', // (Mẹo nhỏ) Kéo 2 dấu !! sát lại với nhau một chút cho giống manga hơn
-                                                            transform: 'translateX(10%)'
+                                                            letterSpacing: '-1px'
                                                         }),
                                                         ...(isSinglePunctuation && {
-                                                            // Dịch chuyển khoảng -15% đến -20% chiều rộng của chính nó sang trái
-                                                            transform: 'translateX(-25%)', 
-                                                            display: 'inline-block' // Bắt buộc phải có để transform hoạt động
+                                                            transform: 'translateX(-15%)', 
+                                                            display: 'inline-block' 
                                                         })
-
-                                                    }}
+                                                    } : {}}
                                                     onMouseEnter={() => handleChunkHover(bubble.id, idx)}
                                                     onMouseLeave={handleChunkLeave}
                                                     onClick={(e) => handleWordClick(bubble.id, idx, chunk, e)}
