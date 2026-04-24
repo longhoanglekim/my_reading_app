@@ -1,10 +1,8 @@
-/* eslint-disable react-hooks/refs */
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
-import { useIntl } from 'react-intl'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 
 /* =========================
    TYPES
@@ -47,7 +45,14 @@ type ChapterPage = {
     chapter_id: string
     page_number: number
     image_url: string
+    original_lang: 'jp' | 'en' | 'vi'
     bubbles: Bubble[]
+}
+
+type SelectionTranslation = {
+    text: string
+    translation: string
+    chunks: BubbleChunk[]
 }
 
 /* =========================
@@ -89,6 +94,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         chapter_id: "ch-nha-001",
         page_number: 1,
         image_url: "/cleaned_image.jpg",
+        original_lang: "jp",
         bubbles: [
             {
                 id: 1,
@@ -179,12 +185,14 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         chapter_id: "ch-nha-001",
         page_number: 2,
         image_url: "https://picsum.photos/id/1015/800/1200",
+        original_lang: "jp",
         bubbles: []
     },
     {
         page_id: "page-003",
         chapter_id: "ch-nha-001",
         page_number: 3,
+        original_lang: "jp",
         image_url: "https://picsum.photos/id/1016/800/1200",
         bubbles: []
     },
@@ -192,6 +200,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         page_id: "page-004",
         chapter_id: "ch-nha-002",
         page_number: 1,
+        original_lang: "jp",
         image_url: "https://picsum.photos/id/201/800/1200",
         bubbles: []
     },
@@ -200,6 +209,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         chapter_id: "ch-nha-002",
         page_number: 2,
         image_url: "https://picsum.photos/id/202/800/1200",
+        original_lang: "jp",
         bubbles: []
     }
 ]
@@ -211,52 +221,196 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
 export default function ChapterPage() {
     const params = useParams()
     const router = useRouter()
-    const intl = useIntl()
 
     const bookId = params.id as string
     const chapterNumber = parseInt(params.chapter as string, 10)
 
     const [currentPage, setCurrentPage] = useState(1)
     const [selectedBubble, setSelectedBubble] = useState<Bubble | null>(null)
-    const [hoveredBubbleId, setHoveredBubbleId] = useState<number | null>(null)
-    const [forceUpdate, setForceUpdate] = useState(0)
+    const [hoveredWord, setHoveredWord] = useState<{ bubbleId: number, chunkIndex: number } | null>(null)
+    const [activeWord, setActiveWord] = useState<{ bubbleId: number, chunkIndex: number } | null>(null)
+    const [textSelection, setTextSelection] = useState<SelectionTranslation | null>(null)
+    const [imageScale, setImageScale] = useState(1)
 
     const imageRef = useRef<HTMLImageElement>(null)
+    const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const book = MOCK_BOOKS.find((b) => b.id === bookId)
-    const chapter = MOCK_CHAPTERS.find(
-        (ch) => ch.book_id === bookId && ch.chapter_number === chapterNumber
+    const book = useMemo(
+        () => MOCK_BOOKS.find((b) => b.id === bookId),
+        [bookId]
     )
 
-    useEffect(() => {
-        setCurrentPage(1)
-        setSelectedBubble(null)
-        setHoveredBubbleId(null)
-    }, [chapterNumber])
+    const chapter = useMemo(
+        () => MOCK_CHAPTERS.find(
+            (ch) => ch.book_id === bookId && ch.chapter_number === chapterNumber
+        ),
+        [bookId, chapterNumber]
+    )
 
-    useEffect(() => {
-        const handleResize = () => setForceUpdate(prev => prev + 1)
-        window.addEventListener('resize', handleResize)
-        return () => window.removeEventListener('resize', handleResize)
-    }, [])
-
-    if (!book) return <div className="p-10 text-center text-red-500">Không tìm thấy truyện</div>
-    if (!chapter) return <div className="p-10 text-center text-red-500">Chương không tồn tại</div>
-
-    const pages = MOCK_CHAPTER_PAGES
-        .filter((page) => page.chapter_id === chapter.id)
-        .sort((a, b) => a.page_number - b.page_number)
+    const pages = useMemo(
+        () => MOCK_CHAPTER_PAGES
+            .filter((page) => page.chapter_id === chapter?.id)
+            .sort((a, b) => a.page_number - b.page_number),
+        [chapter?.id]
+    )
 
     const totalPages = pages.length
-    const currentPageData = pages.find((p) => p.page_number === currentPage)
-    const currentImage = currentPageData?.image_url
-    const currentBubbles = currentPageData?.bubbles || []
+    const currentPageData = useMemo(
+        () => pages.find((p) => p.page_number === currentPage),
+        [pages, currentPage]
+    )
+    const isJapanese = currentPageData?.original_lang === 'jp'
 
-    const prevChapterNum = chapter.chapter_number - 1
-    const nextChapterNum = chapter.chapter_number + 1
+
+    const currentImage = currentPageData?.image_url
+    const currentBubbles = useMemo(() => currentPageData?.bubbles || [], [currentPageData])
+    const sortedBubbles = useMemo(() => {
+        if (!isJapanese) return currentBubbles
+
+        return [...currentBubbles].sort((a, b) => {
+            const [ax, ay] = a.box
+            const [bx, by] = b.box
+
+            // phải → trái
+            if (Math.abs(ax - bx) > 50) {
+                return bx - ax
+            }
+
+            // trên → dưới
+            return ay - by
+        })
+    }, [currentBubbles, isJapanese])
+    const updateImageScale = useCallback(() => {
+        const img = imageRef.current
+        if (!img) return
+
+        const displayedWidth = img.getBoundingClientRect().width
+        const naturalWidth = img.naturalWidth || 800
+        setImageScale(displayedWidth / naturalWidth)
+    }, [])
+
+    useEffect(() => {
+        updateImageScale()
+        window.addEventListener('resize', updateImageScale)
+        return () => window.removeEventListener('resize', updateImageScale)
+    }, [currentImage, updateImageScale])
+
+    useEffect(() => {
+        const handleDocumentClick = (event: MouseEvent) => {
+            const target = event.target as Node | null
+            const element = target
+                ? target.nodeType === Node.ELEMENT_NODE
+                    ? (target as Element)
+                    : target.nodeType === Node.TEXT_NODE
+                        ? target.parentElement
+                        : null
+                : null
+
+            if (!element?.closest('[data-chunk-word]')) {
+                setActiveWord(null)
+            }
+        }
+
+        document.addEventListener('click', handleDocumentClick)
+        return () => document.removeEventListener('click', handleDocumentClick)
+    }, [])
+
+    // Xử lý bôi đen text
+    useEffect(() => {
+        const handleTextSelection = () => {
+            if (selectionTimeoutRef.current) clearTimeout(selectionTimeoutRef.current)
+
+            selectionTimeoutRef.current = setTimeout(() => {
+                const selection = window.getSelection()
+                if (!selection || selection.isCollapsed) {
+                    setTextSelection(null)
+                    return
+                }
+
+                const selectedText = selection.toString().trim()
+                if (!selectedText) return
+
+                let bestBubble: Bubble | null = null
+                let bestChunks: BubbleChunk[] = []
+
+                for (const bubble of currentBubbles) {
+                    const matched = bubble.chunks.filter(chunk =>
+                        selectedText.includes(chunk.word) || chunk.word.includes(selectedText)
+                    )
+                    if (matched.length > bestChunks.length) {
+                        bestBubble = bubble
+                        bestChunks = matched
+                    }
+                }
+
+                if (bestBubble) {
+                    const translation = bestChunks.length > 0
+                        ? bestChunks.map(c => `${c.word} (${c.romaji}): ${c.meaning}`).join("\n")
+                        : bestBubble.full_translation
+
+                    setTextSelection({
+                        text: selectedText,
+                        translation,
+                        chunks: bestChunks.length > 0 ? bestChunks : bestBubble.chunks
+                    })
+                }
+            }, 300)
+        }
+
+        document.addEventListener('mouseup', handleTextSelection)
+        return () => document.removeEventListener('mouseup', handleTextSelection)
+    }, [currentBubbles])
+
+    const getBubbleStyle = (bubble: Bubble) => {
+        const [x, y, w, h] = bubble.box
+
+        return {
+            left: `${Math.round(x * imageScale)}px`,
+            top: `${Math.round(y * imageScale)}px`,
+            width: `${Math.round(w * imageScale)}px`,
+            height: `${Math.round(h * imageScale)}px`,
+        }
+    }
+
+    // Hover vào chữ → hiện tooltip
+    const handleChunkHover = (bubbleId: number, chunkIndex: number) => {
+        setHoveredWord({ bubbleId, chunkIndex })
+    }
+
+    const handleChunkLeave = () => {
+        setHoveredWord(null)
+    }
+
+    // Click vào chữ → hiện panel dịch phía dưới
+    const handleWordClick = (
+        bubbleId: number,
+        chunkIndex: number,
+        chunk: BubbleChunk,
+        e: React.MouseEvent
+    ) => {
+        e.stopPropagation()
+        window.getSelection()?.removeAllRanges()
+        setHoveredWord({ bubbleId, chunkIndex })
+        setActiveWord({ bubbleId, chunkIndex })
+
+        setTextSelection({
+            text: chunk.word,
+            translation: `${chunk.word} (${chunk.romaji}): ${chunk.meaning}`,
+            chunks: [chunk]
+        })
+    }
+
+    // Click cả bubble → mở popup chi tiết
+    const handleBubbleClick = (bubble: Bubble) => {
+        setActiveWord(null)
+        setSelectedBubble(bubble)
+    }
+
+    const prevChapterNum = chapter?.chapter_number ? chapter.chapter_number - 1 : 0
+    const nextChapterNum = chapter?.chapter_number ? chapter.chapter_number + 1 : 0
 
     const hasPrevChapter = MOCK_CHAPTERS.some(ch => ch.book_id === bookId && ch.chapter_number === prevChapterNum)
-    const hasNextChapter = chapter.hasNextChapter
+    const hasNextChapter = chapter?.hasNextChapter || false
 
     const handlePrevPage = () => {
         if (currentPage > 1) setCurrentPage(prev => prev - 1)
@@ -268,49 +422,30 @@ export default function ChapterPage() {
         else if (hasNextChapter) router.push(`/books/${bookId}/chapter/${nextChapterNum}`)
     }
 
-    const getBubbleStyle = (bubble: Bubble) => {
-        if (!imageRef.current) return { left: '10px', top: '10px', width: '100px', height: '50px' }
-
-        const img = imageRef.current
-        const displayedWidth = img.getBoundingClientRect().width
-        const naturalWidth = img.naturalWidth
-        const scale = displayedWidth / naturalWidth
-
-        const [x, y, w, h] = bubble.box
-
-        return {
-            left: `${Math.round(x * scale)}px`,
-            top: `${Math.round(y * scale)}px`,
-            width: `${Math.round(w * scale)}px`,
-            height: `${Math.round(h * scale)}px`,
-        }
-    }
-
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50">
+        <div key={chapterNumber} className="min-h-screen flex flex-col bg-gray-50">
             {/* HEADER */}
             <div className="w-full max-w-5xl mx-auto px-4 py-6">
-                <div className="flex items-center justify-between">
+                <div className="relative flex items-center">
                     <button
                         onClick={() => router.push(`/books/${bookId}`)}
-                        className="px-5 py-2 border rounded-lg hover:bg-gray-100"
+                        className="px-5 py-2 border rounded-lg hover:bg-gray-100 z-10"
                     >
-                        {intl.formatMessage({ id: 'dashboard.book.info' })}
+                        ← Thông tin truyện
                     </button>
 
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold">{book.title}</h1>
+                    <div className="absolute left-1/2 -translate-x-1/2 text-center">
+                        <h1 className="text-2xl font-bold">{book?.title}</h1>
                         <p className="text-gray-600">
-                            {chapter.title} • {intl.formatMessage({ id: 'common.pageCapital' })} {currentPage} / {totalPages}
+                            {chapter?.title} • Trang {currentPage}/{totalPages}
                         </p>
                     </div>
-                    <div className="w-20" />
                 </div>
             </div>
 
             {/* IMAGE + BUBBLES */}
             <div className="flex-1 flex justify-center px-4 pb-24">
-                <div className="relative w-full max-w-[800px] mx-auto">
+                <div className="relative w-full max-w-200 mx-auto">
                     {currentImage ? (
                         <div className="relative">
                             <img
@@ -318,34 +453,61 @@ export default function ChapterPage() {
                                 src={currentImage}
                                 alt={`Trang ${currentPage}`}
                                 className="w-full h-auto rounded-xl shadow-2xl block"
-                                onLoad={() => setForceUpdate(prev => prev + 1)}
+                                onLoad={updateImageScale}
                             />
 
-                            {/* Bubble Overlay */}
-                            {currentBubbles.map((bubble) => {
-                                const isHovered = hoveredBubbleId === bubble.id
-                                const isSelected = selectedBubble?.id === bubble.id
+                            {sortedBubbles.map((bubble) => (
+                                <div
+                                    key={bubble.id}
+                                    className="absolute flex items-center justify-center text-center p-3 transition-all duration-200 cursor-pointer rounded gap-1 border border-transparent hover:border-yellow-300 hover:bg-white/70"
+                                    style={getBubbleStyle(bubble)}
+                                    onClick={() => handleBubbleClick(bubble)}
+                                >
+                                    <div className="flex flex-wrap gap-1 justify-center">
+                                        {bubble.chunks.map((chunk, idx) => {
+                                            const isActive =
+                                                (hoveredWord?.bubbleId === bubble.id && hoveredWord?.chunkIndex === idx) ||
+                                                (activeWord?.bubbleId === bubble.id && activeWord?.chunkIndex === idx)
 
-                                return (
-                                    <div
-                                        key={bubble.id}
-                                        className={`absolute flex items-center justify-center text-center p-2 transition-all duration-200 cursor-pointer rounded overflow-hidden
-                                            ${isHovered || isSelected
-                                                ? 'border-2 border-yellow-400 bg-white/95 shadow-md'
-                                                : 'border border-transparent hover:border-yellow-300 hover:bg-white/70'
-                                            }`}
-                                        style={getBubbleStyle(bubble)}
-                                        onMouseEnter={() => setHoveredBubbleId(bubble.id)}
-                                        onMouseLeave={() => setHoveredBubbleId(null)}
-                                        onClick={() => setSelectedBubble(bubble)}
-                                    >
-                                        <p className={`text-sm leading-tight font-medium transition-all duration-200 break-words
-                                            ${isHovered || isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
-                                            {isHovered || isSelected ? bubble.full_translation : bubble.original_text}
-                                        </p>
+                                            return (
+                                                <span
+                                                    key={idx}
+                                                    data-chunk-word
+                                                    className="relative hover:bg-yellow-200 hover:text-black px-2 py-1 rounded cursor-pointer transition-colors text-sm select-none"
+                                                    onMouseEnter={() => handleChunkHover(bubble.id, idx)}
+                                                    onMouseLeave={handleChunkLeave}
+                                                    onClick={(e) => handleWordClick(bubble.id, idx, chunk, e)}
+                                                >
+                                                    {chunk.word}
+
+                                                    {/* Tooltip Hover */}
+                                                    {isActive && (
+                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-50 pointer-events-none border">
+
+                                                            {/* WORD */}
+                                                            <div className="flex items-baseline gap-2 mb-1">
+                                                                <span className="font-bold text-lg">{chunk.word}</span>
+                                                                <span className="text-xs text-gray-500">{chunk.romaji}</span>
+                                                            </div>
+
+                                                            {/* MEANING */}
+                                                            <p className="text-sm text-gray-700 mb-2">
+                                                                {chunk.meaning}
+                                                            </p>
+
+                                                            {/* TYPE */}
+                                                            <p className="text-[11px] text-gray-400">
+                                                                Loại: {chunk.type}
+                                                            </p>
+
+                                                        </div>
+                                                    )}
+                                                </span>
+                                            )
+                                        })}
                                     </div>
-                                )
-                            })}
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <div className="text-center py-20 text-gray-500">Đang tải trang...</div>
@@ -353,7 +515,9 @@ export default function ChapterPage() {
                 </div>
             </div>
 
-            {/* FOOTER NAVIGATION */}
+
+
+            {/* FOOTER */}
             <footer className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
                 <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
                     <button
@@ -361,7 +525,7 @@ export default function ChapterPage() {
                         disabled={currentPage === 1 && !hasPrevChapter}
                         className="px-6 py-3 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 rounded-lg font-medium"
                     >
-                        {intl.formatMessage({ id: 'common.prev' })}
+                        ← Trang trước
                     </button>
 
                     <span className="font-medium text-lg">{currentPage} / {totalPages}</span>
@@ -371,7 +535,7 @@ export default function ChapterPage() {
                         disabled={currentPage === totalPages && !hasNextChapter}
                         className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium"
                     >
-                        {intl.formatMessage({ id: 'common.next' })}
+                        Trang sau →
                     </button>
                 </div>
             </footer>
