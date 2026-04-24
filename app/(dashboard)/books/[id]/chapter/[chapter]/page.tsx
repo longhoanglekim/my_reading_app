@@ -26,6 +26,7 @@ type BookChapter = {
 }
 
 type BubbleChunk = {
+    chunk_id: string
     meaning: string
     romaji: string
     type: string
@@ -45,7 +46,7 @@ type ChapterPage = {
     chapter_id: string
     page_number: number
     image_url: string
-    original_lang: 'jp' | 'en' | 'vi'
+    original_lang: 'ja' | 'ko' | 'zh' | 'en' | 'vi' // Follows ISO 639-1 2-character language codes
     bubbles: Bubble[]
 }
 
@@ -94,89 +95,427 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         chapter_id: "ch-nha-001",
         page_number: 1,
         image_url: "/cleaned_image.jpg",
-        original_lang: "jp",
-        bubbles: [
+        original_lang: "ja",
+        "bubbles": [
             {
-                id: 1,
-                box: [318, 69, 140, 218],
-                chunks: [
-                    { meaning: "À thì/Này", romaji: "e-", type: "interjection", word: "えー" },
-                    { meaning: "Mọi người", romaji: "minna", type: "noun", word: "みにゃ" },
-                    { meaning: "：", romaji: ":", type: "punctuation", word: "：" },
-                    { meaning: "Mọi người", romaji: "mina", type: "noun", word: "皆" },
-                    { meaning: "cũng", romaji: "mo", type: "particle", word: "も" },
-                    { meaning: "đang nghe", romaji: "kiiteiru", type: "verb", word: "聞いている" },
-                    { meaning: "như đã...", romaji: "toori", type: "noun", word: "通り" }
+                "id": 1,
+                "box": [
+                    318,
+                    69,
+                    140,
+                    218
                 ],
-                full_translation: "À này mọi người, như các em đã nghe đấy...",
-                original_text: "えーみにゃ：皆も聞いている通り"
+                "original_text": "えーみにゃ：皆も聞いている通り",
+                "full_translation": "Well, Minya: As you all have heard,",
+                "chunks": [
+                    {
+                        "chunk_id": "1-1",
+                        "word": "えー",
+                        "romaji": "e-",
+                        "type": "interjection",
+                        "meaning": "Well / Uh (filler)"
+                    },
+                    {
+                        "chunk_id": "1-2",
+                        "word": "みにゃ",
+                        "romaji": "minya",
+                        "type": "noun",
+                        "meaning": "Minya (speaker name)"
+                    },
+                    {
+                        "chunk_id": "1-3",
+                        "word": "：",
+                        "romaji": ":",
+                        "type": "punctuation",
+                        "meaning": "Colon (punctuation)"
+                    },
+                    {
+                        "chunk_id": "1-4",
+                        "word": "皆",
+                        "romaji": "mina",
+                        "type": "noun",
+                        "meaning": "Everyone"
+                    },
+                    {
+                        "chunk_id": "1-5",
+                        "word": "も",
+                        "romaji": "mo",
+                        "type": "particle",
+                        "meaning": "Also / too (particle)"
+                    },
+                    {
+                        "chunk_id": "1-6",
+                        "word": "聞いている",
+                        "romaji": "kiiteiru",
+                        "type": "verb",
+                        "meaning": "As you have heard (te-iru form, present continuous/state)"
+                    },
+                    {
+                        "chunk_id": "1-7",
+                        "word": "通り",
+                        "romaji": "toori",
+                        "type": "noun",
+                        "meaning": "As / according to"
+                    }
+                ]
             },
             {
-                id: 2,
-                box: [818, 431, 136, 208],
-                chunks: [
-                    { meaning: "Trường nữ sinh Fuurin này", romaji: "kono fuurin joshikou wa", type: "noun phrase", word: "この楓林女子高は" },
-                    { meaning: "do việc sáp nhập trường học", romaji: "gakuen heigou ni tomonai", type: "phrase", word: "学園併合に伴い" }
+                "id": 2,
+                "box": [
+                    818,
+                    431,
+                    136,
+                    208
                 ],
-                full_translation: "Do việc sáp nhập trường học, ngôi trường nữ sinh Fuurin này...",
-                original_text: "この楓林女子高は学園併合に伴い"
+                "original_text": "この楓林女子高は学園併合に伴い",
+                "full_translation": "Due to the school merger, this Furin Girls' High School...",
+                "chunks": [
+                    {
+                        "chunk_id": "2-1",
+                        "word": "この",
+                        "romaji": "kono",
+                        "type": "determiner",
+                        "meaning": "This"
+                    },
+                    {
+                        "chunk_id": "2-2",
+                        "word": "楓林",
+                        "romaji": "fuurin",
+                        "type": "noun",
+                        "meaning": "Furin (name)"
+                    },
+                    {
+                        "chunk_id": "2-3",
+                        "word": "女子高",
+                        "romaji": "joshikou",
+                        "type": "noun",
+                        "meaning": "Girls' high school"
+                    },
+                    {
+                        "chunk_id": "2-4",
+                        "word": "は",
+                        "romaji": "wa",
+                        "type": "particle",
+                        "meaning": "Is (copula)"
+                    },
+                    {
+                        "chunk_id": "2-5",
+                        "word": "学園",
+                        "romaji": "gakuen",
+                        "type": "noun",
+                        "meaning": "School"
+                    },
+                    {
+                        "chunk_id": "2-6",
+                        "word": "併合",
+                        "romaji": "heigou",
+                        "type": "noun",
+                        "meaning": "Merger"
+                    },
+                    {
+                        "chunk_id": "2-7",
+                        "word": "に伴い",
+                        "romaji": "nitomanoi",
+                        "type": "particle",
+                        "meaning": "Due to / along with"
+                    }
+                ]
             },
             {
-                id: 3,
-                box: [159, 460, 168, 187],
-                chunks: [
-                    { meaning: "Từ năm học này", romaji: "hon-nendo kara", type: "noun phrase", word: "本年度から" },
-                    { meaning: "sáp nhập với trường trung học nam Furin", romaji: "fuurin danshikou to gappei shi", type: "verb phrase", word: "楓林男子高と合併し" },
-                    { meaning: "trở thành trường đồng giáo", romaji: "kyougaku to naru", type: "verb phrase", word: "共学となる" }
+                "id": 3,
+                "box": [
+                    159,
+                    460,
+                    168,
+                    187
                 ],
-                full_translation: "Từ năm học này, trường chúng ta sẽ sáp nhập với trường nam sinh Furin và chính thức trở thành trường đồng giáo.",
-                original_text: "本年度から楓林男子高と合併し共学となる"
+                "original_text": "本年度から楓林男子高と合併し共学となる",
+                "full_translation": "will merge with Furin Boys' High School starting this year and become co-ed.",
+                "chunks": [
+                    {
+                        "chunk_id": "3-1",
+                        "word": "本年度",
+                        "romaji": "honnendo",
+                        "type": "noun",
+                        "meaning": "This fiscal year"
+                    },
+                    {
+                        "chunk_id": "3-2",
+                        "word": "から",
+                        "romaji": "kara",
+                        "type": "particle",
+                        "meaning": "From"
+                    },
+                    {
+                        "chunk_id": "3-3",
+                        "word": "楓林",
+                        "romaji": "fuurin",
+                        "type": "noun",
+                        "meaning": "Furin (name)"
+                    },
+                    {
+                        "chunk_id": "3-4",
+                        "word": "男子高",
+                        "romaji": "danshikou",
+                        "type": "noun",
+                        "meaning": "Boys' high school"
+                    },
+                    {
+                        "chunk_id": "3-5",
+                        "word": "と",
+                        "romaji": "to",
+                        "type": "particle",
+                        "meaning": "With"
+                    },
+                    {
+                        "chunk_id": "3-6",
+                        "word": "合併",
+                        "romaji": "gappei",
+                        "type": "noun",
+                        "meaning": "Merge"
+                    },
+                    {
+                        "chunk_id": "3-7",
+                        "word": "し",
+                        "romaji": "shi",
+                        "type": "verb",
+                        "meaning": "Do (connective form)"
+                    },
+                    {
+                        "chunk_id": "3-8",
+                        "word": "共学",
+                        "romaji": "kyougaku",
+                        "type": "noun",
+                        "meaning": "Co-ed"
+                    },
+                    {
+                        "chunk_id": "3-9",
+                        "word": "となる",
+                        "romaji": "tonaru",
+                        "type": "verb",
+                        "meaning": "Becomes (dictionary form)"
+                    }
+                ]
             },
             {
-                id: 4,
-                box: [813, 792, 178, 220],
-                chunks: [
-                    { meaning: "đột ngột", romaji: "kyuu ni", type: "adverb", word: "急に" },
-                    { meaning: "con trai", romaji: "danshi", type: "noun", word: "男子" },
-                    { meaning: "đã vào", romaji: "ga haitte kite", type: "verb phrase", word: "が入ってきて" },
-                    { meaning: "chắc là sẽ bối rối", romaji: "tomadou darou ga", type: "verb phrase", word: "戸惑うだろうが" },
-                    { meaning: "hãy hòa thuận với nhau nhé", romaji: "nakayoku shite kure", type: "verb phrase", word: "仲良くしてくれ" }
+                "id": 4,
+                "box": [
+                    813,
+                    792,
+                    178,
+                    220
                 ],
-                full_translation: "Đột nhiên có nam sinh nhập học, chắc các em cũng thấy bối rối, nhưng hãy hòa thuận với nhau nhé!",
-                original_text: "急に男子が入ってきて戸惑うだろうが仲良くしてくれ"
+                "original_text": "急に男子が入ってきて戸惑うだろうが仲良くしてくれ",
+                "full_translation": "I'm sure you're bewildered by the boys suddenly entering, but please get along with them.",
+                "chunks": [
+                    {
+                        "chunk_id": "4-1",
+                        "word": "急に",
+                        "romaji": "kyuu ni",
+                        "type": "adverb",
+                        "meaning": "Suddenly"
+                    },
+                    {
+                        "chunk_id": "4-2",
+                        "word": "男子",
+                        "romaji": "danshi",
+                        "type": "noun",
+                        "meaning": "Boys"
+                    },
+                    {
+                        "chunk_id": "4-3",
+                        "word": "が",
+                        "romaji": "ga",
+                        "type": "particle",
+                        "meaning": "Subject marker"
+                    },
+                    {
+                        "chunk_id": "4-4",
+                        "word": "入ってきて",
+                        "romaji": "haittekite",
+                        "type": "verb",
+                        "meaning": "Enter (te-form)"
+                    },
+                    {
+                        "chunk_id": "4-5",
+                        "word": "戸惑う",
+                        "romaji": "tomadou",
+                        "type": "verb",
+                        "meaning": "Be bewildered (dictionary form)"
+                    },
+                    {
+                        "chunk_id": "4-6",
+                        "word": "だろう",
+                        "romaji": "darou",
+                        "type": "auxiliary",
+                        "meaning": "Probably (conjecture)"
+                    },
+                    {
+                        "chunk_id": "4-7",
+                        "word": "が",
+                        "romaji": "ga",
+                        "type": "particle",
+                        "meaning": "But"
+                    },
+                    {
+                        "chunk_id": "4-8",
+                        "word": "仲良く",
+                        "romaji": "nakayoku",
+                        "type": "adverb",
+                        "meaning": "Get along well"
+                    },
+                    {
+                        "chunk_id": "4-9",
+                        "word": "して",
+                        "romaji": "shite",
+                        "type": "verb",
+                        "meaning": "Do (te-form)"
+                    },
+                    {
+                        "chunk_id": "4-10",
+                        "word": "くれ",
+                        "romaji": "kure",
+                        "type": "verb",
+                        "meaning": "Please (request)"
+                    }
+                ]
             },
             {
-                id: 5,
-                box: [341, 1174, 196, 212],
-                chunks: [
-                    { meaning: "Vậy thì", romaji: "jaa", type: "conjunction", word: "じゃあ" },
-                    { meaning: "vì là học kỳ mới", romaji: "shingakki dashi", type: "phrase", word: "新学期だし" },
-                    { meaning: "từ việc giới thiệu bản thân", romaji: "jikoshoukai kara", type: "phrase", word: "自己紹介から" },
-                    { meaning: "làm nhé", romaji: "suru ka", type: "verb", word: "するか！" }
+                "id": 5,
+                "box": [
+                    341,
+                    1174,
+                    196,
+                    212
                 ],
-                full_translation: "Được rồi, nhân dịp đầu học kỳ mới, chúng ta bắt đầu bằng màn giới thiệu bản thân nhé!",
-                original_text: "じゃあ新学期だし自己紹介からするか！"
+                "original_text": "じゃあ新学期だし自己紹介からするか！",
+                "full_translation": "Well then, it's the new semester, so shall we start with self-introductions!",
+                "chunks": [
+                    {
+                        "chunk_id": "5-1",
+                        "word": "じゃあ",
+                        "romaji": "jaa",
+                        "type": "conjunction",
+                        "meaning": "Well then"
+                    },
+                    {
+                        "chunk_id": "5-2",
+                        "word": "新学期",
+                        "romaji": "shingakki",
+                        "type": "noun",
+                        "meaning": "New semester"
+                    },
+                    {
+                        "chunk_id": "5-3",
+                        "word": "だし",
+                        "romaji": "dashi",
+                        "type": "particle",
+                        "meaning": "Is (copula)"
+                    },
+                    {
+                        "chunk_id": "5-4",
+                        "word": "自己紹介",
+                        "romaji": "jikoshoukai",
+                        "type": "noun",
+                        "meaning": "Self-introduction"
+                    },
+                    {
+                        "chunk_id": "5-5",
+                        "word": "から",
+                        "romaji": "kara",
+                        "type": "particle",
+                        "meaning": "From"
+                    },
+                    {
+                        "chunk_id": "5-6",
+                        "word": "するか",
+                        "romaji": "suru ka",
+                        "type": "verb",
+                        "meaning": "Do (volitional form)"
+                    },
+                    {
+                        "chunk_id": "5-7",
+                        "word": "！",
+                        "romaji": "!",
+                        "type": "punctuation",
+                        "meaning": "Exclamation mark"
+                    }
+                ]
             },
             {
-                id: 6,
-                box: [134, 805, 109, 189],
-                chunks: [
-                    { meaning: "Trước hết", romaji: "mazu wa", type: "adverb/particle", word: "まずは" },
-                    { meaning: "từ phía bên trái", romaji: "hidari no danshi kara", type: "noun phrase", word: "左の男子から" },
-                    { meaning: "...", romaji: "...", type: "punctuation", word: "．．．" }
+                "id": 6,
+                "box": [
+                    134,
+                    805,
+                    109,
+                    189
                 ],
-                full_translation: "Đầu tiên, bắt đầu từ bạn nam bên trái nhé...",
-                original_text: "まずは左の男子から．．．"
+                "original_text": "まずは左の男子から．．．",
+                "full_translation": "First, from the boys on the left...",
+                "chunks": [
+                    {
+                        "chunk_id": "6-1",
+                        "word": "まずは",
+                        "romaji": "mazu wa",
+                        "type": "adverb",
+                        "meaning": "First"
+                    },
+                    {
+                        "chunk_id": "6-2",
+                        "word": "左の",
+                        "romaji": "hidari no",
+                        "type": "noun",
+                        "meaning": "Left"
+                    },
+                    {
+                        "chunk_id": "6-3",
+                        "word": "男子",
+                        "romaji": "danshi",
+                        "type": "noun",
+                        "meaning": "Boys"
+                    },
+                    {
+                        "chunk_id": "6-4",
+                        "word": "から",
+                        "romaji": "kara",
+                        "type": "particle",
+                        "meaning": "From"
+                    },
+                    {
+                        "chunk_id": "6-5",
+                        "word": "．．．",
+                        "romaji": "...",
+                        "type": "punctuation",
+                        "meaning": "Ellipsis"
+                    }
+                ]
             },
             {
-                id: 7,
-                box: [63, 1235, 141, 276],
-                chunks: [
-                    { meaning: "Thầy/Cô giáo", romaji: "sensei", type: "noun", word: "先生" },
-                    { meaning: "!!", romaji: "!!", type: "punctuation", word: "！！" }
+                "id": 7,
+                "box": [
+                    63,
+                    1235,
+                    141,
+                    276
                 ],
-                full_translation: "Thưa thầy!!",
-                original_text: "先生！！"
+                "original_text": "先生！！",
+                "full_translation": "Teacher!!",
+                "chunks": [
+                    {
+                        "chunk_id": "7-1",
+                        "word": "先生",
+                        "romaji": "sensei",
+                        "type": "noun",
+                        "meaning": "Teacher"
+                    },
+                    {
+                        "chunk_id": "7-2",
+                        "word": "！！",
+                        "romaji": "!!",
+                        "type": "punctuation",
+                        "meaning": "Exclamation marks"
+                    }
+                ]
             }
         ]
     },
@@ -185,14 +524,14 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         chapter_id: "ch-nha-001",
         page_number: 2,
         image_url: "https://picsum.photos/id/1015/800/1200",
-        original_lang: "jp",
+        original_lang: "ja",
         bubbles: []
     },
     {
         page_id: "page-003",
         chapter_id: "ch-nha-001",
         page_number: 3,
-        original_lang: "jp",
+        original_lang: "ja",
         image_url: "https://picsum.photos/id/1016/800/1200",
         bubbles: []
     },
@@ -200,7 +539,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         page_id: "page-004",
         chapter_id: "ch-nha-002",
         page_number: 1,
-        original_lang: "jp",
+        original_lang: "ja",
         image_url: "https://picsum.photos/id/201/800/1200",
         bubbles: []
     },
@@ -209,7 +548,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
         chapter_id: "ch-nha-002",
         page_number: 2,
         image_url: "https://picsum.photos/id/202/800/1200",
-        original_lang: "jp",
+        original_lang: "ja",
         bubbles: []
     }
 ]
@@ -259,7 +598,7 @@ export default function ChapterPage() {
         () => pages.find((p) => p.page_number === currentPage),
         [pages, currentPage]
     )
-    const isJapanese = currentPageData?.original_lang === 'jp'
+    const isJapanese = currentPageData?.original_lang === 'ja'
 
 
     const currentImage = currentPageData?.image_url
@@ -463,17 +802,46 @@ export default function ChapterPage() {
                                     style={getBubbleStyle(bubble)}
                                     onClick={() => handleBubbleClick(bubble)}
                                 >
-                                    <div className="flex flex-wrap gap-1 justify-center">
+                                    <div 
+                                        className="max-w-full"
+                                        style={{ 
+                                            writingMode: 'vertical-rl',
+                                            textOrientation: 'mixed',
+                                            textAlign: 'center',   
+                                            maxHeight: '100%',     // Rất quan trọng: Ép chữ phải rớt cột khi chạm đáy bubble
+                                            wordBreak: 'break-word',
+                                            textWrap: 'balance'
+                                        }}
+                                    >
                                         {bubble.chunks.map((chunk, idx) => {
                                             const isActive =
                                                 (hoveredWord?.bubbleId === bubble.id && hoveredWord?.chunkIndex === idx) ||
                                                 (activeWord?.bubbleId === bubble.id && activeWord?.chunkIndex === idx)
 
+                                            const isTateChuYoko = /^[!?！？\d]{2,3}$/.test(chunk.word);
+
+                                            const isSinglePunctuation = /^[!?！？]$/.test(chunk.word);
+
                                             return (
                                                 <span
                                                     key={idx}
                                                     data-chunk-word
-                                                    className="relative hover:bg-yellow-200 hover:text-black px-2 py-1 rounded cursor-pointer transition-colors text-sm select-none"
+                                                    className="relative inline-block max-w-full hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none"
+                                                    style={{
+                                                        ...(isTateChuYoko && { 
+                                                            textCombineUpright: 'all', 
+                                                            textOrientation: 'upright',
+                                                            fontWeight: '700',
+                                                            letterSpacing: '-1px', // (Mẹo nhỏ) Kéo 2 dấu !! sát lại với nhau một chút cho giống manga hơn
+                                                            transform: 'translateX(10%)'
+                                                        }),
+                                                        ...(isSinglePunctuation && {
+                                                            // Dịch chuyển khoảng -15% đến -20% chiều rộng của chính nó sang trái
+                                                            transform: 'translateX(-25%)', 
+                                                            display: 'inline-block' // Bắt buộc phải có để transform hoạt động
+                                                        })
+
+                                                    }}
                                                     onMouseEnter={() => handleChunkHover(bubble.id, idx)}
                                                     onMouseLeave={handleChunkLeave}
                                                     onClick={(e) => handleWordClick(bubble.id, idx, chunk, e)}
@@ -482,7 +850,10 @@ export default function ChapterPage() {
 
                                                     {/* Tooltip Hover */}
                                                     {isActive && (
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-50 pointer-events-none border">
+                                                        <div 
+                                                            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-50 pointer-events-none border"
+                                                            style={{ writingMode: 'horizontal-tb' }}
+                                                        >
 
                                                             {/* WORD */}
                                                             <div className="flex items-baseline gap-2 mb-1">
