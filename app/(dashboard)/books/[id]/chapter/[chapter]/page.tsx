@@ -826,6 +826,7 @@ export default function ChapterPage() {
 
                                             const isTateChuYoko = isJapanese && (isNumber || isPunctuationCombo);
                                             const isSinglePunctuation = isJapanese && /^[!?！？]$/.test(chunk.word);
+                                            const isEllipsis = isJapanese && /^[.。．…]+$/.test(chunk.word);
 
                                             return (
                                                 <span
@@ -839,7 +840,10 @@ export default function ChapterPage() {
                                                         ...(isTateChuYoko && {
                                                             textCombineUpright: 'all',
                                                             textOrientation: 'upright',
-                                                            letterSpacing: '-1px'
+                                                            letterSpacing: '-1px',
+                                                            transform: 'translateX(10%)', 
+                                                            fontWeight: '900',
+
                                                         }),
                                                         ...(isSinglePunctuation && {
                                                             transform: 'translateX(-15%)',
