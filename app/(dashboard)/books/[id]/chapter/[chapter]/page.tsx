@@ -3,7 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-
+import { useIntl } from 'react-intl'
 /* =========================
    TYPES
 ========================= */
@@ -560,7 +560,7 @@ const MOCK_CHAPTER_PAGES: ChapterPage[] = [
 export default function ChapterPage() {
     const params = useParams()
     const router = useRouter()
-
+    const intl = useIntl();
     const bookId = params.id as string
     const chapterNumber = parseInt(params.chapter as string, 10)
 
@@ -770,13 +770,13 @@ export default function ChapterPage() {
                         onClick={() => router.push(`/books/${bookId}`)}
                         className="px-5 py-2 border rounded-lg hover:bg-gray-100 z-10"
                     >
-                        ← Thông tin truyện
+                        {intl.formatMessage({ id: 'dashboard.book.info' })}
                     </button>
 
                     <div className="absolute left-1/2 -translate-x-1/2 text-center">
                         <h1 className="text-2xl font-bold">{book?.title}</h1>
                         <p className="text-gray-600">
-                            {chapter?.title} • Trang {currentPage}/{totalPages}
+                            {chapter?.title} • {intl.formatMessage({ id: 'common.pageCapital' })} {currentPage} / {totalPages}
                         </p>
                     </div>
                 </div>
@@ -802,13 +802,13 @@ export default function ChapterPage() {
                                     style={getBubbleStyle(bubble)}
                                     onClick={() => handleBubbleClick(bubble)}
                                 >
-                                    <div 
+                                    <div
                                         className={isJapanese ? "max-w-full" : "w-full flex flex-wrap gap-1 justify-center"}
-                                        style={isJapanese ? { 
+                                        style={isJapanese ? {
                                             writingMode: 'vertical-rl',
                                             textOrientation: 'mixed',
-                                            textAlign: 'center',   
-                                            maxHeight: '100%',     
+                                            textAlign: 'center',
+                                            maxHeight: '100%',
                                             wordBreak: 'break-word',
                                             textWrap: 'balance'
                                         } : {
@@ -821,38 +821,39 @@ export default function ChapterPage() {
                                                 (hoveredWord?.bubbleId === bubble.id && hoveredWord?.chunkIndex === idx) ||
                                                 (activeWord?.bubbleId === bubble.id && activeWord?.chunkIndex === idx)
 
-                                            const isTateChuYoko = isJapanese && /^[!?！？\d]{2,3}$/.test(chunk.word);
+                                            const isNumber = /^\d+$/.test(chunk.word)
+                                            const isPunctuationCombo = /^[!?！？]{2,}$/.test(chunk.word)
+
+                                            const isTateChuYoko = isJapanese && (isNumber || isPunctuationCombo);
                                             const isSinglePunctuation = isJapanese && /^[!?！？]$/.test(chunk.word);
 
                                             return (
                                                 <span
                                                     key={idx}
                                                     data-chunk-word
-                                                    className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${
-                                                        isJapanese 
-                                                            ? `inline-block leading-tight ${isTateChuYoko || isSinglePunctuation ? 'font-bold' : ''}` 
-                                                            : 'inline'
-                                                    }`}
+                                                    className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${isJapanese
+                                                        ? `inline-block leading-tight ${isTateChuYoko || isSinglePunctuation ? 'font-bold' : ''}`
+                                                        : 'inline'
+                                                        }`}
                                                     style={isJapanese ? {
-                                                        ...(isTateChuYoko && { 
-                                                            textCombineUpright: 'all', 
+                                                        ...(isTateChuYoko && {
+                                                            textCombineUpright: 'all',
                                                             textOrientation: 'upright',
                                                             letterSpacing: '-1px'
                                                         }),
                                                         ...(isSinglePunctuation && {
-                                                            transform: 'translateX(-15%)', 
-                                                            display: 'inline-block' 
+                                                            transform: 'translateX(-15%)',
+                                                            display: 'inline-block'
                                                         })
                                                     } : {}}
                                                     onMouseEnter={() => handleChunkHover(bubble.id, idx)}
                                                     onMouseLeave={handleChunkLeave}
-                                                    onClick={(e) => handleWordClick(bubble.id, idx, chunk, e)}
                                                 >
                                                     {chunk.word}
 
                                                     {/* Tooltip Hover */}
                                                     {isActive && (
-                                                        <div 
+                                                        <div
                                                             className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-50 pointer-events-none border"
                                                             style={{ writingMode: 'horizontal-tb' }}
                                                         >
@@ -898,7 +899,7 @@ export default function ChapterPage() {
                         disabled={currentPage === 1 && !hasPrevChapter}
                         className="px-6 py-3 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 rounded-lg font-medium"
                     >
-                        ← Trang trước
+                        {intl.formatMessage({ id: 'common.prev' })}
                     </button>
 
                     <span className="font-medium text-lg">{currentPage} / {totalPages}</span>
@@ -908,17 +909,17 @@ export default function ChapterPage() {
                         disabled={currentPage === totalPages && !hasNextChapter}
                         className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium"
                     >
-                        Trang sau →
+                        {intl.formatMessage({ id: 'common.next' })}
                     </button>
                 </div>
             </footer>
 
             {/* POPUP CHI TIẾT */}
             {selectedBubble && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-9999 p-4">
                     <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
                         <div className="p-5 border-b flex justify-between items-center bg-gray-50">
-                            <h3 className="font-bold text-lg">Chi tiết hội thoại</h3>
+                            <h3 className="font-bold text-lg">{intl.formatMessage({ id: 'popups.dialogueInfo.title' })}</h3>
                             <button
                                 onClick={() => setSelectedBubble(null)}
                                 className="text-3xl text-gray-400 hover:text-gray-600"
@@ -929,21 +930,21 @@ export default function ChapterPage() {
 
                         <div className="p-6 space-y-6 overflow-auto max-h-[65vh]">
                             <div>
-                                <p className="text-sm text-gray-500 mb-1">原文 (Original)</p>
+                                <p className="text-sm text-gray-500 mb-1">{intl.formatMessage({ id: 'popups.dialogueInfo.originalText' })}</p>
                                 <p className="font-mono bg-gray-100 p-4 rounded-xl text-lg break-all">
                                     {selectedBubble.original_text}
                                 </p>
                             </div>
 
                             <div>
-                                <p className="text-sm text-gray-500 mb-1">Dịch tiếng Việt</p>
+                                <p className="text-sm text-gray-500 mb-1">{intl.formatMessage({ id: 'popups.dialogueInfo.translatedText' })}</p>
                                 <p className="text-lg leading-relaxed bg-blue-50 p-4 rounded-xl">
                                     {selectedBubble.full_translation}
                                 </p>
                             </div>
 
                             <div>
-                                <p className="text-sm text-gray-500 mb-3">Phân tích từ vựng</p>
+                                <p className="text-sm text-gray-500 mb-3">{intl.formatMessage({ id: 'popups.dialogueInfo.vocabAnalysis' })}</p>
                                 <div className="space-y-5">
                                     {selectedBubble.chunks.map((chunk, idx) => (
                                         <div key={idx} className="border-l-4 border-blue-500 pl-4">
@@ -952,7 +953,7 @@ export default function ChapterPage() {
                                                 <span className="font-mono text-gray-500">{chunk.romaji}</span>
                                             </div>
                                             <p className="text-gray-700 mt-1">{chunk.meaning}</p>
-                                            <p className="text-xs text-gray-400">Loại: {chunk.type}</p>
+                                            <p className="text-xs text-gray-400">{intl.formatMessage({ id: 'popups.dialogueInfo.type' })}: {chunk.type}</p>
                                         </div>
                                     ))}
                                 </div>

@@ -115,5 +115,21 @@
     "settings": "Cài đặt",
     "publish": "Đăng truyện",
     "logout": "Đăng xuất"
+  },
+  "popups": {
+    "deleteChapter": {
+      "title": "Xác nhận xóa chương",
+      "message": "Bạn có chắc chắn muốn xóa chương này không? Hành động này không thể hoàn tác.",
+      "confirm": "Xóa",
+      "cancel": "Hủy"
+    },
+    "dialogueInfo": {
+      "title": "Chi tiết hội thoại",
+      "originalText": "Văn bản gốc",
+      "translatedText": "Văn bản đã dịch",
+      "vocabAnalysis": "Phân tích từ vựng",
+      "type": "Loại",
+      "close": "Đóng"
+    }
   }
 }

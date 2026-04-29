@@ -115,5 +115,14 @@
         "settings": "Settings",
         "publish": "Publish Manga",
         "logout": "Logout"
+    },
+    "popups": {
+        "dialogueInfo": {
+            "title": "Dialogue Details",
+            "originalText": "Original Text",
+            "translatedText": "Translation",
+            "vocabAnalysis": "Vocabulary Analysis",
+            "type": "Type"
+        }
     }
 }
