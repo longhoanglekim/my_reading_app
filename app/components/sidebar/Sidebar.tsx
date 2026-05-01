@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import SidebarItem from './SidebarItem/SidebarItem'
+import { useUserStore } from '@/app/store/userStore'
 
 export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
-
+    const user = useUserStore().user;
     useEffect(() => {
         const checkMobile = () => {
             const mobile = window.innerWidth < 1024
@@ -71,7 +72,19 @@ export default function Sidebar() {
                         <SidebarItem href="/dashboard/events" label="Events" />
                         <SidebarItem href="/dashboard/settings" label="Settings" />
                     </nav>
+                    {user?.role === 'ADMIN' && (
+                        <>
+                            <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100 hidden lg:block px-5 pt-5">
+                                Admin management
+                            </h2>
 
+                            <nav className="flex flex-col gap-1.5 px-5">
+                                <SidebarItem href="/admin-overview" label="Overview" />
+                                <SidebarItem href="/admin-books" label="Books" />
+                                <SidebarItem href="/dashboard/admin/user-management" label="User Management" />
+                            </nav>
+                        </>
+                    )}
                     <div className="mt-auto pt-6 px-5 pb-5 border-t border-gray-200 dark:border-gray-800">
                         <SidebarItem href="/logout" label="Đăng xuất" />
                     </div>

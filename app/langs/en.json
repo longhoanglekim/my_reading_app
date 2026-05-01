@@ -106,7 +106,8 @@
         "pageCapital": "Page",
         "chapterCapital": "Chapter",
         "readFromStart": "Read from Start",
-        "required": "*"
+        "required": "*",
+        "close": "Close"
     },
     "topbar": {
         "title": "Dashboard",

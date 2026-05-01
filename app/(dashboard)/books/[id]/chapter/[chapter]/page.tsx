@@ -841,7 +841,7 @@ export default function ChapterPage() {
                                                             textCombineUpright: 'all',
                                                             textOrientation: 'upright',
                                                             letterSpacing: '-1px',
-                                                            transform: 'translateX(10%)', 
+                                                            transform: 'translateX(10%)',
                                                             fontWeight: '900',
 
                                                         }),
@@ -969,7 +969,7 @@ export default function ChapterPage() {
                                 onClick={() => setSelectedBubble(null)}
                                 className="px-10 py-3 bg-gray-800 text-white rounded-xl hover:bg-black"
                             >
-                                Đóng
+                                {intl.formatMessage({ id: 'common.close' })}
                             </button>
                         </div>
                     </div>

@@ -106,7 +106,8 @@
     "pageCapital": "Trang",
     "chapterCapital": "Chương",
     "readFromStart": "Đọc từ đầu",
-    "required": "*"
+    "required": "*",
+    "close": "Đóng"
   },
   "topbar": {
     "title": "Bảng điều khiển",

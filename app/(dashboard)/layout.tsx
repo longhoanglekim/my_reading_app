@@ -8,7 +8,7 @@ import CButton from "../components/common/CButton";
 import { useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
 
-export default function DashboardLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -55,8 +55,6 @@ export default function DashboardLayout({
             </div>
           </div>
         </main>
-
-        {/* Footer (nếu cần, tránh nền thừa dưới cùng) */}
         <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
           © 2025 My Reading App. All rights reserved.
         </footer>

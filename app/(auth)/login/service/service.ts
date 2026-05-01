@@ -6,7 +6,7 @@ const fakeUserData: User = {
     fullname: "LongHoang",
     email: "hlklonga5@gmail.com",
     avatar: "data:image/png;base64,...",   // giữ nguyên avatar của bạn
-    role: 'memeber'
+    role: 'admin'
 }
 
 export const login = async (email: string, password: string) => {
@@ -18,8 +18,8 @@ export const login = async (email: string, password: string) => {
                     user: {
                         id: parseInt(fakeUserData.id),
                         email: fakeUserData.email,
-                        fullName: fakeUserData.fullname,     
-                        role: fakeUserData.role.toUpperCase() 
+                        fullName: fakeUserData.fullname,
+                        role: fakeUserData.role.toUpperCase()
                     }
                 })
             } else {
