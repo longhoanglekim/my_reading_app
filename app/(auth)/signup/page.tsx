@@ -6,22 +6,58 @@ import CInput from "@/app/components/common/CInput";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useIntl } from "react-intl";
-import { useRouter } from "next/navigation";  // ← Import đúng cho App Router
+import { useRouter } from "next/navigation";
+import { useRegister } from "./queryHook/queryHook";
 
 export default function SignupPage() {
     const intl = useIntl();
-    const router = useRouter();  
+    const router = useRouter();
+    const { mutate: register, isPending } = useRegister();
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
 
     const handleNavigateToLogin = () => {
         setFullName("");
         setEmail("");
         setPassword("");
         setConfirmPassword("");
-        router.push("/login");  // ← Chuyển sang /login
+        setError("");
+        router.push("/login");
+    };
+
+    const handleSignup = () => {
+        setError("");
+        
+        // Validate fields
+        if (!fullName.trim()) {
+            setError(intl.formatMessage({ id: "auth.error.nameRequired" }) || "Vui lòng nhập họ tên");
+            return;
+        }
+        
+        if (!email.trim()) {
+            setError(intl.formatMessage({ id: "auth.error.emailRequired" }) || "Vui lòng nhập email");
+            return;
+        }
+        
+        if (!password) {
+            setError(intl.formatMessage({ id: "auth.error.passwordRequired" }) || "Vui lòng nhập mật khẩu");
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            setError(intl.formatMessage({ id: "auth.error.passwordMismatch" }) || "Mật khẩu không khớp");
+            return;
+        }
+        
+        // Call register mutation
+        register({
+            fullName: fullName.trim(),
+            email: email.trim(),
+            password,
+        });
     };
 
     return (
@@ -94,12 +130,21 @@ export default function SignupPage() {
                     </label>
                 </div>
 
+                {/* Error message */}
+                {error && (
+                    <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+                        {error}
+                    </div>
+                )}
+
                 {/* Sign Up button */}
                 <CButton
                     variant="primary"
                     className="w-full font-medium"
+                    onClick={handleSignup}
+                    disabled={isPending}
                 >
-                    {intl.formatMessage({ id: "auth.button.register" })}
+                    {isPending ? intl.formatMessage({ id: "auth.button.registering" }) || "Đang đăng ký..." : intl.formatMessage({ id: "auth.button.register" })}
                 </CButton>
 
                 {/* Login link */}
