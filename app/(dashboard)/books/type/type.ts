@@ -4,3 +4,14 @@ export type BookOverview = {
     author: string
     cover: string
 }
+
+export interface ComicSummary {
+    id: number;
+    title: string;
+    author: string;
+    coverImageUrl: string;
+    originalLanguage: string;
+    status: string;
+    format: string;
+    averageRating: number;
+}

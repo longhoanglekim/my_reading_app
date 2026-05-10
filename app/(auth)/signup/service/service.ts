@@ -1,3 +1,4 @@
+import HttpRequest from "@/app/config/auth"
 type RegisterResponse = {
     token: string
     user: {
@@ -13,26 +14,17 @@ export const register = async (
     email: string,
     password: string
 ): Promise<RegisterResponse> => {
-    const response = await fetch(
-        "http://localhost:8080/comic/auth/register",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                fullName,
-                email,
-                password,
-            }),
-        }
-    )
+    try {
+    const response = await HttpRequest.post("/auth/register", {
+        fullName,
+        email,
+        password
+    });
+    return response.data as RegisterResponse;
+    } catch (error) {    
+        console.error("Registration error:", error)
+        throw error;
 
-    if (!response.ok) {
-        throw new Error("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.")
     }
 
-    const data: RegisterResponse = await response.json()
-
-    return data
 }

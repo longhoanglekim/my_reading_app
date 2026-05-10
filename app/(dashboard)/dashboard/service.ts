@@ -1,63 +1,163 @@
-import { BookOverview } from "./type";
-import { BookOpen, Users, Calendar, Settings } from 'lucide-react'
+// services/comic/comic.api.ts
 
-export interface IBooksParams {
-    page: number;
-    size: number;
+import HttpRequest from "../../config/auth";
+import { ComicSummary } from "./type";
+import {
+    BookOpen,
+    Users,
+    Calendar,
+    Settings
+} from "lucide-react";
+
+/* =========================
+   TYPES
+========================= */
+
+export interface PaginationResponse<T> {
+    content: T[];
+    pageNo: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+    last: boolean;
 }
-// Dữ liệu giả lập stats
-const stats = [
-    {
-        title: 'Sách đã đọc',
-        value: '1,234',
-        change: '+12.5%',
-        icon: BookOpen,
-        color: 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300',
-        hover: 'hover:bg-amber-200 dark:hover:bg-amber-900/50',
-    },
-    {
-        title: 'Người dùng hoạt động',
-        value: '567',
-        change: '+8.3%',
-        icon: Users,
-        color: 'bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300',
-        hover: 'hover:bg-blue-200 dark:hover:bg-blue-900/50',
-    },
-    {
-        title: 'Sự kiện sắp tới',
-        value: '12',
-        change: '+4.2%',
-        icon: Calendar,
-        color: 'bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300',
-        hover: 'hover:bg-green-200 dark:hover:bg-green-900/50',
-    },
-    {
-        title: 'Cài đặt đang chờ',
-        value: '5',
-        change: '0%',
-        icon: Settings,
-        color: 'bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300',
-        hover: 'hover:bg-purple-200 dark:hover:bg-purple-900/50',
-    },
-]
 
-// Sách đọc gần đây (thêm id)
-const recentBooks: BookOverview[] = [
-    { id: '123', title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
-    { id: '124', title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
-    { id: '125', title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
-]
-const favoriteBooks: BookOverview[] = [
-    { id: '126', title: 'Nhà Giả Kim', author: 'Paulo Coelho', cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800' },
-    { id: '127', title: 'Đắc Nhân Tâm', author: 'Dale Carnegie', cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800' },
-    { id: '128', title: 'Atomic Habits', author: 'James Clear', cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800' },
-]
-export function getRecentBooks(params: IBooksParams): BookOverview[] | undefined {
+export interface ApiResponse<T> {
+    data: T;
+}
+
+export interface GetBookSummaryListParams {
+    page?: number;
+    size?: number;
+    keyword?: string;
+    categoryId?: number;
+    status?: string;
+}
+
+export interface CreateComicBody {
+    title: string;
+    author: string;
+    description?: string;
+    coverImageUrl?: string;
+    originalLanguage?: string;
+    format?: string;
+    status?: string;
+}
+
+/* =========================
+   STATIC DATA
+========================= */
+
+export const stats = [
+    {
+        title: "Sách đã đọc",
+        value: "1,234",
+        change: "+12.5%",
+        icon: BookOpen,
+        color:
+            "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300",
+        hover:
+            "hover:bg-amber-200 dark:hover:bg-amber-900/50",
+    },
+    {
+        title: "Người dùng hoạt động",
+        value: "567",
+        change: "+8.3%",
+        icon: Users,
+        color:
+            "bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300",
+        hover:
+            "hover:bg-blue-200 dark:hover:bg-blue-900/50",
+    },
+    {
+        title: "Sự kiện sắp tới",
+        value: "12",
+        change: "+4.2%",
+        icon: Calendar,
+        color:
+            "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300",
+        hover:
+            "hover:bg-green-200 dark:hover:bg-green-900/50",
+    },
+    {
+        title: "Cài đặt đang chờ",
+        value: "5",
+        change: "0%",
+        icon: Settings,
+        color:
+            "bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300",
+        hover:
+            "hover:bg-purple-200 dark:hover:bg-purple-900/50",
+    },
+];
+
+/* =========================
+   APIs
+========================= */
+
+export const getBookSummaryList = async (
+    params?: GetBookSummaryListParams
+): Promise<PaginationResponse<ComicSummary>> => {
     try {
-        // const data = axios.get data
-        return recentBooks;
+        const res = await HttpRequest.get<
+            ApiResponse<PaginationResponse<ComicSummary>>
+        >("/comics", {
+            params,
+        });
+
+        return res.data.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+/* =========================
+   TEMP DATA
+========================= */
+
+export const getRecentBooks = async (
+    params?: GetBookSummaryListParams
+): Promise<ComicSummary[]> => {
+    try {
+        const data = await getBookSummaryList(params);
+        console.log("Recent Books:", data);
+        return data.content;
     } catch (e) {
         console.log(e);
+        return [];
     }
-}
+};
 
+export const getFavoriteBooks = async (
+    params?: GetBookSummaryListParams
+): Promise<ComicSummary[]> => {
+    try {
+        const data = await getBookSummaryList(params);
+
+        return data.content;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+};
+
+/* =========================
+   CREATE COMIC
+========================= */
+
+export const createComic = async (
+    body: CreateComicBody
+) => {
+    try {
+        const res = await HttpRequest.post(
+            "/api/comics",
+            body
+        );
+
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

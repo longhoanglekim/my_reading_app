@@ -2,19 +2,42 @@
 
 import { useRouter } from 'next/navigation'
 import { BookOpen, Users, Calendar, Settings } from 'lucide-react'
-import { useRecentBooks } from './queryHooks'
-import { IBooksParams } from './service'
+import { useFavoriteBooks, useRecentBooks } from './queryHooks'
+import { GetBookSummaryListParams } from './service'
 import { useIntl } from 'react-intl'
 // Định nghĩa type cho sách (thêm id để route /books/[id])
 
 export default function Dashboard() {
-    const params = { page: 0, size: 3 } as IBooksParams;
+    const params = { page: 0, size: 3 } as GetBookSummaryListParams;
     const router = useRouter()
     const intl = useIntl();
-    const { data: recentBooksData, isLoading: recentLoading, isError: recentError } = useRecentBooks(params);
-    if (recentLoading) {
-        return <div className="text-center py-10">Đang tải sách gần đây...</div>;
-    }
+  const {
+    data: recentBooksData,
+    isLoading: recentLoading,
+    isError: recentError
+} = useRecentBooks(params);
+
+const {
+    data: favoriteBooksData,
+    isLoading: favoriteLoading,
+    isError: favoriteError
+} = useFavoriteBooks(params);
+
+if (recentLoading || favoriteLoading) {
+    return (
+        <div className="text-center py-10">
+            Đang tải dữ liệu...
+        </div>
+    );
+}
+
+if (recentError || favoriteError) {
+    return (
+        <div className="text-center py-10">
+            Có lỗi xảy ra
+        </div>
+    );
+}
     // Dữ liệu giả lập stats
     const stats = [
         {
@@ -60,7 +83,7 @@ export default function Dashboard() {
     const recentBooks = recentBooksData;
 
     // Yêu thích (có thể dùng dữ liệu khác, hiện tại dùng chung)
-    const favoriteBooks = recentBooks
+    const favoriteBooks = favoriteBooksData;
 
     return (
         <div className="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -106,7 +129,7 @@ export default function Dashboard() {
                             >
                                 <div className="aspect-[1] relative">
                                     <img
-                                        src={book.cover}
+                                        src={book.coverImageUrl}
                                         alt={book.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
@@ -138,7 +161,7 @@ export default function Dashboard() {
                             >
                                 <div className="aspect-[1] relative">
                                     <img
-                                        src={book.cover}
+                                        src={book.coverImageUrl}
                                         alt={book.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />

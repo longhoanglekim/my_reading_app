@@ -18,8 +18,11 @@ const fakeUser: User = {
 interface UserState {
     user: User | null
     isAuthenticated: boolean
+    accessToken: string
+    refreshToken: string
     // Actions
     setUser: (user: User) => void
+    setTokens: (accessToken: string, refreshToken: string) => void
     logout: () => void
     updateAvatar: (newAvatar: string) => void
 }
@@ -34,6 +37,10 @@ export const useUserStore = create<UserState>()(
             setUser: (user) => set({
                 user,
                 isAuthenticated: true
+            }),
+            setTokens: (accessToken: string, refreshToken: string) => set({
+                accessToken,
+                refreshToken
             }),
 
             logout: () => {

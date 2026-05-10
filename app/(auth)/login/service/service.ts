@@ -1,6 +1,6 @@
 // api/auth.ts
 import { User } from "@/app/store/userStore"
-
+import HttpRequest from "@/app/config/auth"
 type LoginResponse = {
     token: string
     user: {
@@ -14,26 +14,18 @@ type LoginResponse = {
 export const login = async (
     email: string,
     password: string
-): Promise<LoginResponse> => {
-    const response = await fetch(
-        "http://localhost:8080/comic/auth/login",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email,
-                password,
-            }),
-        }
-    )
+): Promise<LoginResponse> => { 
+    try {
+    
+    const response = await HttpRequest.post("/auth/login", {
+        email,
+        password
+    })
+    console.log("Login response:", response.data);
+    return response.data as LoginResponse;
+    } catch (error) {
+        console.error("Login error:", error)
+        throw error;
 
-    if (!response.ok) {
-        throw new Error("Invalid email or password")
     }
-
-    const data: LoginResponse = await response.json()
-
-    return data
 }

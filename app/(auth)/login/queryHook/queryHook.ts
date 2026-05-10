@@ -26,16 +26,17 @@ export const useLogin = () => {
 
         onSuccess: (data: LoginResponse) => {
             // Lưu token
-            localStorage.setItem('accessToken', data.token)
-
+            console.log("Login successful, received data:", data);
+            userStore.setTokens(data.token, "") 
             // Lưu thông tin user vào store
             userStore.setUser({
                 id: data.user.id.toString(),          
                 fullname: data.user.fullName,        
                 email: data.user.email,
                 avatar: "",                           
-                role: data.user.role
+                role: data.user.role,
             })
+           
 
             showNotification({
                 type: 'success',

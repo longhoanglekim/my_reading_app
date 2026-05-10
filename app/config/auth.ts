@@ -1,16 +1,30 @@
 import axios from "axios";
 
 const HttpRequest = axios.create({
-    baseURL: process.env.API_URL,
+baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
+// lấy data từ localStorage userStorage
+const getUserStorage = () => {
+    const storage = localStorage.getItem("user-storage");
+
+    if (!storage) return null;
+
+    try {
+        return JSON.parse(storage);
+    } catch {
+        return null;
+    }
+};
 
 // request interceptor
 HttpRequest.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
+    const userStorage = getUserStorage();
+
+    const token = userStorage?.state?.accessToken;
 
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -19,16 +33,19 @@ HttpRequest.interceptors.request.use((config) => {
     return config;
 });
 
-
+// response interceptor
 HttpRequest.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+
         if (error.response?.status === 401 && !originalRequest._retry) {
-            const refreshToken = localStorage.getItem("refreshToken");
+            const userStorage = getUserStorage();
+
+            const refreshToken = userStorage?.state?.refreshToken;
+
             if (!refreshToken) {
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
+                localStorage.removeItem("userStorage");
                 return Promise.reject(error);
             }
 
@@ -36,19 +53,26 @@ HttpRequest.interceptors.response.use(
 
             try {
                 const res = await axios.post(
-                    `${process.env.API_URL}/api/auth/refresh`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
                     { refreshToken }
                 );
 
-                const newToken = res.data.accessToken;
+                const newAccessToken = res.data.accessToken;
 
-                localStorage.setItem("accessToken", newToken);
+                // update localStorage
+                userStorage.state.accessToken = newAccessToken;
 
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                localStorage.setItem(
+                    "userStorage",
+                    JSON.stringify(userStorage)
+                );
+
+                // update header request cũ
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
                 return HttpRequest(originalRequest);
             } catch (refreshError) {
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
+                localStorage.removeItem("userStorage");
                 return Promise.reject(refreshError);
             }
         }
@@ -56,4 +80,5 @@ HttpRequest.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
 export default HttpRequest;

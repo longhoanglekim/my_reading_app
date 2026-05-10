@@ -51,7 +51,7 @@ export default function BookDetailPage() {
     const router = useRouter()
     const intl = useIntl();
     const book = MOCK_BOOKS.find((b) => b.id === bookId)
-
+    const {data, isLoading, isError} = useBookSummaryListQuery
     if (!book) {
         return (
             <div className="max-w-6xl mx-auto p-10 text-center">
