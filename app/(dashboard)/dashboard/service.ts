@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
 import HttpRequest from "../../config/auth";
-import { ComicSummary } from "./type";
+import { ComicSummary, UserLibrarySummary } from "./type";
 import {
     BookOpen,
     Users,
@@ -32,6 +32,11 @@ export interface GetBookSummaryListParams {
     keyword?: string;
     categoryId?: number;
     status?: string;
+}
+export interface GetUserLibraryByTypeParams {
+    page?: number;
+    size?: number;
+    listType?: string;
 }
 
 export interface CreateComicBody {
@@ -102,6 +107,23 @@ export const getBookSummaryList = async (
         const res = await HttpRequest.get<
             ApiResponse<PaginationResponse<ComicSummary>>
         >("/comics", {
+            params,
+        });
+
+        return res.data.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+//  get user library by type (recent, favorite, etc.) with pagination
+export const getUserLibraryByType = async (
+    params?: GetBookSummaryListParams
+): Promise<PaginationResponse<UserLibrarySummary>> => {
+    try {
+        const res = await HttpRequest.get<
+            ApiResponse<PaginationResponse<UserLibrarySummary>>
+        >("/user-libraries", {
             params,
         });
 

@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
 import HttpRequest from "../../../config/auth";
-import { ComicSummary } from "../type/type";
+import { ComicOverview, ComicOverviewResponse, ComicSummary } from "../type/type";
 
 /* =========================
    TYPES
@@ -54,6 +54,19 @@ export const getBookSummaryList = async (
         });
 
         return res.data.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+export const getComicOverview = async (comicId: number) => {
+    try {
+        const res = await HttpRequest.get<
+            ComicOverviewResponse
+        >(`/comics/${comicId}/book-overview`);
+
+        return res;
     } catch (error) {
         console.log(error);
         throw error;

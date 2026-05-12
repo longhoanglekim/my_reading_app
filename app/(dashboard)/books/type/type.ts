@@ -15,3 +15,25 @@ export interface ComicSummary {
     format: string;
     averageRating: number;
 }
+
+export interface ChapterSummary {
+    id: number;
+    chapterNumber: number;
+    title: string;
+    createdAt: string;
+}
+export interface ComicOverview {
+    id: number;
+    title: string;
+    author: string;
+    coverImageUrl: string;
+    description: string;
+    totalRatings : number;
+    averageRating: number;
+    chapters: ChapterSummary[];
+}
+export interface ComicOverviewResponse {
+    bookOverviewData: ComicOverview;
+    message: string;
+}
+    

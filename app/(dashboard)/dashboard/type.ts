@@ -16,3 +16,14 @@ export interface ComicSummary {
     format: string;
     averageRating: number;
 }
+export interface UserLibrarySummary {
+    "id": number,
+    "title": string,
+    "author": string,
+    "coverImageUrl": string,
+    "originalLanguage": string,
+    "status": string,
+    "format": string,
+    "averageRating": number,
+    "listType": string,
+}

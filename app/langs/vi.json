@@ -42,7 +42,16 @@
     "book": {
       "introduction": "Giới thiệu",
       "chapterList": "Danh sách chương",
-      "info": "Thông tin truyện"
+      "info": "Thông tin truyện",
+      "author": "Tác giả",
+      "rating": "đánh giá",
+      "writeReview": "Viết đánh giá",
+      "reviewModalTitle": "Đánh giá sách",
+      "reviewPlaceholder": "Viết đánh giá của bạn về cuốn sách này...",
+      "reviewModalSubtitle": "Cho chúng tôi biết cảm nhận của bạn về cuốn sách này.",
+      "reviewRating": "Đánh giá của bạn",
+      "reviewComment": "Nhận xét của bạn",
+      "submitReview": "Gửi đánh giá"
     }
   },
   "uploadPage": {
@@ -107,7 +116,8 @@
     "chapterCapital": "Chương",
     "readFromStart": "Đọc từ đầu",
     "required": "*",
-    "close": "Đóng"
+    "close": "Đóng",
+    "cancel": "Hủy"
   },
   "topbar": {
     "title": "Bảng điều khiển",

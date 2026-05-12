@@ -1,135 +1,253 @@
-'use client'
+"use client";
 
-import { useParams, useRouter } from "next/navigation"
-import { useIntl } from "react-intl"
-
-type Chapter = {
-    id: string
-    chapter_number: number
-    title: string
-}
-
-type BookDetail = {
-    id: string
-    title: string
-    author: string
-    cover: string
-    description: string
-    chapters: Chapter[]
-}
-
-const MOCK_BOOKS: BookDetail[] = [
-    {
-        id: "123",
-        title: "Nhà Giả Kim",
-        author: "Paulo Coelho",
-        cover: "https://images.unsplash.com/photo-1544947950-fa07a98d467e?w=800",
-        description: "Một câu chuyện về hành trình theo đuổi ước mơ của chàng trai Santiago.",
-        chapters: [
-            { id: "ch-001", chapter_number: 1, title: "Giấc mơ" },
-            { id: "ch-002", chapter_number: 2, title: "Hành trình bắt đầu" },
-            { id: "ch-003", chapter_number: 3, title: "Người vua già" },
-        ],
-    },
-    {
-        id: "124",
-        title: "Atomic Habits",
-        author: "James Clear",
-        cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
-        description: "Cuốn sách nói về sức mạnh của thói quen nhỏ.",
-        chapters: [
-            { id: "ch-101", chapter_number: 1, title: "The surprising power of habits" },
-            { id: "ch-102", chapter_number: 2, title: "Identity-based habits" },
-            { id: "ch-103", chapter_number: 3, title: "Make it obvious" },
-        ],
-    },
-]
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useIntl } from "react-intl";
+import { useComicOverviewQuery } from "../queryHook/queryHook";
 
 export default function BookDetailPage() {
-    const params = useParams()
-    const bookId = params.id as string
-    const router = useRouter()
-    const intl = useIntl();
-    const book = MOCK_BOOKS.find((b) => b.id === bookId)
-    const {data, isLoading, isError} = useBookSummaryListQuery
-    if (!book) {
-        return (
-            <div className="max-w-6xl mx-auto p-10 text-center">
-                <p className="text-lg text-gray-500">Không tìm thấy sách</p>
-                <button
-                    onClick={() => router.push("/books")}
-                    className="mt-4 px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                    Quay lại danh sách
-                </button>
-            </div>
-        )
-    }
+  const params = useParams();
+  const bookId = params.id as string;
+  const router = useRouter();
+  const intl = useIntl();
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const { data, isLoading, isError } = useComicOverviewQuery(Number(bookId));
 
+  if (isLoading) {
     return (
-        <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="text-center py-10 font-medium text-gray-500">
+        Đang tải dữ liệu...
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="text-center py-10 font-medium text-red-500">
+        Có lỗi xảy ra khi tải dữ liệu.
+      </div>
+    );
+  }
+  const bookData = data?.bookOverviewData;
+  if (!bookData) {
+    return (
+      <div className="text-center py-10 font-medium text-gray-500">
+        Không tìm thấy sách.
+      </div>
+    );
+  } else {
+    console.log("Book data:", bookData);
+  }
 
-            {/* BOOK HEADER */}
-            <div className="flex flex-col md:flex-row gap-8 mb-12">
-                <img
-                    src={book.cover}
-                    alt={book.title}
-                    className="w-60 h-80 object-cover rounded-lg shadow-xl"
-                />
-                <div className="flex flex-col justify-center">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-3">{book.title}</h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
-                        {book.author}
-                    </p>
-                    <p className="text-gray-500 dark:text-gray-400 mb-6">
-                        {book.chapters.length} {intl.formatMessage({ id: "common.chapter" })}
-                    </p>
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      {/* BOOK HEADER */}
+      <div className="flex flex-col md:flex-row gap-20 mb-12">
+        <img
+          src={bookData.coverImageUrl}
+          alt={bookData.title}
+          className="w-60 h-80 object-cover rounded-lg shadow-xl"
+        />
+        <div className="flex flex-col justify-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">
+            {bookData.title}
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
+            {bookData.author}
+          </p>
 
-                    <button
-                        onClick={() => router.push(`/books/${bookId}/chapter/1`)}
-                        disabled={book.chapters.length === 0}
-                        className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {intl.formatMessage({ id: "common.readFromStart" })}
-                    </button>
-                </div>
+          <div className="flex items-center gap-4 mb-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-500 text-lg">★</span>
+
+              <span className="font-semibold text-lg">
+                {bookData.averageRating.toFixed(1)}
+              </span>
+
+              <span className="text-gray-500 dark:text-gray-400">
+                ({bookData.totalRatings}{" "}
+                {intl.formatMessage({ id: "dashboard.book.rating" })})
+              </span>
             </div>
 
-            {/* OVERVIEW */}
-            <div className="mb-12">
-                <h2 className="text-2xl font-semibold mb-4">{intl.formatMessage({ id: "dashboard.book.introduction" })}</h2>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {book.description}
-                </p>
-            </div>
+            <button
+              className="px-4 py-2 rounded-lg border border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition text-sm font-medium"
+              onClick={() => setIsReviewModalOpen(true)}
+            >
+              ⭐{" "}
+              {intl.formatMessage({
+                id: "dashboard.book.writeReview",
+              })}
+            </button>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            {bookData?.chapters?.length ?? 0}{" "}
+            {intl.formatMessage({ id: "common.chapter" })}
+          </p>
 
-            {/* CHAPTER LIST */}
-            <div>
-                <h2 className="text-2xl font-semibold mb-4">{intl.formatMessage({ id: "dashboard.book.chapterList" })}</h2>
-                <div className="border rounded-xl overflow-hidden divide-y dark:divide-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-                    {book.chapters
-                        .sort((a, b) => a.chapter_number - b.chapter_number)
-                        .map((chapter) => (
-                            <div
-                                key={chapter.id}
-                                onClick={() => router.push(`/books/${bookId}/chapter/${chapter.chapter_number}`)}
-                                className="p-5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition flex justify-between items-center"
-                            >
-                                <span className="font-medium">
-                                    {intl.formatMessage({ id: "common.chapterCapital" })} {chapter.chapter_number}
-                                    {chapter.title ? `: ${chapter.title}` : ""}
-                                </span>
-                                <span className="text-gray-400">→</span>
-                            </div>
-                        ))}
-
-                    {book.chapters.length === 0 && (
-                        <div className="p-8 text-center text-gray-500">
-                            Chưa có chương nào
-                        </div>
-                    )}
-                </div>
-            </div>
+          <button
+            onClick={() => router.push(`/books/${bookId}/chapter/1`)}
+            disabled={bookData?.chapters?.length === 0}
+            className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {intl.formatMessage({ id: "common.readFromStart" })}
+          </button>
         </div>
-    )
+      </div>
+
+      {/* OVERVIEW */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-4">
+          {intl.formatMessage({ id: "dashboard.book.introduction" })}
+        </h2>
+        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+          {bookData.description}
+        </p>
+      </div>
+
+      {/* CHAPTER LIST */}
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">
+          {intl.formatMessage({ id: "dashboard.book.chapterList" })}
+        </h2>
+        <div className="border rounded-xl overflow-hidden divide-y dark:divide-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+          {bookData?.chapters
+            ?.sort((a, b) => a.chapterNumber - b.chapterNumber)
+            .map((chapter) => (
+              <div
+                key={chapter.id}
+                onClick={() =>
+                  router.push(
+                    `/books/${bookId}/chapter/${chapter.chapterNumber}`,
+                  )
+                }
+                className="p-5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition flex justify-between items-center"
+              >
+                <span className="font-medium">
+                  {intl.formatMessage({ id: "common.chapterCapital" })}{" "}
+                  {chapter.chapterNumber}
+                  {chapter.title ? `: ${chapter.title}` : ""}
+                </span>
+                <span className="text-gray-400">→</span>
+              </div>
+            ))}
+
+          {bookData?.chapters?.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              Chưa có chương nào
+            </div>
+          )}
+        </div>
+      </div>
+
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                  {intl.formatMessage({
+                    id: "dashboard.book.reviewModalTitle",
+                  })}
+                </h3>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  {intl.formatMessage({
+                    id: "dashboard.book.reviewModalSubtitle",
+                  })}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsReviewModalOpen(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {intl.formatMessage({
+                    id: "dashboard.book.reviewRating",
+                  })}
+                </label>
+                <select
+                  value={ratingValue}
+                  onChange={(event) =>
+                    setRatingValue(Number(event.target.value))
+                  }
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                >
+                  {[5, 4, 3, 2, 1].map((score) => (
+                    <option key={score} value={score}>
+                      {score} ⭐
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {intl.formatMessage({
+                    id: "dashboard.book.reviewComment",
+                  })}
+                </label>
+                <textarea
+                  value={reviewText}
+                  onChange={(event) => setReviewText(event.target.value)}
+                  rows={4}
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                  placeholder={intl.formatMessage({
+                    id: "dashboard.book.reviewCommentPlaceholder",
+                  })}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setIsReviewModalOpen(false)}
+                className="inline-flex justify-center rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              >
+                {intl.formatMessage({
+                  id: "common.cancel",
+                })}
+              </button>
+              <button
+                type="button"
+                disabled={isSubmittingReview}
+                onClick={() => {
+                  setIsSubmittingReview(true);
+                  console.log("Review submitted:", {
+                    bookId,
+                    rating: ratingValue,
+                    comment: reviewText,
+                  });
+                  setTimeout(() => {
+                    setIsSubmittingReview(false);
+                    setIsReviewModalOpen(false);
+                    setReviewText("");
+                    setRatingValue(5);
+                  }, 300);
+                }}
+                className="inline-flex justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSubmittingReview
+                  ? intl.formatMessage({
+                      id: "common.submitting",
+                    })
+                  : intl.formatMessage({
+                      id: "dashboard.book.submitReview",
+                    })}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
