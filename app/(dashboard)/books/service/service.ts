@@ -73,6 +73,21 @@ export const getComicOverview = async (comicId: number) => {
     }
 };
 
+export const makeComicRating = async (
+    comicId: number,
+    rating: number,
+) => {
+    try {        const res = await HttpRequest.put(
+            `/comics/${comicId}/ratings`,
+            { 'score': rating }
+        );
+        return res;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
 export const createComic = async (
     body: CreateComicBody
 ) => {

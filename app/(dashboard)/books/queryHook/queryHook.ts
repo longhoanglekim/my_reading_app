@@ -1,11 +1,12 @@
 // hooks/queries/useComicQueries.ts
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
     getBookSummaryList,
     GetBookSummaryListParams,
     getComicOverview,
+    makeComicRating,
 } from "../service/service";
 import { useNotification } from "@/app/components/providers/NotificationProvider";
 
@@ -48,6 +49,31 @@ export const useComicOverviewQuery = (comicId: number) => {
                 message: error.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
             })
             }
+        },
+    });
+}
+
+export const useMakeComicRatingMutation = (comicId: number) => {
+    const { showNotification } = useNotification()
+    return useMutation({
+        mutationKey: ["make-comic-rating", comicId],
+        mutationFn: async (rating: number) => {
+            try {
+                const response = await makeComicRating(comicId, rating);
+                showNotification({
+                    type: 'success',
+                    title: 'Đánh giá thành công',
+                    message: 'Cảm ơn bạn đã đánh giá!',
+                });
+                return response;
+            } catch (error) {
+                showNotification({
+                    type: 'error',
+                    title: 'Đánh giá thất bại',
+                    message: error.message || 'Đánh giá thất bại. Vui lòng thử lại.',
+                });
+                throw error;
+            }   
         },
     });
 }

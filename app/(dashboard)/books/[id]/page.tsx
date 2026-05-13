@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
-import { useComicOverviewQuery } from "../queryHook/queryHook";
+import {
+  useComicOverviewQuery,
+  useMakeComicRatingMutation,
+} from "../queryHook/queryHook";
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -12,10 +15,9 @@ export default function BookDetailPage() {
   const intl = useIntl();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [ratingValue, setRatingValue] = useState(5);
-  const [reviewText, setReviewText] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const { data, isLoading, isError } = useComicOverviewQuery(Number(bookId));
-
+  const { mutate: makeRating } = useMakeComicRatingMutation(Number(bookId));
   if (isLoading) {
     return (
       <div className="text-center py-10 font-medium text-gray-500">
@@ -188,23 +190,6 @@ export default function BookDetailPage() {
                   ))}
                 </select>
               </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {intl.formatMessage({
-                    id: "dashboard.book.reviewComment",
-                  })}
-                </label>
-                <textarea
-                  value={reviewText}
-                  onChange={(event) => setReviewText(event.target.value)}
-                  rows={4}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                  placeholder={intl.formatMessage({
-                    id: "dashboard.book.reviewCommentPlaceholder",
-                  })}
-                />
-              </div>
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
@@ -221,16 +206,15 @@ export default function BookDetailPage() {
                 type="button"
                 disabled={isSubmittingReview}
                 onClick={() => {
+                  makeRating(ratingValue);
                   setIsSubmittingReview(true);
                   console.log("Review submitted:", {
                     bookId,
                     rating: ratingValue,
-                    comment: reviewText,
                   });
                   setTimeout(() => {
                     setIsSubmittingReview(false);
                     setIsReviewModalOpen(false);
-                    setReviewText("");
                     setRatingValue(5);
                   }, 300);
                 }}
