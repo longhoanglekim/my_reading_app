@@ -2,7 +2,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  FormEvent,
+} from "react";
 import { useIntl } from "react-intl";
 import {
   Book,
@@ -11,7 +18,13 @@ import {
   BubbleChunk,
   ChapterPage,
   SelectionTranslation,
+  ChapterComment,
 } from "./type";
+import {
+  useChapterComments,
+  useChapterOverview,
+  usePostChapterComment,
+} from "./queryHook/queryHook";
 
 /* =========================
    MOCK DATA
@@ -31,7 +44,7 @@ const MOCK_CHAPTERS: BookChapter[] = [
   {
     id: "ch-nha-001",
     book_id: "123",
-    chapter_number: 1,
+    chapterNumber: 1,
     title: "Giấc Mơ Lặp Lại",
     total_pages: 3,
     hasNextChapter: true,
@@ -39,7 +52,7 @@ const MOCK_CHAPTERS: BookChapter[] = [
   {
     id: "ch-nha-002",
     book_id: "123",
-    chapter_number: 2,
+    chapterNumber: 2,
     title: "Gặp Người Vua Già",
     total_pages: 2,
     hasNextChapter: false,
@@ -490,7 +503,11 @@ export default function ComicChapterPage() {
   const intl = useIntl();
   const bookId = params.id as string;
   const chapterNumber = parseInt(params.chapter as string, 10);
-
+  const {
+    data: chapterOverviewData,
+    isLoading: chapterOverviewLoading,
+    isError: chapterOverviewError,
+  } = useChapterOverview(bookId, chapterNumber);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBubble, setSelectedBubble] = useState<Bubble | null>(null);
   const [hoveredWord, setHoveredWord] = useState<{
@@ -504,6 +521,7 @@ export default function ComicChapterPage() {
   const [textSelection, setTextSelection] =
     useState<SelectionTranslation | null>(null);
   const [imageScale, setImageScale] = useState(1);
+  const [commentText, setCommentText] = useState("");
 
   const imageRef = useRef<HTMLImageElement>(null);
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -513,10 +531,20 @@ export default function ComicChapterPage() {
   const chapter = useMemo(
     () =>
       MOCK_CHAPTERS.find(
-        (ch) => ch.book_id === bookId && ch.chapter_number === chapterNumber,
+        (ch) => ch.book_id === bookId && ch.chapterNumber === chapterNumber,
       ),
     [bookId, chapterNumber],
   );
+  console.log("Chapter overview data:", chapterOverviewData);
+  const chapterKey = chapterOverviewData?.id;
+  const chapterTitle = chapter?.title ?? `Chương ${chapterNumber}`;
+
+  // Use API hooks
+  const { data: commentsData, isLoading: commentsLoading } =
+    useChapterComments(chapterKey);
+  const postCommentMutation = usePostChapterComment(chapterKey);
+
+  const chapterComments = commentsData?.data.content || [];
 
   const pages = useMemo(
     () =>
@@ -538,6 +566,21 @@ export default function ComicChapterPage() {
     () => currentPageData?.bubbles || [],
     [currentPageData],
   );
+
+  const handleCommentSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = commentText.trim();
+    if (!trimmed) return;
+
+    postCommentMutation.mutate(
+      { content: trimmed },
+      {
+        onSuccess: () => {
+          setCommentText("");
+        },
+      },
+    );
+  };
   const sortedBubbles = useMemo(() => {
     if (!isJapanese) return currentBubbles;
 
@@ -661,40 +704,17 @@ export default function ComicChapterPage() {
     setHoveredWord(null);
   };
 
-  // Click vào chữ → hiện panel dịch phía dưới
-  const handleWordClick = (
-    bubbleId: number,
-    chunkIndex: number,
-    chunk: BubbleChunk,
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation();
-    window.getSelection()?.removeAllRanges();
-    setHoveredWord({ bubbleId, chunkIndex });
-    setActiveWord({ bubbleId, chunkIndex });
-
-    setTextSelection({
-      text: chunk.word,
-      translation: `${chunk.word} (${chunk.romaji}): ${chunk.meaning}`,
-      chunks: [chunk],
-    });
-  };
-
   // Click cả bubble → mở popup chi tiết
   const handleBubbleClick = (bubble: Bubble) => {
     setActiveWord(null);
     setSelectedBubble(bubble);
   };
 
-  const prevChapterNum = chapter?.chapter_number
-    ? chapter.chapter_number - 1
-    : 0;
-  const nextChapterNum = chapter?.chapter_number
-    ? chapter.chapter_number + 1
-    : 0;
+  const prevChapterNum = chapter?.chapterNumber ? chapter.chapterNumber - 1 : 0;
+  const nextChapterNum = chapter?.chapterNumber ? chapter.chapterNumber + 1 : 0;
 
   const hasPrevChapter = MOCK_CHAPTERS.some(
-    (ch) => ch.book_id === bookId && ch.chapter_number === prevChapterNum,
+    (ch) => ch.book_id === bookId && ch.chapterNumber === prevChapterNum,
   );
   const hasNextChapter = chapter?.hasNextChapter || false;
 
@@ -711,7 +731,10 @@ export default function ComicChapterPage() {
   };
 
   return (
-    <div key={chapterNumber} className="min-h-screen flex flex-col bg-gray-50">
+    <div
+      key={chapterNumber}
+      className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100"
+    >
       {/* HEADER */}
       <div className="w-full max-w-5xl mx-auto px-4 py-6">
         <div className="relative flex items-center">
@@ -791,8 +814,6 @@ export default function ComicChapterPage() {
                         isJapanese && (isNumber || isPunctuationCombo);
                       const isSinglePunctuation =
                         isJapanese && /^[!?！？]$/.test(chunk.word);
-                      const isEllipsis =
-                        isJapanese && /^[.。．…]+$/.test(chunk.word);
 
                       return (
                         <span
@@ -864,6 +885,117 @@ export default function ComicChapterPage() {
               Đang tải trang...
             </div>
           )}
+        </div>
+      </div>
+
+      {/* COMMENTS */}
+      <div className="w-full max-w-5xl mx-auto px-4 pb-8">
+        <div className="bg-white rounded-3xl border shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl font-bold">
+                {intl.formatMessage({ id: "chapterPage.commentsTitle" })}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {intl.formatMessage({ id: "common.chapterCapital" })}{" "}
+                {chapterNumber}
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleCommentSubmit} className="space-y-3">
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              rows={4}
+              placeholder={intl.formatMessage({
+                id: "chapterPage.commentPlaceholder",
+              })}
+              className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:ring-blue-400/30"
+            />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <button
+                type="submit"
+                disabled={!commentText.trim() || postCommentMutation.isPending}
+                className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+              >
+                {postCommentMutation.isPending ? (
+                  <>
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {intl.formatMessage({ id: "chapterPage.sendingComment" })}
+                  </>
+                ) : (
+                  intl.formatMessage({ id: "chapterPage.submitComment" })
+                )}
+              </button>
+            </div>
+          </form>
+
+          {textSelection && (
+            <div className="mt-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-600 dark:bg-yellow-950/20">
+              <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
+                {intl.formatMessage({ id: "chapterPage.selectedTextTitle" })}
+              </p>
+              <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
+                {textSelection.text}
+              </p>
+              <pre className="mt-3 whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300">
+                {textSelection.translation}
+              </pre>
+            </div>
+          )}
+
+          <div className="mt-8 space-y-4">
+            {commentsLoading ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  {intl.formatMessage({ id: "chapterPage.commentsLoading" })}
+                </p>
+              </div>
+            ) : chapterComments.length > 0 ? (
+              chapterComments.map((comment) => (
+                <div
+                  key={comment.id}
+                  className="rounded-3xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={comment.avatarUrl || "/default-avatar.png"}
+                      alt={comment.fullName}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        {comment.fullName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(comment.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    {comment.content}
+                  </p>
+                  {comment.replies && comment.replies.length > 0 && (
+                    <div className="mt-3 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        {intl.formatMessage({
+                          id: "chapterPage.commentReplies",
+                          values: { count: comment.replies.length },
+                        })}
+                      </p>
+                      {/* You can expand replies here if needed */}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400">
+                {intl.formatMessage({ id: "chapterPage.noComments" })}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

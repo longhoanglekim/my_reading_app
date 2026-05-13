@@ -127,6 +127,17 @@
     "publish": "Publish Manga",
     "logout": "Logout"
   },
+  "chapterPage": {
+    "commentsTitle": "Chapter Comments",
+    "commentPlaceholder": "Write your comment...",
+    "submitComment": "Submit Comment",
+    "sendingComment": "Sending...",
+    "commentSubmitNote": "Comments will be sent to the server.",
+    "commentsLoading": "Loading comments...",
+    "noComments": "No comments yet for this chapter.",
+    "commentReplies": "{count} replies",
+    "selectedTextTitle": "Selected text"
+  },
   "popups": {
     "dialogueInfo": {
       "title": "Dialogue Details",

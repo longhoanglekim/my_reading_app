@@ -127,6 +127,17 @@
     "publish": "Đăng truyện",
     "logout": "Đăng xuất"
   },
+  "chapterPage": {
+    "commentsTitle": "Bình luận chương",
+    "commentPlaceholder": "Viết bình luận của bạn...",
+    "submitComment": "Gửi bình luận",
+    "sendingComment": "Đang gửi...",
+    "commentSubmitNote": "Bình luận sẽ được gửi lên server.",
+    "commentsLoading": "Đang tải bình luận...",
+    "noComments": "Chưa có bình luận nào cho chương này.",
+    "commentReplies": "{count} phản hồi",
+    "selectedTextTitle": "Đã chọn nội dung"
+  },
   "popups": {
     "deleteChapter": {
       "title": "Xác nhận xóa chương",
