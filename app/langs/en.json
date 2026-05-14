@@ -136,7 +136,8 @@
     "commentsLoading": "Loading comments...",
     "noComments": "No comments yet for this chapter.",
     "commentReplies": "{count} replies",
-    "selectedTextTitle": "Selected text"
+    "selectedTextTitle": "Selected text",
+    "editComic": "Edit Comic"
   },
   "popups": {
     "dialogueInfo": {

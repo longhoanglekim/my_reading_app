@@ -19,12 +19,17 @@ export const useBookSummaryListQuery = (
         queryFn: () => {
             try {
                 return getBookSummaryList(params);
-            } catch (error) {
+            } catch (error: unknown) {
+                 const message =
+                     error instanceof Error
+                         ? error.message
+                         : 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.';
+
                  showNotification({
-                type: 'error',
-                title: 'Đăng ký thất bại',
-                message: error.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
-            })
+                     type: 'error',
+                     title: 'Đăng ký thất bại',
+                     message,
+                 });
             }
         },
 
@@ -33,31 +38,50 @@ export const useBookSummaryListQuery = (
 
 
 
-export const useComicOverviewQuery = (comicId: number) => {
-    const { showNotification } = useNotification()
+export const useComicOverviewQuery = (comicId?: number) => {
+    const { showNotification } = useNotification();
+    const enabled = typeof comicId === "number" && !Number.isNaN(comicId) && comicId > 0;
+
     return useQuery({
         queryKey: ["comic-overview", comicId],
         queryFn: async () => {
+            if (!enabled) {
+                throw new Error("Invalid comicId for overview query");
+            }
+
             try {
                 const response = await getComicOverview(comicId);
-                // Giả sử API trả về trực tiếp ComicOverview
                 return response.data || response;
-            } catch (error) {
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Lấy comic overview thất bại. Vui lòng thử lại.';
+
                 showNotification({
-                type: 'error',
-                title: 'Đăng ký thất bại',
-                message: error.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
-            })
+                    type: 'error',
+                    title: 'Đăng ký thất bại',
+                    message,
+                });
+
+                throw error;
             }
         },
+        enabled,
     });
 }
 
-export const useMakeComicRatingMutation = (comicId: number) => {
-    const { showNotification } = useNotification()
+export const useMakeComicRatingMutation = (comicId?: number) => {
+    const { showNotification } = useNotification();
+    const enabled = typeof comicId === "number" && !Number.isNaN(comicId) && comicId > 0;
+
     return useMutation({
         mutationKey: ["make-comic-rating", comicId],
         mutationFn: async (rating: number) => {
+            if (!enabled) {
+                throw new Error("Invalid comicId for rating mutation");
+            }
+
             try {
                 const response = await makeComicRating(comicId, rating);
                 showNotification({
@@ -66,11 +90,16 @@ export const useMakeComicRatingMutation = (comicId: number) => {
                     message: 'Cảm ơn bạn đã đánh giá!',
                 });
                 return response;
-            } catch (error) {
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Đánh giá thất bại. Vui lòng thử lại.';
+
                 showNotification({
                     type: 'error',
                     title: 'Đánh giá thất bại',
-                    message: error.message || 'Đánh giá thất bại. Vui lòng thử lại.',
+                    message,
                 });
                 throw error;
             }   

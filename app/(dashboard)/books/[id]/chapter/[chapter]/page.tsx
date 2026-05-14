@@ -501,8 +501,14 @@ export default function ComicChapterPage() {
   const params = useParams();
   const router = useRouter();
   const intl = useIntl();
-  const bookId = params.id as string;
-  const chapterNumber = parseInt(params.chapter as string, 10);
+  const routeBookId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const routeChapterParam = Array.isArray(params.chapter)
+    ? params.chapter[0]
+    : params.chapter;
+  const bookId = routeBookId ?? "";
+  const chapterNumber = routeChapterParam
+    ? parseInt(routeChapterParam, 10)
+    : NaN;
   const {
     data: chapterOverviewData,
     isLoading: chapterOverviewLoading,

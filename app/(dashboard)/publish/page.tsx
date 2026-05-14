@@ -1,353 +1,388 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useIntl } from "react-intl"
-
-interface Chapter {
-    id: number
-    title: string
-    files: File[]
+import { use, useState } from "react";
+import { useIntl } from "react-intl";
+import { useGenresQuery } from "./queryHooks";
+import { useRouter } from "next/navigation";
+interface Genre {
+  id: number;
+  name: string;
 }
 
-interface MangaData {
-    title: string
-    author: string
-    description: string
-    genre: string[]
-    cover: File | null
+interface Chapter {
+  chapterNumber: number;
+  title: string;
+  files: File[];
+}
+
+interface CreateComicData {
+  title: string;
+  author: string;
+  description: string;
+  genreIds: number[];
+  cover: File | null;
 }
 
 export default function UploadMangaChapters() {
-    const intl = useIntl()
+  const intl = useIntl();
+  const router = useRouter();
+  const {
+    data: genreData,
+    isLoading: isGenresLoading,
+    isError: isGenresError,
+  } = useGenresQuery();
+  // Mock genre data từ API getGenreData
 
-    const [manga, setManga] = useState<MangaData>({
-        title: '',
-        author: '',
-        description: '',
-        genre: [],
-        cover: null,
-    })
+  const [manga, setManga] = useState<CreateComicData>({
+    title: "",
+    author: "",
+    description: "",
+    genreIds: [],
+    cover: null,
+  });
 
-    const [chapters, setChapters] = useState<Chapter[]>([
-        { id: Date.now(), title: '', files: [] }
-    ])
+  const [chapters, setChapters] = useState<Chapter[]>([
+    {
+      chapterNumber: 1,
+      title: "",
+      files: [],
+    },
+  ]);
 
-    // ── Cập nhật manga info ──
-    const updateManga = (field: keyof MangaData, value: string | string[] | File | null) => {
-        setManga(prev => ({ ...prev, [field]: value }))
+  // ─────────────────────────────
+  // Manga Info
+  // ─────────────────────────────
+  const updateManga = (
+    field: keyof CreateComicData,
+    value: string | number | File | null,
+  ) => {
+    setManga((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      updateManga("cover", e.target.files[0]);
     }
+  };
 
-    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            updateManga('cover', e.target.files[0])
-        }
-    }
+  const toggleGenre = (genreId: number) => {
+    setManga((prev) => ({
+      ...prev,
+      genreIds: prev.genreIds.includes(genreId)
+        ? prev.genreIds.filter((id) => id !== genreId)
+        : [...prev.genreIds, genreId],
+    }));
+  };
 
-    const toggleGenre = (genreName: string) => {
-        setManga(prev => {
-            const currentGenres = prev.genre || []
-            if (currentGenres.includes(genreName)) {
-                return { ...prev, genre: currentGenres.filter(g => g !== genreName) }
-            } else {
-                return { ...prev, genre: [...currentGenres, genreName] }
+  // ─────────────────────────────
+  // Chapter Functions
+  // ─────────────────────────────
+  const addNewChapter = () => {
+    setChapters((prev) => [
+      ...prev,
+      {
+        chapterNumber: prev.length + 1,
+        title: "",
+        files: [],
+      },
+    ]);
+  };
+
+  const updateChapterTitle = (chapterNumber: number, title: string) => {
+    setChapters((prev) =>
+      prev.map((chapter) =>
+        chapter.chapterNumber === chapterNumber
+          ? {
+              ...chapter,
+              title,
             }
-        })
+          : chapter,
+      ),
+    );
+  };
+
+  const addFilesToChapter = (chapterNumber: number, newFiles: File[]) => {
+    setChapters((prev) =>
+      prev.map((chapter) =>
+        chapter.chapterNumber === chapterNumber
+          ? {
+              ...chapter,
+              files: [...chapter.files, ...newFiles],
+            }
+          : chapter,
+      ),
+    );
+  };
+
+  const removeFileFromChapter = (chapterNumber: number, fileIndex: number) => {
+    setChapters((prev) =>
+      prev.map((chapter) =>
+        chapter.chapterNumber === chapterNumber
+          ? {
+              ...chapter,
+              files: chapter.files.filter((_, i) => i !== fileIndex),
+            }
+          : chapter,
+      ),
+    );
+  };
+
+  const removeChapter = (chapterNumber: number) => {
+    if (chapters.length === 1) {
+      alert(
+        intl.formatMessage({
+          id: "uploadPage.validation.minChapters",
+        }),
+      );
+      return;
     }
 
-    // ── Functions cho chapters ──
-    const addNewChapter = () => {
-        setChapters(prev => [...prev, { id: Date.now(), title: '', files: [] }])
+    const updated = chapters
+      .filter((chapter) => chapter.chapterNumber !== chapterNumber)
+      .map((chapter, index) => ({
+        ...chapter,
+        chapterNumber: index + 1,
+      }));
+
+    setChapters(updated);
+  };
+
+  // ─────────────────────────────
+  // Submit
+  // ─────────────────────────────
+  const handlePublish = () => {
+    if (!manga.title.trim()) {
+      alert(
+        intl.formatMessage({
+          id: "uploadPage.validation.titleRequired",
+        }),
+      );
+      return;
     }
 
-    const updateChapterTitle = (chapterId: number, title: string) => {
-        setChapters(prev =>
-            prev.map(ch => (ch.id === chapterId ? { ...ch, title } : ch))
-        )
+    if (!manga.author.trim()) {
+      alert(
+        intl.formatMessage({
+          id: "uploadPage.validation.authorRequired",
+        }),
+      );
+      return;
     }
 
-    const addFilesToChapter = (chapterId: number, newFiles: File[]) => {
-        setChapters(prev =>
-            prev.map(ch =>
-                ch.id === chapterId ? { ...ch, files: [...ch.files, ...newFiles] } : ch
-            )
-        )
+    if (!manga.description.trim()) {
+      alert(
+        intl.formatMessage({
+          id: "uploadPage.validation.descriptionRequired",
+        }),
+      );
+      return;
     }
 
-    const removeFileFromChapter = (chapterId: number, fileIndex: number) => {
-        setChapters(prev =>
-            prev.map(ch =>
-                ch.id === chapterId
-                    ? { ...ch, files: ch.files.filter((_, i) => i !== fileIndex) }
-                    : ch
-            )
-        )
+    if (!manga.cover) {
+      alert(
+        intl.formatMessage({
+          id: "uploadPage.validation.coverRequired",
+        }),
+      );
+      return;
     }
 
-    const removeChapter = (chapterId: number) => {
-        if (chapters.length === 1) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.minChapters' }))
-            return
-        }
-        setChapters(prev => prev.filter(ch => ch.id !== chapterId))
+    if (manga.genreIds.length === 0) {
+      alert(
+        intl.formatMessage({
+          id: "uploadPage.validation.genreRequired",
+        }),
+      );
+      return;
     }
 
-    const handlePublish = () => {
-        if (!manga.title.trim()) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.titleRequired' }))
-            return
-        }
-        if (!manga.author.trim()) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.authorRequired' }))
-            return
-        }
-        if (!manga.description.trim()) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.descriptionRequired' }))
-            return
-        }
-        if (!manga.cover) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.coverRequired' }))
-            return
-        }
-        if (manga.genre.length === 0) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.genreRequired' }))
-            return
-        }
+    // DTO gửi BE
+    const comicData = {
+      title: manga.title,
+      author: manga.author,
+      description: manga.description,
+      genreIds: manga.genreIds,
+    };
 
-        const invalidChapter = chapters.some(ch => !ch.title.trim() || ch.files.length === 0)
-        if (invalidChapter) {
-            alert(intl.formatMessage({ id: 'uploadPage.validation.chapterInvalid' }))
-            return
-        }
+    const chapterData = chapters.map((chapter) => ({
+      chapterNumber: chapter.chapterNumber,
+      title: chapter.title,
+    }));
 
-        console.log('Dữ liệu gửi đi:', { manga, chapters })
-        // TODO: Tạo FormData và gọi API thực tế
+    console.log("comicData:", comicData);
+    console.log("chapterData:", chapterData);
+
+    // Mock FormData
+    const formData = new FormData();
+
+    formData.append("comicData", JSON.stringify(comicData));
+
+    formData.append("chapterData", JSON.stringify(chapterData));
+
+    if (manga.cover) {
+      formData.append("cover", manga.cover);
     }
 
-    const genrePrefix = 'uploadPage.genres.';
-    const commonGenres = Object.keys(intl.messages)
-        .filter(key => key.startsWith(genrePrefix))
-        .sort((a, b) => {
-            const aIndex = parseInt(a.split('.').pop() || '0');
-            const bIndex = parseInt(b.split('.').pop() || '0');
-            return aIndex - bIndex;
-        })
-        .map(key => intl.messages[key]);
+    chapters.forEach((chapter) => {
+      chapter.files.forEach((file) => {
+        formData.append(`chapter_${chapter.chapterNumber}`, file);
+      });
+    });
 
-    return (
-        <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 p-6">
-            <div className="max-w-5xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8">
-                    {intl.formatMessage({ id: "uploadPage.title" })}
-                </h1>
+    console.log("Ready to call API");
+    // call hook để publish comic
+    // nếu thành công , lấy id của bộ truyện redirect về màn quản lý truyện này
+    router.push("/books/1/manage");
+    // nếu không báo lỗi và không redirect
+    return;
+  };
 
-                {/* Thông tin truyện */}
-                <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-xl p-6 mb-10 shadow-sm">
-                    <h2 className="text-2xl font-semibold mb-6">
-                        {intl.formatMessage({ id: "uploadPage.bookInfo.title" })}
-                    </h2>
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 p-6">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">
+          {intl.formatMessage({
+            id: "uploadPage.title",
+          })}
+        </h1>
 
-                    {/* Tiêu đề truyện */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2">
-                            {intl.formatMessage({ id: "uploadPage.bookInfo.name" })} *
-                        </label>
-                        <input
-                            value={manga.title}
-                            onChange={e => updateManga('title', e.target.value)}
-                            placeholder={intl.formatMessage({ id: "uploadPage.bookInfo.namePlaceholder" })}
-                            className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-                        />
-                    </div>
+        {/* Manga Info */}
+        <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-xl p-6 mb-10 shadow-sm">
+          <h2 className="text-2xl font-semibold mb-6">
+            {intl.formatMessage({
+              id: "uploadPage.bookInfo.title",
+            })}
+          </h2>
 
-                    {/* Tác giả */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2">
-                            {intl.formatMessage({ id: "uploadPage.bookInfo.author" })} *
-                        </label>
-                        <input
-                            value={manga.author}
-                            onChange={e => updateManga('author', e.target.value)}
-                            placeholder={intl.formatMessage({ id: "uploadPage.bookInfo.authorPlaceholder" })}
-                            className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-                        />
-                    </div>
+          {/* Title */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              {intl.formatMessage({
+                id: "uploadPage.bookInfo.name",
+              })}{" "}
+              *
+            </label>
 
-                    {/* Mô tả */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2">
-                            {intl.formatMessage({ id: "uploadPage.bookInfo.description" })}
-                        </label>
-                        <textarea
-                            value={manga.description}
-                            onChange={e => updateManga('description', e.target.value)}
-                            placeholder={intl.formatMessage({ id: "uploadPage.bookInfo.descriptionPlaceholder" })}
-                            rows={5}
-                            className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-                        />
-                    </div>
+            <input
+              value={manga.title}
+              onChange={(e) => updateManga("title", e.target.value)}
+              className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
+            />
+          </div>
 
-                    {/* Thể loại */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium mb-3">
-                            {intl.formatMessage({ id: "uploadPage.bookInfo.genre" })} *
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                            {commonGenres.map(genre => (
-                                <button
-                                    key={genre}
-                                    type="button"
-                                    onClick={() => toggleGenre(genre)}
-                                    className={`px-4 py-2 rounded-full text-sm transition ${manga.genre.includes(genre)
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    {genre}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+          {/* Author */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              {intl.formatMessage({
+                id: "uploadPage.bookInfo.author",
+              })}{" "}
+              *
+            </label>
 
-                    {/* Ảnh bìa */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {intl.formatMessage({ id: "uploadPage.bookInfo.coverImage" })} *
-                        </label>
-                        <div className="flex flex-col sm:flex-row gap-6 items-start">
-                            {manga.cover && (
-                                <div className="w-48 h-72 rounded-lg overflow-hidden border dark:border-gray-700 shadow">
-                                    <img
-                                        src={URL.createObjectURL(manga.cover)}
-                                        alt="Cover preview"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            )}
+            <input
+              value={manga.author}
+              onChange={(e) => updateManga("author", e.target.value)}
+              className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
+            />
+          </div>
 
-                            <label className="cursor-pointer">
-                                <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-800 transition min-w-[320px]">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleCoverChange}
-                                        className="hidden"
-                                    />
-                                    <span className="text-blue-600 font-medium block mb-2">
-                                        {intl.formatMessage({ id: "uploadPage.bookInfo.chooseCover" })}
-                                    </span>
-                                    <p className="text-sm text-gray-500">
-                                        {intl.formatMessage({ id: "uploadPage.bookInfo.recommendedSize" })}
-                                    </p>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+          {/* Description */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              {intl.formatMessage({
+                id: "uploadPage.bookInfo.description",
+              })}
+            </label>
 
-                {/* Danh sách chương */}
-                <h2 className="text-2xl font-semibold mb-6">
-                    {intl.formatMessage({ id: "uploadPage.chapter.title" })}
-                </h2>
+            <textarea
+              rows={5}
+              value={manga.description}
+              onChange={(e) => updateManga("description", e.target.value)}
+              className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
+            />
+          </div>
 
-                {chapters.map((chapter, chapterIndex) => (
-                    <div
-                        key={chapter.id}
-                        className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-xl p-6 mb-8 shadow-sm"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-semibold">
-                                {intl.formatMessage({ id: "uploadPage.chapter.chapterNumber" })} {chapterIndex + 1}
-                            </h3>
-                            {chapters.length > 1 && (
-                                <button
-                                    onClick={() => removeChapter(chapter.id)}
-                                    className="text-red-500 hover:text-red-700 text-sm"
-                                >
-                                    {intl.formatMessage({ id: "uploadPage.chapter.removeChapter" })}
-                                </button>
-                            )}
-                        </div>
+          {/* Genre */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-3">
+              {intl.formatMessage({
+                id: "uploadPage.bookInfo.genre",
+              })}{" "}
+              *
+            </label>
 
-                        <input
-                            value={chapter.title}
-                            onChange={e => updateChapterTitle(chapter.id, e.target.value)}
-                            placeholder={intl.formatMessage({ id: "uploadPage.chapter.chapterTitlePlaceholder" })}
-                            className="w-full p-3 mb-6 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-                        />
-
-                        {/* Upload pages */}
-                        <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl p-8 text-center mb-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <label className="cursor-pointer">
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={e => {
-                                        if (e.target.files) {
-                                            addFilesToChapter(chapter.id, Array.from(e.target.files))
-                                        }
-                                    }}
-                                    className="hidden"
-                                />
-                                <span className="text-blue-600 font-medium">
-                                    {intl.formatMessage({ id: "uploadPage.chapter.uploadPages" })}
-                                </span>
-                                <p className="mt-2 text-sm text-gray-500">
-                                    {intl.formatMessage({ id: "uploadPage.chapter.uploadPagesDesc" })}
-                                </p>
-                            </label>
-                        </div>
-
-                        {/* Preview pages */}
-                        {chapter.files.length > 0 && (
-                            <div className="mt-4">
-                                <h4 className="font-medium mb-3">
-                                    {intl.formatMessage({ id: "uploadPage.chapter.selectedPages" })} ({chapter.files.length})
-                                </h4>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                    {chapter.files.map((file, idx) => (
-                                        <div key={idx} className="relative group rounded-lg overflow-hidden">
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                alt={`page ${idx + 1}`}
-                                                className="w-full h-48 object-cover"
-                                            />
-                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                                <button
-                                                    onClick={() => removeFileFromChapter(chapter.id, idx)}
-                                                    className="bg-red-600 text-white px-4 py-2 rounded text-sm"
-                                                >
-                                                    {intl.formatMessage({ id: "uploadPage.delete" })}
-                                                </button>
-                                            </div>
-                                            <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                                                {intl.formatMessage({ id: "uploadPage.pageNumber" }, { number: idx + 1 })}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
-
-                {/* Nút hành động */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-between mt-10">
-                    <button
-                        onClick={addNewChapter}
-                        className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                    >
-                        {intl.formatMessage({ id: "uploadPage.chapter.addNewChapter" })}
-                    </button>
-
-                    <button
-                        onClick={handlePublish}
-                        className="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
-                    >
-                        {intl.formatMessage({ id: "uploadPage.action.publish" })}
-                    </button>
-                </div>
+            <div className="flex flex-wrap gap-2">
+              {genreData?.map((genre) => (
+                <button
+                  key={genre.id}
+                  type="button"
+                  onClick={() => toggleGenre(genre.id)}
+                  className={`px-4 py-2 rounded-full text-sm transition ${
+                    manga.genreIds.includes(genre.id)
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {genre.name}
+                </button>
+              ))}
             </div>
+          </div>
+
+          {/* Cover */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              {intl.formatMessage({
+                id: "uploadPage.bookInfo.coverImage",
+              })}{" "}
+              *
+            </label>
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-between items-center">
+              <label className="cursor-pointer">
+                <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-800 transition min-w-[320px] ">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple={false}
+                    onChange={handleCoverChange}
+                    className="hidden"
+                  />
+
+                  <span className="text-blue-600 font-medium block mb-2">
+                    Choose Cover
+                  </span>
+
+                  <p className="text-sm text-gray-500">JPG, PNG, WEBP</p>
+                </div>
+              </label>
+              {manga.cover && (
+                <div className="w-48 h-72 rounded-lg overflow-hidden border dark:border-gray-700 shadow">
+                  <img
+                    src={URL.createObjectURL(manga.cover)}
+                    alt="Cover preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-    )
+        {/* Nút hành động */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-between mt-10">
+          <div></div>
+
+          <button
+            onClick={handlePublish}
+            className="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+          >
+            {intl.formatMessage({ id: "uploadPage.action.publish" })}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

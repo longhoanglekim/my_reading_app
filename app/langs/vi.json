@@ -136,7 +136,8 @@
     "commentsLoading": "Đang tải bình luận...",
     "noComments": "Chưa có bình luận nào cho chương này.",
     "commentReplies": "{count} phản hồi",
-    "selectedTextTitle": "Đã chọn nội dung"
+    "selectedTextTitle": "Đã chọn nội dung",
+    "editComic": "Chỉnh sửa truyện"
   },
   "popups": {
     "deleteChapter": {

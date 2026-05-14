@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
@@ -10,21 +11,31 @@ import {
 
 export default function BookDetailPage() {
   const params = useParams();
-  const bookId = params.id as string;
+  const routeBookId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const bookId = routeBookId ? Number(routeBookId) : undefined;
+  const hasValidBookId =
+    typeof bookId === "number" && !Number.isNaN(bookId) && bookId > 0;
+
   const router = useRouter();
   const intl = useIntl();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [ratingValue, setRatingValue] = useState(5);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const { data, isLoading, isError } = useComicOverviewQuery(Number(bookId));
-  const { mutate: makeRating } = useMakeComicRatingMutation(Number(bookId));
-  if (isLoading) {
+  const { data, isLoading, isError } = useComicOverviewQuery(
+    hasValidBookId ? bookId : undefined,
+  );
+  const { mutate: makeRating } = useMakeComicRatingMutation(
+    hasValidBookId ? bookId : undefined,
+  );
+
+  if (!hasValidBookId || isLoading) {
     return (
       <div className="text-center py-10 font-medium text-gray-500">
         Đang tải dữ liệu...
       </div>
     );
   }
+
   if (isError) {
     return (
       <div className="text-center py-10 font-medium text-red-500">
@@ -32,6 +43,7 @@ export default function BookDetailPage() {
       </div>
     );
   }
+
   const bookData = data?.bookOverviewData;
   if (!bookData) {
     return (
@@ -46,55 +58,68 @@ export default function BookDetailPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       {/* BOOK HEADER */}
-      <div className="flex flex-col md:flex-row gap-20 mb-12">
-        <img
-          src={bookData.coverImageUrl}
-          alt={bookData.title}
-          className="w-60 h-80 object-cover rounded-lg shadow-xl"
-        />
-        <div className="flex flex-col justify-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">
-            {bookData.title}
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
-            {bookData.author}
-          </p>
+      <div className="flex justify-between mb-8">
+        <div className="flex flex-col md:flex-row gap-20 mb-12">
+          <Image
+            src={bookData.coverImageUrl}
+            alt={bookData.title}
+            width={240}
+            height={320}
+            unoptimized
+            className="w-60 h-80 object-cover rounded-lg shadow-xl"
+          />
+          <div className="flex flex-col justify-center">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
+              {bookData.title}
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">
+              {bookData.author}
+            </p>
 
-          <div className="flex items-center gap-4 mb-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-500 text-lg">★</span>
+            <div className="flex items-center gap-4 mb-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-yellow-500 text-lg">★</span>
 
-              <span className="font-semibold text-lg">
-                {bookData.averageRating.toFixed(1)}
-              </span>
+                <span className="font-semibold text-lg">
+                  {bookData.averageRating.toFixed(1)}
+                </span>
 
-              <span className="text-gray-500 dark:text-gray-400">
-                ({bookData.totalRatings}{" "}
-                {intl.formatMessage({ id: "dashboard.book.rating" })})
-              </span>
+                <span className="text-gray-500 dark:text-gray-400">
+                  ({bookData.totalRatings}{" "}
+                  {intl.formatMessage({ id: "dashboard.book.rating" })})
+                </span>
+              </div>
+
+              <button
+                className="px-4 py-2 rounded-lg border border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition text-sm font-medium"
+                onClick={() => setIsReviewModalOpen(true)}
+              >
+                ⭐{" "}
+                {intl.formatMessage({
+                  id: "dashboard.book.writeReview",
+                })}
+              </button>
             </div>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              {bookData?.chapters?.length ?? 0}{" "}
+              {intl.formatMessage({ id: "common.chapter" })}
+            </p>
 
             <button
-              className="px-4 py-2 rounded-lg border border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition text-sm font-medium"
-              onClick={() => setIsReviewModalOpen(true)}
+              onClick={() => router.push(`/books/${bookId}/chapter/1`)}
+              disabled={bookData?.chapters?.length === 0}
+              className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ⭐{" "}
-              {intl.formatMessage({
-                id: "dashboard.book.writeReview",
-              })}
+              {intl.formatMessage({ id: "common.readFromStart" })}
             </button>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
-            {bookData?.chapters?.length ?? 0}{" "}
-            {intl.formatMessage({ id: "common.chapter" })}
-          </p>
-
+        </div>
+        <div>
           <button
-            onClick={() => router.push(`/books/${bookId}/chapter/1`)}
-            disabled={bookData?.chapters?.length === 0}
-            className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => router.push(`/books/${bookId}/manage`)}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
           >
-            {intl.formatMessage({ id: "common.readFromStart" })}
+            {intl.formatMessage({ id: "chapterPage.editComic" })}
           </button>
         </div>
       </div>
