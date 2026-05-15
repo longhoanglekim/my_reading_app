@@ -66,7 +66,7 @@ export default function UploadChapterPage() {
       });
 
       alert("✅ Chapter đã được upload thành công!");
-      router.push(`/dashboard/books/${mangaId}/manage`);
+      router.push(`/books/${mangaId}/manage`);
     } catch (error) {
       console.error("❌ Upload failed:", error);
       alert("❌ Upload thất bại. Vui lòng thử lại.");
