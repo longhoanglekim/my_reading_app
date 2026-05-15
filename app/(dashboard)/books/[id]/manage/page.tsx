@@ -36,17 +36,18 @@ export default function EditMangaPage() {
     isError: isOverviewError,
   } = useComicOverviewQuery(Number(comicId));
 
-  // const {
-  //   data: chapterResponse,
-  //   isLoading: isChaptersLoading,
-  //   isError: isChaptersError,
-  // } = useComicChaptersQuery(Number(comicId));
+  const {
+    data: chapterResponse,
+    isLoading: isChaptersLoading,
+    isError: isChaptersError,
+  } = useComicChaptersQuery(Number(comicId));
 
   const isLoading = isOverviewLoading;
   const isError = isOverviewError;
 
   const [chapters, setChapters] = useState<BookChapter[]>([]);
-
+  const maxChapter =
+    chapters.length > 0 ? Math.max(...chapters.map((c) => c.chapterNumber)) : 0;
   useEffect(() => {
     if (!comicData || isInitialized) return;
 
@@ -60,20 +61,20 @@ export default function EditMangaPage() {
     setIsInitialized(true);
   }, [comicData, isInitialized]);
 
-  // useEffect(() => {
-  //   if (!chapterResponse?.content) return;
+  useEffect(() => {
+    if (!chapterResponse?.content) return;
 
-  //   setChapters(
-  //     chapterResponse.content.map((chapter) => ({
-  //       id: String(chapter.id),
-  //       book_id: comicId,
-  //       chapterNumber: chapter.chapterNumber,
-  //       title: chapter.title,
-  //       total_pages: 0,
-  //       hasNextChapter: false,
-  //     })),
-  //   );
-  // }, [chapterResponse, comicId]);
+    setChapters(
+      chapterResponse.content.map((chapter) => ({
+        id: String(chapter.id),
+        book_id: comicId,
+        chapterNumber: chapter.chapterNumber,
+        title: chapter.title,
+        total_pages: 0,
+        hasNextChapter: false,
+      })),
+    );
+  }, [chapterResponse, comicId]);
 
   // ==================== HANDLERS ====================
 
@@ -269,7 +270,9 @@ export default function EditMangaPage() {
 
           <button
             onClick={() =>
-              router.push(`/books/${comicId}/manage/upload-chapter`)
+              router.push(
+                `/books/${comicId}/manage/upload-chapter?newChapterNumber=${maxChapter + 1}`,
+              )
             }
             className="px-6 py-3 border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 transition"
           >

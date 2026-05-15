@@ -1,6 +1,6 @@
 // services/comic/comic.api.ts
 
-import HttpRequest from "@/config/auth";
+import HttpRequest from "@/app/config/auth";
 import { ApiResponse, ComicOverview, ChapterOverview } from "./type";
 import { PaginationResponse } from "@/app/(dashboard)/dashboard/service";
 

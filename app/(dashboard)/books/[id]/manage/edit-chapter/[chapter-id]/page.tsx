@@ -11,14 +11,20 @@ interface ChapterData {
 
 export default function EditChapterPage() {
   const params = useParams();
+  console.log("📖 EditChapterPage - params:", params);
   const router = useRouter();
   const intl = useIntl();
 
   const mangaId = Array.isArray(params.id) ? params.id[0] : params.id || "";
-  const chapterId = Array.isArray(params.chapterId)
-    ? params.chapterId[0]
-    : params.chapterId || "";
-
+  const chapterId = Array.isArray(params["chapter-id"])
+    ? params["chapter-id"][0]
+    : params["chapter-id"] || "";
+  console.log(
+    "📖 EditChapterPage - mangaId:",
+    mangaId,
+    "chapterId:",
+    chapterId,
+  );
   const [chapterData, setChapterData] = useState<ChapterData>({
     chapterNumber: 0,
     title: "",

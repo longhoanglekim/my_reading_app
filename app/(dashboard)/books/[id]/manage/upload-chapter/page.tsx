@@ -1,24 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useIntl } from "react-intl";
-import { BookChapter } from "./type";
+import { useUploadChapterWithPages } from "./queryhook";
+import { CreateChapterRequest } from "./type";
 
 export default function UploadChapterPage() {
   const params = useParams();
   const router = useRouter();
   const intl = useIntl();
-
+  const searchParams = useSearchParams();
   const mangaId = Array.isArray(params.id) ? params.id[0] : params.id || "";
+  const newChapterNumber = searchParams.get("newChapterNumber")
+    ? parseInt(searchParams.get("newChapterNumber") as string)
+    : 1;
 
-  const [chapterData, setChapterData] = useState<Partial<BookChapter>>({
-    chapterNumber: 1,
+  console.log(
+    "📖 UploadChapterPage - comicId:",
+    mangaId,
+    "newChapterNumber:",
+    newChapterNumber,
+  );
+
+  const [chapterData, setChapterData] = useState<CreateChapterRequest>({
+    chapterNumber: newChapterNumber,
     title: "",
   });
 
   const [newFiles, setNewFiles] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+
+  // Use the upload hook
+  const uploadMutation = useUploadChapterWithPages();
+  const isUploading = uploadMutation.isPending;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -29,19 +43,34 @@ export default function UploadChapterPage() {
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleUpload = () => {
-    setIsUploading(true);
-    console.log("📤 Uploading new chapter:", {
-      mangaId,
-      chapterData,
-      files: newFiles,
-    });
+  const handleUpload = async () => {
+    if (!chapterData.title || newFiles.length === 0) {
+      alert("⚠️ Vui lòng nhập tiêu đề và chọn ít nhất một ảnh");
+      return;
+    }
 
-    setTimeout(() => {
+    try {
+      console.log("📤 Starting upload...", {
+        comicId: mangaId,
+        chapterData,
+        filesCount: newFiles.length,
+      });
+
+      await uploadMutation.mutateAsync({
+        comicId: mangaId,
+        chapterData: {
+          chapterNumber: chapterData.chapterNumber,
+          title: chapterData.title,
+        },
+        files: newFiles,
+      });
+
       alert("✅ Chapter đã được upload thành công!");
-      router.push(`/dashboard/manga/${mangaId}/edit`);
-      setIsUploading(false);
-    }, 1000);
+      router.push(`/dashboard/books/${mangaId}/manage`);
+    } catch (error) {
+      console.error("❌ Upload failed:", error);
+      alert("❌ Upload thất bại. Vui lòng thử lại.");
+    }
   };
 
   return (
@@ -130,14 +159,17 @@ export default function UploadChapterPage() {
 
         <div className="flex gap-4">
           <button
-            onClick={() => router.push(`/dashboard/manga/${mangaId}/edit`)}
-            className="flex-1 py-4 border rounded-2xl"
+            onClick={() => router.push(`/dashboard/books/${mangaId}/manage`)}
+            className="flex-1 py-4 border rounded-2xl hover:bg-gray-100 disabled:opacity-50"
+            disabled={isUploading}
           >
             Hủy
           </button>
           <button
             onClick={handleUpload}
-            disabled={isUploading || newFiles.length === 0}
+            disabled={
+              isUploading || newFiles.length === 0 || !chapterData.title
+            }
             className="flex-1 py-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 disabled:opacity-50"
           >
             {isUploading ? "Đang upload..." : "Đăng Chapter"}
