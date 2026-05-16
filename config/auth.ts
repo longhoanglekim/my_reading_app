@@ -11,7 +11,7 @@ httpRequest.interceptors.request.use(
   (config) => {
     // Add auth token if available (only in browser)
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

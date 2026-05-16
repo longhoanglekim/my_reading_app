@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import { useIntl } from "react-intl";
-import { useGenresQuery } from "./queryHooks";
+import { useGenresQuery, useCreateComicMutation } from "./queryHooks";
 import { useRouter } from "next/navigation";
 interface Genre {
   id: number;
@@ -19,6 +19,9 @@ interface CreateComicData {
   title: string;
   author: string;
   description: string;
+  originalLanguage: string;
+  format: string;
+  status: string;
   genreIds: number[];
   cover: File | null;
 }
@@ -31,12 +34,16 @@ export default function UploadMangaChapters() {
     isLoading: isGenresLoading,
     isError: isGenresError,
   } = useGenresQuery();
-  // Mock genre data từ API getGenreData
+
+  const createComicMutation = useCreateComicMutation();
 
   const [manga, setManga] = useState<CreateComicData>({
     title: "",
     author: "",
     description: "",
+    originalLanguage: "",
+    format: "",
+    status: "",
     genreIds: [],
     cover: null,
   });
@@ -153,7 +160,7 @@ export default function UploadMangaChapters() {
   // ─────────────────────────────
   // Submit
   // ─────────────────────────────
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!manga.title.trim()) {
       alert(
         intl.formatMessage({
@@ -199,45 +206,31 @@ export default function UploadMangaChapters() {
       return;
     }
 
-    // DTO gửi BE
-    const comicData = {
-      title: manga.title,
-      author: manga.author,
-      description: manga.description,
-      genreIds: manga.genreIds,
-    };
-
-    const chapterData = chapters.map((chapter) => ({
-      chapterNumber: chapter.chapterNumber,
-      title: chapter.title,
-    }));
-
-    console.log("comicData:", comicData);
-    console.log("chapterData:", chapterData);
-
-    // Mock FormData
     const formData = new FormData();
-
-    formData.append("comicData", JSON.stringify(comicData));
-
-    formData.append("chapterData", JSON.stringify(chapterData));
-
-    if (manga.cover) {
-      formData.append("cover", manga.cover);
-    }
-
-    chapters.forEach((chapter) => {
-      chapter.files.forEach((file) => {
-        formData.append(`chapter_${chapter.chapterNumber}`, file);
-      });
+    formData.append("title", manga.title);
+    formData.append("author", manga.author);
+    formData.append("description", manga.description);
+    formData.append("originalLanguage", manga.originalLanguage);
+    formData.append("format", manga.format);
+    formData.append("status", manga.status);
+    manga.genreIds.forEach((genreId) => {
+      formData.append("genres", genreId.toString());
     });
 
-    console.log("Ready to call API");
-    // call hook để publish comic
-    // nếu thành công , lấy id của bộ truyện redirect về màn quản lý truyện này
-    router.push("/books/1/manage");
-    // nếu không báo lỗi và không redirect
-    return;
+    if (manga.cover) {
+      formData.append("coverImage", manga.cover);
+    }
+
+    try {
+      const response = await createComicMutation.mutateAsync(formData);
+      const comicId = response?.data?.id;
+
+      if (comicId) {
+        router.push(`/books/${comicId}/manage`);
+      }
+    } catch (error) {
+      console.error("Failed to create comic", error);
+    }
   };
 
   return (
@@ -287,6 +280,37 @@ export default function UploadMangaChapters() {
               onChange={(e) => updateManga("author", e.target.value)}
               className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Original Language
+              </label>
+              <input
+                value={manga.originalLanguage}
+                onChange={(e) =>
+                  updateManga("originalLanguage", e.target.value)
+                }
+                className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Format</label>
+              <input
+                value={manga.format}
+                onChange={(e) => updateManga("format", e.target.value)}
+                className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Status</label>
+              <input
+                value={manga.status}
+                onChange={(e) => updateManga("status", e.target.value)}
+                className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
+              />
+            </div>
           </div>
 
           {/* Description */}

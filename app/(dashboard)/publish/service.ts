@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
-import HttpRequest from "../../../config/auth";
-import { CreateComicBody, Genre } from "./type";
+import HttpRequest from "@/app/config/auth";
+import { CreateComicFormData, CreateComicResponse, Genre } from "./type";
 
 /* =========================
    TYPES
@@ -35,9 +35,9 @@ export const getBookGenre = async (): Promise<Genre[]> => {
   }
 };
 
-export const createComic = async (body: CreateComicBody) => {
+export const createComic = async (body: CreateComicFormData) => {
   try {
-    const res = await HttpRequest.post("/api/comics", body);
+    const res = await HttpRequest.post<CreateComicResponse>("/comics", body);
 
     return res.data;
   } catch (error) {

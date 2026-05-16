@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { useNotification } from "@/app/components/providers/NotificationProvider";
 import { createComic, getBookGenre } from "./service";
-import { CreateComicBody } from "../dashboard/service";
+import { CreateComicFormData } from "./type";
 
 export const useGenresQuery = (
 ) => {
@@ -30,7 +30,7 @@ export const useCreateComicMutation = () => {
     const { showNotification } = useNotification()
     return useMutation({
         mutationKey: ["create-comic"],
-        mutationFn: async (body: CreateComicBody) => {
+        mutationFn: async (body: CreateComicFormData) => {
             try {
                 const response = await createComic(body);
                 showNotification({
