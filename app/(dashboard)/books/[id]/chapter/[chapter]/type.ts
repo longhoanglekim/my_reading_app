@@ -16,30 +16,16 @@ export type BookChapter = {
     hasNextChapter: boolean
 }
 
-export type BubbleChunk = {
-    chunk_id: string
-    meaning: string
-    romaji: string
-    type: string
-    word: string
+
+
+export interface ChapterPage {
+  id: number;
+  pageNumber: number;
+  imageUrl: string;
+  cleanedImageUrl: string;
+  originalMetadataUrl: string;
 }
 
-export type Bubble = {
-    id: number
-    box: [number, number, number, number]
-    chunks: BubbleChunk[]
-    full_translation: string
-    original_text: string
-}
-
-export type ChapterPage = {
-    page_id: string
-    chapter_id: string
-    page_number: number
-    image_url: string
-    original_lang: 'ja' | 'ko' | 'zh' | 'en' | 'vi' // Follows ISO 639-1 2-character language codes
-    bubbles: Bubble[]
-}
 export type ChapterOverview = {
     id: string
     chapterNumber: number
@@ -71,4 +57,30 @@ export type CommentsResponse = {
         totalPages: number
         last: boolean
     }
+}
+export interface PageImages {
+  originalUrl: string;
+  inpaintedUrl: string;
+}
+
+export interface BubbleChunk {
+  chunk_id: string;
+  word: string;
+  romaji: string;
+  type: string;
+}
+
+export interface Bubble {
+  id: number;
+  box: number[];
+  original_text: string;
+  chunks: BubbleChunk[];
+}
+
+export interface PageDetailResponse {
+  pageId: number;
+  chapterId: number;
+  pageNumber: number;
+  images: PageImages;
+  bubbles: Bubble[];
 }

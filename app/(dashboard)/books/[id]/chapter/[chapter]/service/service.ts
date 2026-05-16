@@ -1,5 +1,6 @@
 import HttpRequest from "../../../../../../config/auth";
-import { CommentsResponse, ChapterComment, ChapterOverview } from '../type'
+import { CommentsResponse, ChapterComment, ChapterOverview, PageDetailResponse, ChapterPage } from '../type'
+const appLocale = localStorage.getItem('appLocale') || 'en';
 export const getChapterOverview = async (comicId : string, chapterNumber: number) : Promise<ChapterOverview> => {
     try {
         const res = await HttpRequest.get(`/comics/${comicId}/chapter/${chapterNumber}`);
@@ -50,3 +51,34 @@ export const postChapterComment = async (
     throw error;
   }
 }
+
+export const getPageDetail = async (
+  pageId: number
+): Promise<PageDetailResponse> => {
+  
+  try {
+    const res = await HttpRequest.get<PageDetailResponse>(
+      `/pages/${pageId}?lang=${appLocale}`
+    );
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const getChapterPages = async (
+  chapterId: number
+): Promise<ChapterPage[]> => {
+  try {
+    const res = await HttpRequest.get<ChapterPage[]>(
+      `/chapters/${chapterId}/pages`
+    );
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

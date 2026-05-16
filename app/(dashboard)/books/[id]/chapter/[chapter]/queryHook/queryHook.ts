@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getChapterComments, getChapterOverview, postChapterComment } from '../service/service'
+import { getChapterComments, getChapterOverview, getChapterPages, getPageDetail, postChapterComment } from '../service/service'
 import { ChapterComment } from '../type'
 export const useChapterOverview = (comicId: string, chapterNumber: number) => {
     return useQuery({
@@ -15,6 +15,13 @@ export const useChapterComments = (chapterId: string | undefined, page: number =
     enabled: !!chapterId,
   })
 }
+export const usePageDetail = (pageId: number) => {
+  return useQuery({
+    queryKey: ['pageDetail', pageId],
+    queryFn: () => getPageDetail(pageId!),
+    enabled: !!pageId,
+  });
+};
 
 export const usePostChapterComment = (chapterId: string | undefined) => {
   const queryClient = useQueryClient()
@@ -30,3 +37,13 @@ export const usePostChapterComment = (chapterId: string | undefined) => {
     },
   })
 }
+
+export const useChapterPages = (
+  chapterId: number | undefined
+) => {
+  return useQuery({
+    queryKey: ['chapterPages', chapterId],
+    queryFn: () => getChapterPages(chapterId!),
+    enabled: !!chapterId,
+  });
+};
