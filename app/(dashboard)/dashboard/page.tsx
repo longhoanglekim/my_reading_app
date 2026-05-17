@@ -27,8 +27,16 @@ export default function Dashboard() {
     ...params,
     listType: "FAVORITE",
   });
+  const {
+    data: readLaterBooksData,
+    isLoading: readLaterLoading,
+    isError: readLaterError,
+  } = useUserLibraryByType({
+    ...params,
+    listType: "READ_LATER",
+  });
 
-  if (recentLoading || favoriteLoading) {
+  if (recentLoading || favoriteLoading || readLaterLoading) {
     return <div className="text-center py-10">Đang tải dữ liệu...</div>;
   }
 
@@ -162,6 +170,42 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {favoriteBooks?.content.map((book) => (
+              <div
+                key={book.id}
+                onClick={() => router.push(`/books/${book.id}`)} // ← Click để đi đến trang chi tiết sách
+                className="group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer"
+              >
+                <div className="aspect-[1] relative">
+                  <img
+                    src={book.coverImageUrl}
+                    alt={book.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold line-clamp-1">{book.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {book.author}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Read Later books */}
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">{titleMap.readLater}</h2>
+            <button
+              className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+              onClick={() => router.push("/books?type=readLater")}
+            >
+              {intl.formatMessage({ id: "common.seeAll" })}
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {readLaterBooksData?.content.map((book) => (
               <div
                 key={book.id}
                 onClick={() => router.push(`/books/${book.id}`)} // ← Click để đi đến trang chi tiết sách

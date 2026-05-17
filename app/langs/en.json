@@ -39,6 +39,7 @@
     "searchBarPlaceholder": "Search by book title, author, or genre...",
     "recentBooks": "Recently Read",
     "favoriteBooks": "Favorites",
+    "readLaterBooks": "Read Later",
     "book": {
       "introduction": "Introduction",
       "chapterList": "Chapter List",

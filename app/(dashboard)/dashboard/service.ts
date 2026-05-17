@@ -1,6 +1,6 @@
 // services/comic/comic.api.ts
 
-import HttpRequest from "../../config/auth";
+import HttpRequest from "@/app/config/auth";
 import { ComicSummary, UserLibrarySummary } from "./type";
 import {
     BookOpen,
@@ -126,7 +126,7 @@ export const getUserLibraryByType = async (
         >("/user-libraries", {
             params,
         });
-
+        
         return res.data.data;
     } catch (error) {
         console.log(error);
@@ -134,9 +134,6 @@ export const getUserLibraryByType = async (
     }
 };
 
-/* =========================
-   TEMP DATA
-========================= */
 
 export const getRecentBooks = async (
     params?: GetBookSummaryListParams
@@ -164,9 +161,27 @@ export const getFavoriteBooks = async (
     }
 };
 
-/* =========================
-   CREATE COMIC
-========================= */
+export const getBooksByQuery = async (
+    params?: GetBookSummaryListParams
+): Promise<PaginationResponse<ComicSummary>> => {
+    try {
+        const data = await getBookSummaryList(params);
+        console.log("Books by Query:", data);
+        return data  ;
+    } catch (e) {
+        console.log(e);
+        return {
+            content: [],
+            pageNo: 0,
+            pageSize: 0,
+            totalElements: 0,
+            totalPages: 0,
+            last: true,
+        };
+    }
+}
+
+
 
 export const createComic = async (
     body: CreateComicBody

@@ -39,6 +39,7 @@
     "searchBarPlaceholder": "Nhập tên sách, tác giả, thể loại...",
     "recentBooks": "Sách đọc gần đây",
     "favoriteBooks": "Sách yêu thích",
+    "readLaterBooks": "Đọc sau",
     "book": {
       "introduction": "Giới thiệu",
       "chapterList": "Danh sách chương",

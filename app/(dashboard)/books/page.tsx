@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import BookRating from "@/app/components/common/BookRating";
-import { useUserLibraryByType } from "../dashboard/queryHooks";
+import { useBooksByQuery, useUserLibraryByType } from "../dashboard/queryHooks";
 
 const PAGE_SIZE_DEFAULT = 8;
 
@@ -16,15 +16,28 @@ export default function BooksPage() {
   const [page, setPage] = useState(1);
 
   const type = searchParams.get("type") || "recent";
+  const isSearchMode = type === "query";
+  const searchQuery = searchParams.get("query") || "";
+  const {
+    data: searchData,
+    isLoading: searchLoading,
+    isError: searchError,
+  } = useBooksByQuery({
+    keyword: searchQuery,
+    page: page - 1,
+    size: PAGE_SIZE_DEFAULT,
+  });
   let listType = "";
-  if (type == "recent") {
+  if (type == "query") {
+    listType = "QUERY";
+  } else if (type == "recent") {
     listType = "READING";
   } else if (type == "favorite") {
     listType = "FAVORITE";
-  } else {
+  } else if (type == "readLater") {
     listType = "READ_LATER";
   }
-  const searchQuery = searchParams.get("query") || "";
+
   const {
     data: userLibraryData,
     isLoading: userLibraryLoading,
@@ -34,10 +47,14 @@ export default function BooksPage() {
     size: PAGE_SIZE_DEFAULT,
     listType,
   });
-  const fetchData = userLibraryData;
+  const fetchData = isSearchMode ? searchData : userLibraryData;
+
+  const isLoading = isSearchMode ? searchLoading : userLibraryLoading;
+
+  const isError = isSearchMode ? searchError : userLibraryError;
   let totalPage = null;
   if (fetchData) {
-    totalPage = fetchData.totalPages;
+    totalPage = Math.ceil(fetchData.totalElements / PAGE_SIZE_DEFAULT);
   }
 
   // 5. Logic phân trang dựa trên dữ liệu đã lọc
@@ -46,6 +63,7 @@ export default function BooksPage() {
     recent: intl.formatMessage({ id: "dashboard.recentBooks" }),
     favorite: intl.formatMessage({ id: "dashboard.favoriteBooks" }),
     recommended: "Sách đề xuất",
+    readLater: intl.formatMessage({ id: "dashboard.readLaterBooks" }),
     query: searchQuery
       ? `Kết quả tìm kiếm cho "${searchQuery}"`
       : "Tìm kiếm sách",
