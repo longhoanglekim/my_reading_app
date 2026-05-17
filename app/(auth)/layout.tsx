@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useIntl } from "react-intl";
 
 export default function AuthLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const intl = useIntl();
     return (
         <div
             className={`
@@ -76,7 +78,7 @@ export default function AuthLayout({
                 <div className="relative w-[70%] max-w-md aspect-square z-10">
                     <Image
                         src="/library-illu.png"
-                        alt="Library illustration"
+                        alt={intl.formatMessage({ id: "auth.alt.libraryIllustration" })}
                         fill
                         className="object-contain rounded-xl drop-shadow-2xl"
                         priority

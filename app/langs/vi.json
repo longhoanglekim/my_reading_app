@@ -14,6 +14,7 @@
     "button": {
       "login": "Đăng nhập",
       "register": "Đăng ký",
+      "registering": "Đang đăng ký...",
       "loginWithGoogle": "Đăng nhập bằng Google",
       "registerWithGoogle": "Đăng ký bằng Google"
     },
@@ -33,6 +34,15 @@
       "confirmPassword": "Nhập lại mật khẩu",
       "name": "Nhập họ và tên",
       "fullName": "Nhập họ và tên đầy đủ"
+    },
+    "alt": {
+      "libraryIllustration": "Hình minh họa thư viện"
+    },
+    "error": {
+      "nameRequired": "Vui lòng nhập họ tên",
+      "emailRequired": "Vui lòng nhập email",
+      "passwordRequired": "Vui lòng nhập mật khẩu",
+      "passwordMismatch": "Mật khẩu không khớp"
     }
   },
   "dashboard": {
@@ -40,6 +50,13 @@
     "recentBooks": "Sách đọc gần đây",
     "favoriteBooks": "Sách yêu thích",
     "readLaterBooks": "Đọc sau",
+    "recommendedBooks": "Sách đề xuất",
+    "stats": {
+      "read": "Sách đã đọc",
+      "activeUsers": "Người dùng hoạt động",
+      "upcomingEvents": "Sự kiện sắp tới",
+      "pendingSettings": "Cài đặt đang chờ"
+    },
     "book": {
       "introduction": "Giới thiệu",
       "chapterList": "Danh sách chương",
@@ -55,6 +72,14 @@
       "submitReview": "Gửi đánh giá"
     }
   },
+  "books": {
+    "searchResults": "Kết quả tìm kiếm cho \"{query}\"",
+    "searchBooks": "Tìm kiếm sách",
+    "bookList": "Danh sách sách",
+    "exploreByGenre": "Khám phá theo thể loại",
+    "emptySearchKeyword": "Vui lòng nhập từ khóa tìm kiếm.",
+    "emptyCategory": "Hiện chưa có sách nào trong danh mục này."
+  },
   "uploadPage": {
     "title": "Đăng truyện mới",
     "bookInfo": {
@@ -68,7 +93,10 @@
       "authorPlaceholder": "Tên tác giả / nhóm dịch",
       "descriptionPlaceholder": "Tóm tắt nội dung truyện...",
       "chooseCover": "Chọn ảnh bìa",
-      "recommendedSize": "Kích thước đề xuất: 800x1200px"
+      "recommendedSize": "Kích thước đề xuất: 800x1200px",
+      "originalLanguage": "Ngôn ngữ gốc",
+      "format": "Định dạng",
+      "status": "Trạng thái"
     },
     "chapter": {
       "title": "Các chương",
@@ -118,7 +146,17 @@
     "readFromStart": "Đọc từ đầu",
     "required": "*",
     "close": "Đóng",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "loading": "Đang tải dữ liệu...",
+    "error": "Có lỗi xảy ra",
+    "searching": "Đang tìm...",
+    "noResults": "Không tìm thấy truyện",
+    "footer": "© 2025 My Reading App. Đã đăng ký bản quyền.",
+    "bookNotFound": "Không tìm thấy sách.",
+    "noChapters": "Chưa có chương nào",
+    "submitting": "Đang gửi...",
+    "updating": "Đang cập nhật...",
+    "deleteConfirm": "Bạn có chắc muốn xóa {item} không? Hành động này không thể hoàn tác."
   },
   "topbar": {
     "title": "Bảng điều khiển",
@@ -138,7 +176,8 @@
     "noComments": "Chưa có bình luận nào cho chương này.",
     "commentReplies": "{count} phản hồi",
     "selectedTextTitle": "Đã chọn nội dung",
-    "editComic": "Chỉnh sửa truyện"
+    "editComic": "Chỉnh sửa truyện",
+    "noImageFound": "Không tìm thấy hình ảnh trang"
   },
   "popups": {
     "deleteChapter": {
@@ -155,5 +194,93 @@
       "type": "Loại",
       "close": "Đóng"
     }
+  },
+  "manageBook": {
+    "saveSuccess": "Đã lưu thông tin truyện thành công!",
+    "deleteChapterConfirm": "Xóa chương {chapterNumber}?",
+    "loadError": "Không thể tải dữ liệu truyện",
+    "title": "Chỉnh sửa truyện",
+    "backToDetails": "← Quay lại Trang Chi Tiết",
+    "mangaInfo": "Thông tin truyện",
+    "coverImage": "Ảnh bìa",
+    "noCover": "Không có ảnh bìa",
+    "uploadCover": "Đăng ảnh bìa",
+    "titleLabel": "Tiêu đề",
+    "authorLabel": "Tác giả",
+    "descriptionLabel": "Mô tả",
+    "saving": "Đang lưu...",
+    "saveButton": "Lưu thông tin truyện",
+    "chapterListTitle": "Danh sách chương ({count})",
+    "uploadNewChapter": "+ Đăng chương mới",
+    "chapterDefaultTitle": "Chương {number}",
+    "totalPagesCount": "{count} trang",
+    "editPages": "Chỉnh sửa trang",
+    "deleteButton": "Xóa",
+    "noChapters": "Chưa có chương nào"
+  },
+  "editChapter": {
+    "deletePageConfirm": "Xóa trang này?",
+    "deleteChapterConfirm": "Xóa toàn bộ chương này?",
+    "deleteSuccess": "Chương đã bị xóa",
+    "saveSuccess": "Cập nhật chương thành công",
+    "title": "Chỉnh sửa chương {number}",
+    "infoTitle": "Thông tin chương",
+    "existingPagesCount": "Trang hiện có ({count})",
+    "pageLabel": "Trang {number}",
+    "addNewPages": "Thêm trang mới",
+    "uploadImage": "Upload ảnh chương",
+    "selectMultipleImages": "Chọn nhiều ảnh cùng lúc",
+    "deleting": "Đang xóa...",
+    "deleteButton": "Xóa chương",
+    "saving": "Đang lưu...",
+    "updateButton": "Cập nhật chương"
+  },
+  "uploadChapter": {
+    "validationError": "⚠️ Vui lòng nhập tiêu đề và chọn ít nhất một ảnh trang",
+    "uploadSuccess": "Đăng chương mới thành công!",
+    "uploadError": "Đăng chương thất bại. Vui lòng thử lại.",
+    "title": "Đăng chương mới",
+    "chapterNumberLabel": "Số chương",
+    "chapterTitleLabel": "Tiêu đề chương",
+    "chapterTitlePlaceholder": "Ví dụ: Cuộc gặp định mệnh",
+    "uploadPagesLabel": "Đăng hình ảnh các trang",
+    "uploadBoxTitle": "Kéo thả hoặc click để tải lên",
+    "uploadBoxSubtitle": "PNG, JPG, WebP - Chọn nhiều file cùng lúc",
+    "selectedPagesCount": "Ảnh đã chọn ({count})",
+    "uploading": "Đang đăng...",
+    "uploadButton": "Đăng chương"
+  },
+  "adminUser": {
+    "title": "Quản lý người dùng",
+    "searchPlaceholder": "Tìm kiếm người dùng...",
+    "noUsers": "Không tìm thấy người dùng",
+    "table": {
+      "name": "Họ tên",
+      "email": "Email",
+      "role": "Vai trò",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "roleUser": "Người dùng",
+    "roleAdmin": "Quản trị viên",
+    "statusActive": "Hoạt động",
+    "statusBanned": "Bị khóa",
+    "ban": "Khóa",
+    "activate": "Kích hoạt"
+  },
+  "sidebar": {
+    "close": "Đóng sidebar",
+    "open": "Mở sidebar",
+    "title": "Bảng điều khiển",
+    "overview": "Tổng quan",
+    "books": "Truyện",
+    "events": "Sự kiện",
+    "settings": "Cài đặt",
+    "adminManagement": "Quản trị",
+    "userManagement": "Quản lý người dùng"
+  },
+  "themeToggle": {
+    "switchToLight": "Chuyển sang chế độ sáng",
+    "switchToDark": "Chuyển sang chế độ tối"
   }
 }

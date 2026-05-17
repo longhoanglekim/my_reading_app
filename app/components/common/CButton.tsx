@@ -3,6 +3,7 @@
 import React from "react";
 import clsx from "clsx";
 import { ButtonVariant } from "@/app/const/style";
+import { useIntl } from "react-intl";
 
 type ButtonAction = "delete";
 
@@ -51,11 +52,12 @@ export default function CButton({
   disabled,
   ...props
 }: CButtonProps) {
+  const intl = useIntl();
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (loading) return;
 
     if (action === "delete") {
-      const confirmed = window.confirm("Bạn có chắc muốn xóa không?");
+      const confirmed = window.confirm(intl.formatMessage({ id: "common.deleteConfirm" }, { item: intl.formatMessage({ id: "common.chapter" }) }));
       if (!confirmed) return;
     }
 

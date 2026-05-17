@@ -68,7 +68,7 @@ export default function UserLayout({
                     <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
                       {isLoading ? (
                         <div className="p-3 text-sm text-gray-500">
-                          Đang tìm...
+                          {intl.formatMessage({ id: "common.searching" })}
                         </div>
                       ) : suggestions && suggestions.length > 0 ? (
                         suggestions.map((comic: ComicSuggestion) => (
@@ -92,7 +92,7 @@ export default function UserLayout({
                         ))
                       ) : (
                         <div className="p-3 text-sm text-gray-500">
-                          Không tìm thấy truyện
+                          {intl.formatMessage({ id: "common.noResults" })}
                         </div>
                       )}
                     </div>
@@ -114,7 +114,7 @@ export default function UserLayout({
         </main>
 
         <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-          © 2025 My Reading App. All rights reserved.
+          {intl.formatMessage({ id: "common.footer" })}
         </footer>
       </div>
     </div>

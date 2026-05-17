@@ -65,11 +65,11 @@ export default function BooksPage() {
   const titleMap: Record<string, string> = {
     recent: intl.formatMessage({ id: "dashboard.recentBooks" }),
     favorite: intl.formatMessage({ id: "dashboard.favoriteBooks" }),
-    recommended: "Sách đề xuất",
+    recommended: intl.formatMessage({ id: "dashboard.recommendedBooks" }),
     readLater: intl.formatMessage({ id: "dashboard.readLaterBooks" }),
     query: searchQuery
-      ? `Kết quả tìm kiếm cho "${searchQuery}"`
-      : "Tìm kiếm sách",
+      ? intl.formatMessage({ id: "books.searchResults" }, { query: searchQuery })
+      : intl.formatMessage({ id: "books.searchBooks" }),
   };
 
   // ==================== FAKE DATA CHO TRƯỜNG HỢP TYPE RỖNG ====================
@@ -83,14 +83,14 @@ export default function BooksPage() {
   if (userLibraryLoading) {
     return (
       <div className="text-center py-10 font-medium text-gray-500">
-        Đang tải dữ liệu...
+        {intl.formatMessage({ id: "common.loading" })}
       </div>
     );
   }
   if (userLibraryError) {
     return (
       <div className="text-center py-10 font-medium text-red-500">
-        Có lỗi xảy ra khi tải dữ liệu.
+        {intl.formatMessage({ id: "common.error" })}
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function BooksPage() {
     <div className="max-w-7xl mx-auto px-0 py-8 w-full">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">
-          {type ? titleMap[type] || "Danh sách sách" : "Khám phá theo thể loại"}
+          {type ? titleMap[type] || intl.formatMessage({ id: "books.bookList" }) : intl.formatMessage({ id: "books.exploreByGenre" })}
         </h1>
       </div>
 
@@ -119,7 +119,7 @@ export default function BooksPage() {
                   }
                   className="text-blue-600 hover:underline text-sm font-medium"
                 >
-                  Xem tất cả →
+                  {intl.formatMessage({ id: "common.seeAll" })} →
                 </button>
               </div>
 
@@ -163,8 +163,8 @@ export default function BooksPage() {
           {fetchData?.content.length === 0 ? (
             <div className="min-h-[40vh] flex flex-col items-center justify-center text-center text-gray-500">
               {type === "query" && !searchQuery.trim()
-                ? "Vui lòng nhập từ khóa tìm kiếm."
-                : "Hiện chưa có sách nào trong danh mục này."}
+                ? intl.formatMessage({ id: "books.emptySearchKeyword" })
+                : intl.formatMessage({ id: "books.emptyCategory" })}
             </div>
           ) : (
             <>

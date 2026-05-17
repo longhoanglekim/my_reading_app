@@ -181,11 +181,11 @@ export default function ComicChapterPage() {
           const translation =
             bestChunks.length > 0
               ? bestChunks
-                  .map(
-                    (c: any) =>
-                      `${c.word} (${c.romaji}): ${c.meaning || c.type}`,
-                  )
-                  .join("\n")
+                .map(
+                  (c: any) =>
+                    `${c.word} (${c.romaji}): ${c.meaning || c.type}`,
+                )
+                .join("\n")
               : bestBubble.original_text;
 
           setTextSelection({
@@ -275,7 +275,7 @@ export default function ComicChapterPage() {
               {comicDetailData?.title || "Tên book test"}
             </h1>
             <p className="text-gray-600">
-              {chapterTitle} • Trang {currentPage} / {totalPages || "?"}
+              {chapterTitle} • {intl.formatMessage({ id: "common.pageCapital" })} {currentPage} / {totalPages || "?"}
             </p>
           </div>
         </div>
@@ -288,7 +288,7 @@ export default function ComicChapterPage() {
             <div className="flex items-center justify-center h-[600px] bg-gray-100 dark:bg-gray-900 rounded-xl">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-gray-500">Đang tải trang...</p>
+                <p className="mt-4 text-gray-500">{intl.formatMessage({ id: "common.loading" })}</p>
               </div>
             </div>
           ) : currentImage ? (
@@ -317,16 +317,16 @@ export default function ComicChapterPage() {
                     style={
                       isJapanese
                         ? {
-                            writingMode: "vertical-rl",
-                            textOrientation: "mixed",
-                            textAlign: "center",
-                            maxHeight: "100%",
-                            wordBreak: "break-word",
-                          }
+                          writingMode: "vertical-rl",
+                          textOrientation: "mixed",
+                          textAlign: "center",
+                          maxHeight: "100%",
+                          wordBreak: "break-word",
+                        }
                         : {
-                            textAlign: "center",
-                            wordBreak: "break-word",
-                          }
+                          textAlign: "center",
+                          wordBreak: "break-word",
+                        }
                     }
                   >
                     {bubble.chunks.map((chunk: any, idx: number) => {
@@ -340,9 +340,8 @@ export default function ComicChapterPage() {
                         <span
                           key={idx}
                           data-chunk-word
-                          className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${
-                            isJapanese ? "inline-block leading-tight" : "inline"
-                          }`}
+                          className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${isJapanese ? "inline-block leading-tight" : "inline"
+                            }`}
                           onMouseEnter={() => handleChunkHover(bubble.id, idx)}
                           onMouseLeave={handleChunkLeave}
                         >
@@ -365,7 +364,7 @@ export default function ComicChapterPage() {
                                 {chunk.meaning || chunk.type}
                               </p>
                               <p className="text-[11px] text-gray-400">
-                                Loại: {chunk.type}
+                                {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
                               </p>
                             </div>
                           )}
@@ -378,7 +377,7 @@ export default function ComicChapterPage() {
             </div>
           ) : (
             <div className="text-center py-20 text-gray-500">
-              Không tìm thấy hình ảnh trang
+              {intl.formatMessage({ id: "chapterPage.noImageFound" })}
             </div>
           )}
         </div>
@@ -416,8 +415,8 @@ export default function ComicChapterPage() {
                 className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
               >
                 {postCommentMutation.isPending
-                  ? "Đang gửi..."
-                  : "Gửi bình luận"}
+                  ? intl.formatMessage({ id: "chapterPage.sendingComment" })
+                  : intl.formatMessage({ id: "chapterPage.submitComment" })}
               </button>
             </div>
           </form>
@@ -425,7 +424,7 @@ export default function ComicChapterPage() {
           {textSelection && (
             <div className="mt-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-600 dark:bg-yellow-950/20">
               <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
-                Văn bản đã chọn
+                {intl.formatMessage({ id: "chapterPage.selectedTextTitle" })}
               </p>
               <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
                 {textSelection.text}
@@ -438,7 +437,7 @@ export default function ComicChapterPage() {
 
           <div className="mt-8 space-y-4">
             {commentsLoading ? (
-              <div className="text-center py-8">Đang tải bình luận...</div>
+              <div className="text-center py-8">{intl.formatMessage({ id: "chapterPage.commentsLoading" })}</div>
             ) : chapterComments.length > 0 ? (
               chapterComments.map((comment: ChapterComment) => (
                 <div
@@ -464,7 +463,7 @@ export default function ComicChapterPage() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">Chưa có bình luận nào.</p>
+              <p className="text-gray-500">{intl.formatMessage({ id: "chapterPage.noComments" })}</p>
             )}
           </div>
         </div>
@@ -500,7 +499,7 @@ export default function ComicChapterPage() {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
             <div className="p-5 border-b flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg">Thông tin hội thoại</h3>
+              <h3 className="font-bold text-lg">{intl.formatMessage({ id: "popups.dialogueInfo.title" })}</h3>
               <button
                 onClick={() => setSelectedBubble(null)}
                 className="text-3xl text-gray-400 hover:text-gray-600"
@@ -511,21 +510,21 @@ export default function ComicChapterPage() {
 
             <div className="p-6 space-y-6 overflow-auto max-h-[65vh]">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Original Text</p>
+                <p className="text-sm text-gray-500 mb-1">{intl.formatMessage({ id: "popups.dialogueInfo.originalText" })}</p>
                 <p className="font-mono bg-gray-100 p-4 rounded-xl text-lg break-all">
                   {selectedBubble.original_text}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 mb-1">Bản dịch</p>
+                <p className="text-sm text-gray-500 mb-1">{intl.formatMessage({ id: "popups.dialogueInfo.translatedText" })}</p>
                 <p className="text-lg leading-relaxed bg-blue-50 p-4 rounded-xl">
-                  {selectedBubble.full_translation || "Đang cập nhật..."}
+                  {selectedBubble.full_translation || intl.formatMessage({ id: "common.updating" })}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 mb-3">Phân tích từ vựng</p>
+                <p className="text-sm text-gray-500 mb-3">{intl.formatMessage({ id: "popups.dialogueInfo.vocabAnalysis" })}</p>
                 <div className="space-y-5">
                   {selectedBubble.chunks.map((chunk: any, idx: number) => (
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
@@ -537,7 +536,7 @@ export default function ComicChapterPage() {
                       </div>
                       <p className="text-gray-700 mt-1">{chunk.meaning}</p>
                       <p className="text-xs text-gray-400">
-                        Loại: {chunk.type}
+                        {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
                       </p>
                     </div>
                   ))}
@@ -550,7 +549,7 @@ export default function ComicChapterPage() {
                 onClick={() => setSelectedBubble(null)}
                 className="px-10 py-3 bg-gray-800 text-white rounded-xl hover:bg-black"
               >
-                Đóng
+                {intl.formatMessage({ id: "common.close" })}
               </button>
             </div>
           </div>

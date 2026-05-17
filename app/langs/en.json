@@ -14,6 +14,7 @@
     "button": {
       "login": "Login",
       "register": "Register",
+      "registering": "Registering...",
       "loginWithGoogle": "Login with Google",
       "registerWithGoogle": "Register with Google"
     },
@@ -33,6 +34,15 @@
       "confirmPassword": "Confirm your password",
       "name": "Enter your full name",
       "fullName": "Enter your full name"
+    },
+    "alt": {
+      "libraryIllustration": "Library illustration"
+    },
+    "error": {
+      "nameRequired": "Please enter your name",
+      "emailRequired": "Please enter your email",
+      "passwordRequired": "Please enter your password",
+      "passwordMismatch": "Passwords do not match"
     }
   },
   "dashboard": {
@@ -40,6 +50,13 @@
     "recentBooks": "Recently Read",
     "favoriteBooks": "Favorites",
     "readLaterBooks": "Read Later",
+    "recommendedBooks": "Recommended Books",
+    "stats": {
+      "read": "Books Read",
+      "activeUsers": "Active Users",
+      "upcomingEvents": "Upcoming Events",
+      "pendingSettings": "Pending Settings"
+    },
     "book": {
       "introduction": "Introduction",
       "chapterList": "Chapter List",
@@ -55,6 +72,14 @@
       "submitReview": "Submit Review"
     }
   },
+  "books": {
+    "searchResults": "Search results for \"{query}\"",
+    "searchBooks": "Search Books",
+    "bookList": "Book List",
+    "exploreByGenre": "Explore by Genre",
+    "emptySearchKeyword": "Please enter a search keyword.",
+    "emptyCategory": "There are currently no books in this category."
+  },
   "uploadPage": {
     "title": "Upload New Manga",
     "bookInfo": {
@@ -68,7 +93,10 @@
       "authorPlaceholder": "Author / Translation Group",
       "descriptionPlaceholder": "Summary of the story content...",
       "chooseCover": "Choose cover image",
-      "recommendedSize": "Recommended size: 800x1200px"
+      "recommendedSize": "Recommended size: 800x1200px",
+      "originalLanguage": "Original Language",
+      "format": "Format",
+      "status": "Status"
     },
     "chapter": {
       "title": "Chapters",
@@ -118,7 +146,17 @@
     "readFromStart": "Read from Start",
     "required": "*",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loading": "Loading data...",
+    "error": "An error occurred",
+    "searching": "Searching...",
+    "noResults": "No comics found",
+    "footer": "© 2025 My Reading App. All rights reserved.",
+    "bookNotFound": "Book not found.",
+    "noChapters": "No chapters yet",
+    "submitting": "Submitting...",
+    "updating": "Updating...",
+    "deleteConfirm": "Are you sure you want to delete this {item}? This action cannot be undone."
   },
   "topbar": {
     "title": "Dashboard",
@@ -138,15 +176,111 @@
     "noComments": "No comments yet for this chapter.",
     "commentReplies": "{count} replies",
     "selectedTextTitle": "Selected text",
-    "editComic": "Edit Comic"
+    "editComic": "Edit Comic",
+    "noImageFound": "Page image not found"
   },
   "popups": {
+    "deleteChapter": {
+      "title": "Confirm Delete Chapter",
+      "message": "Are you sure you want to delete this chapter? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
     "dialogueInfo": {
       "title": "Dialogue Details",
       "originalText": "Original Text",
       "translatedText": "Translation",
       "vocabAnalysis": "Vocabulary Analysis",
-      "type": "Type"
+      "type": "Type",
+      "close": "Close"
     }
+  },
+  "manageBook": {
+    "saveSuccess": "✅ Manga information saved successfully!",
+    "deleteChapterConfirm": "Delete Chapter {chapterNumber}?",
+    "loadError": "Unable to load manga data",
+    "title": "Edit Manga",
+    "backToDetails": "← Back to Details Page",
+    "mangaInfo": "Manga Information",
+    "coverImage": "Cover Image",
+    "noCover": "No Cover",
+    "uploadCover": "Upload cover image",
+    "titleLabel": "Title",
+    "authorLabel": "Author",
+    "descriptionLabel": "Description",
+    "saving": "Saving...",
+    "saveButton": "💾 Save Manga Information",
+    "chapterListTitle": "Chapter List ({count})",
+    "uploadNewChapter": "+ Upload New Chapter",
+    "chapterDefaultTitle": "Chapter {number}",
+    "totalPagesCount": "{count} pages",
+    "editPages": "Edit Pages",
+    "deleteButton": "Delete",
+    "noChapters": "No chapters yet"
+  },
+  "editChapter": {
+    "deletePageConfirm": "Delete this page?",
+    "deleteChapterConfirm": "⚠️ Delete this entire chapter?",
+    "deleteSuccess": "Chapter deleted successfully",
+    "saveSuccess": "Chapter updated successfully",
+    "title": "Edit Chapter {number}",
+    "infoTitle": "Chapter Information",
+    "existingPagesCount": "Existing Pages ({count})",
+    "pageLabel": "Page {number}",
+    "addNewPages": "Add new pages",
+    "uploadImage": "Upload chapter image",
+    "selectMultipleImages": "Select multiple images at once",
+    "deleting": "Deleting...",
+    "deleteButton": "Delete Chapter",
+    "saving": "Saving...",
+    "updateButton": "Update Chapter"
+  },
+  "uploadChapter": {
+    "validationError": "⚠️ Please enter a title and select at least one page image",
+    "uploadSuccess": "Chapter uploaded successfully!",
+    "uploadError": "Upload failed. Please try again.",
+    "title": "Upload New Chapter",
+    "chapterNumberLabel": "Chapter Number",
+    "chapterTitleLabel": "Chapter Title",
+    "chapterTitlePlaceholder": "E.g. The fateful meeting",
+    "uploadPagesLabel": "Upload page images",
+    "uploadBoxTitle": "Drag and drop or click to upload",
+    "uploadBoxSubtitle": "PNG, JPG, WebP - Multiple files supported",
+    "selectedPagesCount": "Selected pages ({count})",
+    "uploading": "Uploading...",
+    "uploadButton": "Publish Chapter"
+  },
+  "adminUser": {
+    "title": "User Management",
+    "searchPlaceholder": "Search user...",
+    "noUsers": "No users found",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "roleUser": "User",
+    "roleAdmin": "Admin",
+    "statusActive": "Active",
+    "statusBanned": "Banned",
+    "ban": "Ban",
+    "activate": "Activate"
+  },
+  "sidebar": {
+    "close": "Close sidebar",
+    "open": "Open sidebar",
+    "title": "Dashboard",
+    "overview": "Overview",
+    "books": "Books",
+    "events": "Events",
+    "settings": "Settings",
+    "adminManagement": "Admin management",
+    "userManagement": "User Management"
+  },
+  "themeToggle": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
   }
 }

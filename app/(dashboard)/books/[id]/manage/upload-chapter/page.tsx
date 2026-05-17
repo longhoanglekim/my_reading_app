@@ -45,7 +45,7 @@ export default function UploadChapterPage() {
 
   const handleUpload = async () => {
     if (!chapterData.title || newFiles.length === 0) {
-      alert("⚠️ Vui lòng nhập tiêu đề và chọn ít nhất một ảnh");
+      alert(intl.formatMessage({ id: "uploadChapter.validationError" }));
       return;
     }
 
@@ -65,22 +65,26 @@ export default function UploadChapterPage() {
         files: newFiles,
       });
 
-      alert("✅ Chapter đã được upload thành công!");
+      alert(intl.formatMessage({ id: "uploadChapter.uploadSuccess" }));
       router.push(`/books/${mangaId}/manage`);
     } catch (error) {
       console.error("❌ Upload failed:", error);
-      alert("❌ Upload thất bại. Vui lòng thử lại.");
+      alert(intl.formatMessage({ id: "uploadChapter.uploadError" }));
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8">Upload Chapter Mới</h1>
+      <h1 className="text-3xl font-bold mb-8">
+        {intl.formatMessage({ id: "uploadChapter.title" })}
+      </h1>
 
       <div className="bg-white dark:bg-gray-800 rounded-3xl shadow p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           <div>
-            <label className="block text-sm font-medium mb-2">Số Chapter</label>
+            <label className="block text-sm font-medium mb-2">
+              {intl.formatMessage({ id: "uploadChapter.chapterNumberLabel" })}
+            </label>
             <input
               type="number"
               value={chapterData.chapterNumber}
@@ -95,7 +99,7 @@ export default function UploadChapterPage() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">
-              Tiêu đề Chapter
+              {intl.formatMessage({ id: "uploadChapter.chapterTitleLabel" })}
             </label>
             <input
               type="text"
@@ -103,7 +107,9 @@ export default function UploadChapterPage() {
               onChange={(e) =>
                 setChapterData({ ...chapterData, title: e.target.value })
               }
-              placeholder="Ví dụ: Cuộc gặp định mệnh"
+              placeholder={intl.formatMessage({
+                id: "uploadChapter.chapterTitlePlaceholder",
+              })}
               className="w-full border rounded-2xl px-5 py-4"
             />
           </div>
@@ -111,7 +117,7 @@ export default function UploadChapterPage() {
 
         <div className="mb-8">
           <label className="block text-sm font-medium mb-3">
-            Upload hình ảnh các trang
+            {intl.formatMessage({ id: "uploadChapter.uploadPagesLabel" })}
           </label>
           <div className="border-2 border-dashed border-gray-300 rounded-3xl p-12 text-center hover:border-blue-500 transition">
             <input
@@ -125,10 +131,10 @@ export default function UploadChapterPage() {
             <label htmlFor="upload" className="cursor-pointer">
               <div className="text-5xl mb-4">📤</div>
               <p className="text-lg font-medium">
-                Kéo thả hoặc click để upload
+                {intl.formatMessage({ id: "uploadChapter.uploadBoxTitle" })}
               </p>
               <p className="text-gray-500">
-                PNG, JPG, WebP - Upload nhiều file
+                {intl.formatMessage({ id: "uploadChapter.uploadBoxSubtitle" })}
               </p>
             </label>
           </div>
@@ -136,7 +142,12 @@ export default function UploadChapterPage() {
 
         {newFiles.length > 0 && (
           <div className="mb-8">
-            <p className="font-medium mb-4">Hình đã chọn ({newFiles.length})</p>
+            <p className="font-medium mb-4">
+              {intl.formatMessage(
+                { id: "uploadChapter.selectedPagesCount" },
+                { count: newFiles.length }
+              )}
+            </p>
             <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
               {newFiles.map((file, i) => (
                 <div key={i} className="relative">
@@ -163,7 +174,7 @@ export default function UploadChapterPage() {
             className="flex-1 py-4 border rounded-2xl hover:bg-gray-100 disabled:opacity-50"
             disabled={isUploading}
           >
-            Hủy
+            {intl.formatMessage({ id: "common.cancel" })}
           </button>
           <button
             onClick={handleUpload}
@@ -172,7 +183,9 @@ export default function UploadChapterPage() {
             }
             className="flex-1 py-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 disabled:opacity-50"
           >
-            {isUploading ? "Đang upload..." : "Đăng Chapter"}
+            {isUploading
+              ? intl.formatMessage({ id: "uploadChapter.uploading" })
+              : intl.formatMessage({ id: "uploadChapter.uploadButton" })}
           </button>
         </div>
       </div>

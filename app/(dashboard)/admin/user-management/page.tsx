@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
 
 type User = {
     id: number
@@ -29,6 +30,7 @@ const ALL_USERS: User[] = [
 ]
 
 export default function AdminUsersPage() {
+    const intl = useIntl()
     const [users, setUsers] = useState<User[]>([])
     const [filtered, setFiltered] = useState<User[]>([])
     const [page, setPage] = useState(1)
@@ -86,21 +88,23 @@ export default function AdminUsersPage() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">User Management</h1>
+            <h1 className="text-2xl font-bold mb-6">
+                {intl.formatMessage({ id: "adminUser.title" })}
+            </h1>
 
             {/* SEARCH */}
             <div className="flex gap-3 mb-6 max-w-md">
                 <input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Search user..."
+                    placeholder={intl.formatMessage({ id: "adminUser.searchPlaceholder" })}
                     className="flex-1 border px-3 py-2 rounded-lg"
                 />
                 <button
                     onClick={handleSearch}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg"
                 >
-                    Search
+                    {intl.formatMessage({ id: "common.search" })}
                 </button>
             </div>
 
@@ -112,7 +116,9 @@ export default function AdminUsersPage() {
                     ))}
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="text-gray-500">No users found</div>
+                <div className="text-gray-500">
+                    {intl.formatMessage({ id: "adminUser.noUsers" })}
+                </div>
             ) : (
                 <>
                     {/* TABLE */}
@@ -120,11 +126,21 @@ export default function AdminUsersPage() {
                         <table className="w-full text-left">
                             <thead className="bg-gray-100 text-sm">
                                 <tr>
-                                    <th className="p-3">Name</th>
-                                    <th className="p-3">Email</th>
-                                    <th className="p-3">Role</th>
-                                    <th className="p-3">Status</th>
-                                    <th className="p-3">Actions</th>
+                                    <th className="p-3">
+                                        {intl.formatMessage({ id: "adminUser.table.name" })}
+                                    </th>
+                                    <th className="p-3">
+                                        {intl.formatMessage({ id: "adminUser.table.email" })}
+                                    </th>
+                                    <th className="p-3">
+                                        {intl.formatMessage({ id: "adminUser.table.role" })}
+                                    </th>
+                                    <th className="p-3">
+                                        {intl.formatMessage({ id: "adminUser.table.status" })}
+                                    </th>
+                                    <th className="p-3">
+                                        {intl.formatMessage({ id: "adminUser.table.actions" })}
+                                    </th>
                                 </tr>
                             </thead>
 
@@ -143,8 +159,12 @@ export default function AdminUsersPage() {
                                                 }
                                                 className="border rounded px-2 py-1"
                                             >
-                                                <option value="USER">USER</option>
-                                                <option value="ADMIN">ADMIN</option>
+                                                <option value="USER">
+                                                    {intl.formatMessage({ id: "adminUser.roleUser" })}
+                                                </option>
+                                                <option value="ADMIN">
+                                                    {intl.formatMessage({ id: "adminUser.roleAdmin" })}
+                                                </option>
                                             </select>
                                         </td>
 
@@ -156,7 +176,9 @@ export default function AdminUsersPage() {
                                                     : 'bg-red-100 text-red-700'
                                                     }`}
                                             >
-                                                {user.status}
+                                                {user.status === 'ACTIVE'
+                                                    ? intl.formatMessage({ id: "adminUser.statusActive" })
+                                                    : intl.formatMessage({ id: "adminUser.statusBanned" })}
                                             </span>
                                         </td>
 
@@ -167,14 +189,14 @@ export default function AdminUsersPage() {
                                                     onClick={() => updateStatus(user.id, 'BANNED')}
                                                     className="text-red-600 hover:underline"
                                                 >
-                                                    Ban
+                                                    {intl.formatMessage({ id: "adminUser.ban" })}
                                                 </button>
                                             ) : (
                                                 <button
                                                     onClick={() => updateStatus(user.id, 'ACTIVE')}
                                                     className="text-green-600 hover:underline"
                                                 >
-                                                    Activate
+                                                    {intl.formatMessage({ id: "adminUser.activate" })}
                                                 </button>
                                             )}
                                         </td>
@@ -191,7 +213,7 @@ export default function AdminUsersPage() {
                             onClick={() => setPage(page - 1)}
                             className="px-3 py-1 border rounded disabled:opacity-40"
                         >
-                            Prev
+                            {intl.formatMessage({ id: "common.prev" })}
                         </button>
 
                         {Array.from({ length: totalPages }).map((_, i) => {
@@ -213,7 +235,7 @@ export default function AdminUsersPage() {
                             onClick={() => setPage(page + 1)}
                             className="px-3 py-1 border rounded disabled:opacity-40"
                         >
-                            Next
+                            {intl.formatMessage({ id: "common.next" })}
                         </button>
                     </div>
                 </>

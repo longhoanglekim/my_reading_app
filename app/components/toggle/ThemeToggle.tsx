@@ -2,8 +2,10 @@
 
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import { useIntl } from "react-intl";
 
 export default function ThemeToggle() {
+    const intl = useIntl();
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -22,13 +24,16 @@ export default function ThemeToggle() {
     }
 
     const isDark = resolvedTheme === "dark";
+    const label = intl.formatMessage({
+        id: isDark ? "themeToggle.switchToLight" : "themeToggle.switchToDark",
+    });
 
     return (
         <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className="w-9 h-9 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
-            aria-label={`Chuyển sang chế độ ${isDark ? "sáng" : "tối"}`}
-            title={`Chuyển sang chế độ ${isDark ? "sáng" : "tối"}`}
+            aria-label={label}
+            title={label}
         >
             {isDark ? "☀️" : "🌙"}
         </button>

@@ -71,7 +71,7 @@ export default function EditChapterPage() {
   };
 
   const removeExistingPage = (pageId: string) => {
-    if (confirm("Xóa trang này?")) {
+    if (confirm(intl.formatMessage({ id: "editChapter.deletePageConfirm" }))) {
       setPages((prev) => prev.filter((p) => p.page_id !== pageId));
     }
   };
@@ -81,11 +81,11 @@ export default function EditChapterPage() {
   };
 
   const handleDeleteChapter = () => {
-    if (confirm("⚠️ Xóa toàn bộ chapter này?")) {
+    if (confirm(intl.formatMessage({ id: "editChapter.deleteChapterConfirm" }))) {
       setIsDeleting(true);
 
       setTimeout(() => {
-        alert("Chapter đã bị xóa");
+        alert(intl.formatMessage({ id: "editChapter.deleteSuccess" }));
         router.push(`/dashboard/manga/${mangaId}/edit`);
       }, 600);
     }
@@ -98,7 +98,7 @@ export default function EditChapterPage() {
       // TODO: call update API
 
       setTimeout(() => {
-        alert("Cập nhật chapter thành công");
+        alert(intl.formatMessage({ id: "editChapter.saveSuccess" }));
       }, 500);
     } finally {
       setIsSaving(false);
@@ -108,13 +108,18 @@ export default function EditChapterPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-bold mb-8">
-        Chỉnh sửa Chapter {chapterData.chapterNumber}
+        {intl.formatMessage(
+          { id: "editChapter.title" },
+          { number: chapterData.chapterNumber }
+        )}
       </h1>
 
       <div className="bg-white dark:bg-gray-800 rounded-3xl shadow p-8">
         {/* Chapter Info */}
         <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">Thông tin Chapter</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {intl.formatMessage({ id: "editChapter.infoTitle" })}
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input
@@ -145,7 +150,12 @@ export default function EditChapterPage() {
 
         {/* Existing Pages */}
         <div className="mb-12">
-          <h3 className="font-semibold mb-4">Trang hiện có ({pages.length})</h3>
+          <h3 className="font-semibold mb-4">
+            {intl.formatMessage(
+              { id: "editChapter.existingPagesCount" },
+              { count: pages.length }
+            )}
+          </h3>
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {pages.map((page) => (
@@ -157,7 +167,10 @@ export default function EditChapterPage() {
                 />
 
                 <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
-                  Trang {page.page_number}
+                  {intl.formatMessage(
+                    { id: "editChapter.pageLabel" },
+                    { number: page.page_number }
+                  )}
                 </div>
 
                 <button
@@ -173,7 +186,9 @@ export default function EditChapterPage() {
 
         {/* Upload new pages */}
         <div className="mb-10">
-          <h3 className="font-semibold mb-4">Thêm trang mới</h3>
+          <h3 className="font-semibold mb-4">
+            {intl.formatMessage({ id: "editChapter.addNewPages" })}
+          </h3>
 
           <label className="border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
             <input
@@ -185,11 +200,11 @@ export default function EditChapterPage() {
             />
 
             <span className="font-medium text-blue-600">
-              Upload ảnh chapter
+              {intl.formatMessage({ id: "editChapter.uploadImage" })}
             </span>
 
             <p className="text-sm text-gray-500 mt-2">
-              Chọn nhiều ảnh cùng lúc
+              {intl.formatMessage({ id: "editChapter.selectMultipleImages" })}
             </p>
           </label>
 
@@ -222,14 +237,16 @@ export default function EditChapterPage() {
             disabled={isDeleting}
             className="px-8 py-4 border border-red-500 text-red-600 rounded-2xl"
           >
-            {isDeleting ? "Đang xóa..." : "Xóa Chapter"}
+            {isDeleting
+              ? intl.formatMessage({ id: "editChapter.deleting" })
+              : intl.formatMessage({ id: "editChapter.deleteButton" })}
           </button>
 
           <button
             onClick={() => router.push(`/dashboard/manga/${mangaId}/edit`)}
             className="flex-1 py-4 border rounded-2xl"
           >
-            Hủy
+            {intl.formatMessage({ id: "common.cancel" })}
           </button>
 
           <button
@@ -237,7 +254,9 @@ export default function EditChapterPage() {
             disabled={isSaving}
             className="flex-1 py-4 bg-blue-600 text-white rounded-2xl"
           >
-            {isSaving ? "Đang lưu..." : "Cập nhật Chapter"}
+            {isSaving
+              ? intl.formatMessage({ id: "editChapter.saving" })
+              : intl.formatMessage({ id: "editChapter.updateButton" })}
           </button>
         </div>
       </div>

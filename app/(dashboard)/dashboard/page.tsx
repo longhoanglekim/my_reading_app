@@ -37,16 +37,16 @@ export default function Dashboard() {
   });
 
   if (recentLoading || favoriteLoading || readLaterLoading) {
-    return <div className="text-center py-10">Đang tải dữ liệu...</div>;
+    return <div className="text-center py-10">{intl.formatMessage({ id: "common.loading" })}</div>;
   }
 
   if (recentError || favoriteError) {
-    return <div className="text-center py-10">Có lỗi xảy ra</div>;
+    return <div className="text-center py-10">{intl.formatMessage({ id: "common.error" })}</div>;
   }
   // Dữ liệu giả lập stats
   const stats = [
     {
-      title: "Sách đã đọc",
+      title: intl.formatMessage({ id: "dashboard.stats.read" }),
       value: "1,234",
       change: "+12.5%",
       icon: BookOpen,
@@ -55,7 +55,7 @@ export default function Dashboard() {
       hover: "hover:bg-amber-200 dark:hover:bg-amber-900/50",
     },
     {
-      title: "Người dùng hoạt động",
+      title: intl.formatMessage({ id: "dashboard.stats.activeUsers" }),
       value: "567",
       change: "+8.3%",
       icon: Users,
@@ -63,7 +63,7 @@ export default function Dashboard() {
       hover: "hover:bg-blue-200 dark:hover:bg-blue-900/50",
     },
     {
-      title: "Sự kiện sắp tới",
+      title: intl.formatMessage({ id: "dashboard.stats.upcomingEvents" }),
       value: "12",
       change: "+4.2%",
       icon: Calendar,
@@ -72,7 +72,7 @@ export default function Dashboard() {
       hover: "hover:bg-green-200 dark:hover:bg-green-900/50",
     },
     {
-      title: "Cài đặt đang chờ",
+      title: intl.formatMessage({ id: "dashboard.stats.pendingSettings" }),
       value: "5",
       change: "0%",
       icon: Settings,
@@ -84,7 +84,8 @@ export default function Dashboard() {
   const titleMap: Record<string, string> = {
     recent: intl.formatMessage({ id: "dashboard.recentBooks" }),
     favorite: intl.formatMessage({ id: "dashboard.favoriteBooks" }),
-    recommended: "Sách đề xuất",
+    recorecommended: intl.formatMessage({ id: "dashboard.recommendedBooks" }),
+    readLater: intl.formatMessage({ id: "dashboard.readLaterBooks" }),
   };
 
   // Sách đọc gần đây (thêm id)

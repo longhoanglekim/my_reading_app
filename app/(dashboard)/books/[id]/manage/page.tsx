@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useIntl } from "react-intl";
 import { useComicChaptersQuery, useComicOverviewQuery } from "./queryHooks";
 
 interface BookChapter {
@@ -20,6 +21,7 @@ export default function EditMangaPage() {
   const comicId = params.id as string;
   console.log("Comic ID from params:", comicId);
   const router = useRouter();
+  const intl = useIntl();
   const [formData, setFormData] = useState({
     title: "",
     author: "",
@@ -88,7 +90,7 @@ export default function EditMangaPage() {
       // await updateComic()
 
       setTimeout(() => {
-        alert("✅ Đã lưu thông tin manga thành công!");
+        alert(intl.formatMessage({ id: "manageBook.saveSuccess" }));
         setIsSaving(false);
       }, 700);
     } catch (error) {
@@ -102,7 +104,12 @@ export default function EditMangaPage() {
 
     if (!targetChapter) return;
 
-    const confirmed = confirm(`Xóa Chapter ${targetChapter.chapterNumber}?`);
+    const confirmed = confirm(
+      intl.formatMessage(
+        { id: "manageBook.deleteChapterConfirm" },
+        { chapterNumber: targetChapter.chapterNumber }
+      )
+    );
 
     if (!confirmed) return;
 
@@ -114,7 +121,7 @@ export default function EditMangaPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        Đang tải dữ liệu...
+        {intl.formatMessage({ id: "common.loading" })}
       </div>
     );
   }
@@ -124,7 +131,7 @@ export default function EditMangaPage() {
   if (isError) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] text-red-500">
-        Không thể tải dữ liệu manga
+        {intl.formatMessage({ id: "manageBook.loadError" })}
       </div>
     );
   }
@@ -135,25 +142,31 @@ export default function EditMangaPage() {
     <div className="max-w-6xl mx-auto px-6 py-10">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Chỉnh sửa Manga</h1>
+        <h1 className="text-3xl font-bold">
+          {intl.formatMessage({ id: "manageBook.title" })}
+        </h1>
 
         <button
           onClick={() => router.push(`/books/${comicId}`)}
           className="px-5 py-2.5 bg-gray-700 hover:bg-gray-800 text-white rounded-xl transition"
         >
-          ← Quay lại Trang Chi Tiết
+          {intl.formatMessage({ id: "manageBook.backToDetails" })}
         </button>
       </div>
 
       {/* ==================== MANGA INFO ==================== */}
 
       <div className="bg-white dark:bg-gray-800 rounded-3xl shadow p-8 mb-10">
-        <h2 className="text-2xl font-semibold mb-6">Thông tin Manga</h2>
+        <h2 className="text-2xl font-semibold mb-6">
+          {intl.formatMessage({ id: "manageBook.mangaInfo" })}
+        </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* COVER */}
           <div className="lg:col-span-4">
-            <label className="block text-sm font-medium mb-3">Ảnh bìa</label>
+            <label className="block text-sm font-medium mb-3">
+              {intl.formatMessage({ id: "manageBook.coverImage" })}
+            </label>
 
             {formData.cover ? (
               <img
@@ -163,7 +176,7 @@ export default function EditMangaPage() {
               />
             ) : (
               <div className="w-full aspect-[3/4] rounded-2xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                No Cover
+                {intl.formatMessage({ id: "manageBook.noCover" })}
               </div>
             )}
 
@@ -186,7 +199,7 @@ export default function EditMangaPage() {
                 />
 
                 <span className="text-blue-600 font-medium block mb-2">
-                  Upload ảnh bìa
+                  {intl.formatMessage({ id: "manageBook.uploadCover" })}
                 </span>
 
                 <p className="text-sm text-gray-500">JPG, PNG, WEBP</p>
@@ -198,7 +211,9 @@ export default function EditMangaPage() {
           <div className="lg:col-span-8 space-y-6">
             {/* TITLE */}
             <div>
-              <label className="block text-sm font-medium mb-2">Tiêu đề</label>
+              <label className="block text-sm font-medium mb-2">
+                {intl.formatMessage({ id: "manageBook.titleLabel" })}
+              </label>
 
               <input
                 type="text"
@@ -215,7 +230,9 @@ export default function EditMangaPage() {
 
             {/* AUTHOR */}
             <div>
-              <label className="block text-sm font-medium mb-2">Tác giả</label>
+              <label className="block text-sm font-medium mb-2">
+                {intl.formatMessage({ id: "manageBook.authorLabel" })}
+              </label>
 
               <input
                 type="text"
@@ -232,7 +249,9 @@ export default function EditMangaPage() {
 
             {/* DESCRIPTION */}
             <div>
-              <label className="block text-sm font-medium mb-2">Mô tả</label>
+              <label className="block text-sm font-medium mb-2">
+                {intl.formatMessage({ id: "manageBook.descriptionLabel" })}
+              </label>
 
               <textarea
                 rows={6}
@@ -256,7 +275,9 @@ export default function EditMangaPage() {
           disabled={isSaving}
           className="mt-8 px-10 py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 disabled:opacity-70"
         >
-          {isSaving ? "Đang lưu..." : "💾 Lưu thông tin Manga"}
+          {isSaving
+            ? intl.formatMessage({ id: "manageBook.saving" })
+            : intl.formatMessage({ id: "manageBook.saveButton" })}
         </button>
       </div>
 
@@ -265,7 +286,10 @@ export default function EditMangaPage() {
       <div className="bg-white dark:bg-gray-800 rounded-3xl shadow p-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-semibold">
-            Danh sách Chapter ({chapters.length})
+            {intl.formatMessage(
+              { id: "manageBook.chapterListTitle" },
+              { count: chapters.length }
+            )}
           </h2>
 
           <button
@@ -276,7 +300,7 @@ export default function EditMangaPage() {
             }
             className="px-6 py-3 border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 transition"
           >
-            + Upload Chapter Mới
+            {intl.formatMessage({ id: "manageBook.uploadNewChapter" })}
           </button>
         </div>
 
@@ -295,11 +319,18 @@ export default function EditMangaPage() {
 
                   <div>
                     <div className="font-medium text-lg">
-                      {chapter.title || `Chapter ${chapter.chapterNumber}`}
+                      {chapter.title ||
+                        intl.formatMessage(
+                          { id: "manageBook.chapterDefaultTitle" },
+                          { number: chapter.chapterNumber }
+                        )}
                     </div>
 
                     <div className="text-sm text-gray-500 mt-1">
-                      {chapter.total_pages} trang
+                      {intl.formatMessage(
+                        { id: "manageBook.totalPagesCount" },
+                        { count: chapter.total_pages }
+                      )}
                     </div>
                   </div>
                 </div>
@@ -313,14 +344,14 @@ export default function EditMangaPage() {
                     }
                     className="px-6 py-3 border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 transition"
                   >
-                    Chỉnh sửa Pages
+                    {intl.formatMessage({ id: "manageBook.editPages" })}
                   </button>
 
                   <button
                     onClick={() => handleDeleteChapter(chapter.id)}
                     className="px-6 py-3 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 transition"
                   >
-                    Xóa
+                    {intl.formatMessage({ id: "manageBook.deleteButton" })}
                   </button>
                 </div>
               </div>
@@ -328,7 +359,7 @@ export default function EditMangaPage() {
 
           {chapters.length === 0 && (
             <div className="text-center py-16 text-gray-500">
-              Chưa có chapter nào
+              {intl.formatMessage({ id: "manageBook.noChapters" })}
             </div>
           )}
         </div>

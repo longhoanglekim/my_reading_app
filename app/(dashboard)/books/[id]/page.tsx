@@ -31,7 +31,7 @@ export default function BookDetailPage() {
   if (!hasValidBookId || isLoading) {
     return (
       <div className="text-center py-10 font-medium text-gray-500">
-        Đang tải dữ liệu...
+        {intl.formatMessage({ id: "common.loading" })}
       </div>
     );
   }
@@ -39,7 +39,7 @@ export default function BookDetailPage() {
   if (isError) {
     return (
       <div className="text-center py-10 font-medium text-red-500">
-        Có lỗi xảy ra khi tải dữ liệu.
+        {intl.formatMessage({ id: "common.error" })}
       </div>
     );
   }
@@ -48,7 +48,7 @@ export default function BookDetailPage() {
   if (!bookData) {
     return (
       <div className="text-center py-10 font-medium text-gray-500">
-        Không tìm thấy sách.
+        {intl.formatMessage({ id: "common.bookNotFound" })}
       </div>
     );
   } else {
@@ -163,7 +163,7 @@ export default function BookDetailPage() {
 
           {bookData?.chapters?.length === 0 && (
             <div className="p-8 text-center text-gray-500">
-              Chưa có chương nào
+              {intl.formatMessage({ id: "common.noChapters" })}
             </div>
           )}
         </div>
