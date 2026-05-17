@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
 import HttpRequest from "../../../config/auth";
-import { ComicOverview, ComicOverviewResponse, ComicSummary } from "../type/type";
+import { ComicOverview, ComicOverviewGroupByGenre, ComicOverviewResponse, ComicSummary } from "../type/type";
 
 /* =========================
    TYPES
@@ -72,7 +72,17 @@ export const getComicOverview = async (comicId: number) => {
         throw error;
     }
 };
-
+export const getComicOverviewGroupByGenre = async () => {
+    try {
+        const res = await HttpRequest.get<
+            ApiResponse<PaginationResponse<ComicOverviewGroupByGenre>>
+        >(`/comics/by-genre`);
+        return res;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
 export const makeComicRating = async (
     comicId: number,
     rating: number,

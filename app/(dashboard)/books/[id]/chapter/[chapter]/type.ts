@@ -85,3 +85,23 @@ export interface PageDetailResponse {
   images: PageImages;
   bubbles: Bubble[];
 }
+
+export interface ComicDetail {
+  id: number;
+  title: string;
+  description: string;
+  author: string;
+  coverImageUrl: string;
+  originalLanguage: string;
+  format: string;
+  status: string;
+  averageRating: number;
+  totalRatings: number;
+  createdAt: string;
+  updatedAt: string;
+  categories: string[];
+}
+
+export interface ComicDetailResponse {
+  data: ComicDetail;
+}

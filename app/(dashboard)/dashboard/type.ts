@@ -27,3 +27,8 @@ export interface UserLibrarySummary {
     "averageRating": number,
     "listType": string,
 }
+
+export interface ComicSuggestion {
+  id: number;
+  title: string;
+}

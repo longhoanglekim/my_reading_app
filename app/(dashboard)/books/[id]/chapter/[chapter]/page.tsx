@@ -19,6 +19,7 @@ import {
   usePostChapterComment,
   useChapterPages,
   usePageDetail,
+  useComicDetail,
 } from "./queryHook/queryHook";
 
 export default function ComicChapterPage() {
@@ -37,6 +38,13 @@ export default function ComicChapterPage() {
     : NaN;
 
   // ==================== API CALLS ====================
+
+  const {
+    data: comicDetailData,
+    isLoading: comicDetailLoading,
+    isError: comicDetailError,
+  } = useComicDetail(bookId ? parseInt(bookId) : undefined);
+
   const { data: chapterOverviewData, isLoading: chapterOverviewLoading } =
     useChapterOverview(bookId, chapterNumber);
 
@@ -263,7 +271,9 @@ export default function ComicChapterPage() {
           </button>
 
           <div className="absolute left-1/2 -translate-x-1/2 text-center">
-            <h1 className="text-2xl font-bold">{"Tên book test"}</h1>
+            <h1 className="text-2xl font-bold">
+              {comicDetailData?.title || "Tên book test"}
+            </h1>
             <p className="text-gray-600">
               {chapterTitle} • Trang {currentPage} / {totalPages || "?"}
             </p>

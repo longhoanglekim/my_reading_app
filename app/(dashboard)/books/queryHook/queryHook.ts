@@ -6,6 +6,7 @@ import {
     getBookSummaryList,
     GetBookSummaryListParams,
     getComicOverview,
+    getComicOverviewGroupByGenre,
     makeComicRating,
 } from "../service/service";
 import { useNotification } from "@/app/components/providers/NotificationProvider";
@@ -103,6 +104,31 @@ export const useMakeComicRatingMutation = (comicId?: number) => {
                 });
                 throw error;
             }   
+        },
+    });
+}
+
+export const useGetBookOverviewGroupByGenreQuery = () => {
+    const { showNotification } = useNotification();
+    return useQuery({
+        queryKey: ["comic-overview-by-genre"],
+        queryFn: async () => {
+            try {
+                const response = await getComicOverviewGroupByGenre();
+                console.log("Response from getComicOverviewGroupByGenre:", response.data.data);
+                return response.data.data;
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Lấy comic overview theo thể loại thất bại. Vui lòng thử lại.';
+                showNotification({
+                    type: 'error',
+                    title: 'Lấy comic overview theo thể loại thất bại',
+                    message,
+                });
+                throw error;
+            }
         },
     });
 }

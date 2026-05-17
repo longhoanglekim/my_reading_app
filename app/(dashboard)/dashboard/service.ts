@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
 import HttpRequest from "@/app/config/auth";
-import { ComicSummary, UserLibrarySummary } from "./type";
+import { ComicSuggestion, ComicSummary, UserLibrarySummary } from "./type";
 import {
     BookOpen,
     Users,
@@ -165,9 +165,14 @@ export const getBooksByQuery = async (
     params?: GetBookSummaryListParams
 ): Promise<PaginationResponse<ComicSummary>> => {
     try {
-        const data = await getBookSummaryList(params);
-        console.log("Books by Query:", data);
-        return data  ;
+        const res = await HttpRequest.get<ApiResponse<PaginationResponse<ComicSummary>>>(
+            "/comics/search/detail",
+            {
+                params,
+            }
+        );
+        console.log("Books by Query:", res.data.data);
+        return res.data.data ;
     } catch (e) {
         console.log(e);
         return {
@@ -196,5 +201,20 @@ export const createComic = async (
     } catch (error) {
         console.log(error);
         throw error;
+    }
+};
+
+export const getSuggestions = async (
+  keyword: string
+): Promise<ComicSuggestion[]> => {
+    try {
+        const data = await HttpRequest.get<ApiResponse<ComicSuggestion[]>>(`/comics/search`, {
+            params: { keyword , limit: 5 },
+
+        });
+        return data.data.data
+    } catch (e) {
+        console.log(e);
+        throw e;
     }
 };

@@ -37,3 +37,7 @@ export interface ComicOverviewResponse {
     message: string;
 }
     
+export interface ComicOverviewGroupByGenre {
+    genre: string;
+    comics: ComicSummary[];
+}

@@ -89,6 +89,7 @@ export default function Dashboard() {
 
   // Sách đọc gần đây (thêm id)
   const recentBooks = recentBooksData;
+  console.log("Recent Books:", recentBooks);
 
   // Yêu thích (có thể dùng dữ liệu khác, hiện tại dùng chung)
   const favoriteBooks = favoriteBooksData;
