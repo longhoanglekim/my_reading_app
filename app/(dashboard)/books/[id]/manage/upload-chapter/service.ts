@@ -45,7 +45,7 @@ export const uploadChapterPages = async (
   chapterId: number,
   files: File[],
   startPageNumber: number = 1,
-  targetLangs: string[] = ["vi"]
+  targetLangs: string[] = ["vi","en"]
 ): Promise<UploadPageResponse[]> => {
   try {
     const formData = new FormData();
@@ -82,7 +82,7 @@ export const uploadChapterWithPages = async (
   chapterData: CreateChapterRequest,
   files: File[],
   startPageNumber: number = 1,
-  targetLangs: string[] = ["vi"]
+  targetLangs: string[] = ["vi","en"]
 ): Promise<{ chapter: CreateChapterResponse; pages: UploadPageResponse[] }> => {
   try {
     // Step 1: Create chapter
