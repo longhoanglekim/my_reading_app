@@ -33,7 +33,7 @@ export const useUploadChapterPages = () => {
       chapterId,
       files,
       startPageNumber = 1,
-      targetLangs = ["vi"],
+      targetLangs = ["vi","en"],
     }: {
       chapterId: number;
       files: File[];
@@ -56,7 +56,7 @@ export const useUploadChapterWithPages = () => {
       chapterData,
       files,
       startPageNumber = 1,
-      targetLangs = ["vi"],
+      targetLangs = ["vi","en"],
     }: {
       comicId: string | number;
       chapterData: CreateChapterRequest;

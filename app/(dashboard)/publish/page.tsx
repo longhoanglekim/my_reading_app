@@ -1,13 +1,9 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { useIntl } from "react-intl";
 import { useGenresQuery, useCreateComicMutation } from "./queryHooks";
 import { useRouter } from "next/navigation";
-interface Genre {
-  id: number;
-  name: string;
-}
 
 interface Chapter {
   chapterNumber: number;
@@ -26,14 +22,24 @@ interface CreateComicData {
   cover: File | null;
 }
 
+const LANGUAGE_OPTIONS = [
+  { value: "vi", label: "Vietnamese" },
+  { value: "en", label: "English" },
+  { value: "ja", label: "Japanese" },
+  { value: "zh", label: "Chinese" },
+  { value: "ko", label: "Korean" },
+];
+
+const FORMAT_OPTIONS = [
+  { value: "webtoon", label: "Webtoon" },
+  { value: "manga", label: "Manga" },
+];
+
 export default function UploadMangaChapters() {
   const intl = useIntl();
   const router = useRouter();
-  const {
-    data: genreData,
-    isLoading: isGenresLoading,
-    isError: isGenresError,
-  } = useGenresQuery();
+
+  const { data: genreData } = useGenresQuery();
 
   const createComicMutation = useCreateComicMutation();
 
@@ -41,8 +47,8 @@ export default function UploadMangaChapters() {
     title: "",
     author: "",
     description: "",
-    originalLanguage: "",
-    format: "",
+    originalLanguage: "vi",
+    format: "manga",
     status: "",
     genreIds: [],
     cover: null,
@@ -207,12 +213,14 @@ export default function UploadMangaChapters() {
     }
 
     const formData = new FormData();
+
     formData.append("title", manga.title);
     formData.append("author", manga.author);
     formData.append("description", manga.description);
     formData.append("originalLanguage", manga.originalLanguage);
     formData.append("format", manga.format);
     formData.append("status", manga.status);
+
     manga.genreIds.forEach((genreId) => {
       formData.append("genres", genreId.toString());
     });
@@ -223,6 +231,7 @@ export default function UploadMangaChapters() {
 
     try {
       const response = await createComicMutation.mutateAsync(formData);
+
       const comicId = response?.data?.id;
 
       if (comicId) {
@@ -262,7 +271,9 @@ export default function UploadMangaChapters() {
             <input
               value={manga.title}
               onChange={(e) => updateManga("title", e.target.value)}
-              placeholder={intl.formatMessage({ id: "uploadPage.bookInfo.namePlaceholder" })}
+              placeholder={intl.formatMessage({
+                id: "uploadPage.bookInfo.namePlaceholder",
+              })}
               className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
             />
           </div>
@@ -279,37 +290,79 @@ export default function UploadMangaChapters() {
             <input
               value={manga.author}
               onChange={(e) => updateManga("author", e.target.value)}
-              placeholder={intl.formatMessage({ id: "uploadPage.bookInfo.authorPlaceholder" })}
+              placeholder={intl.formatMessage({
+                id: "uploadPage.bookInfo.authorPlaceholder",
+              })}
               className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
             />
           </div>
 
+          {/* Language - Format - Status */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {/* Original Language */}
             <div>
               <label className="block text-sm font-medium mb-2">
-                {intl.formatMessage({ id: "uploadPage.bookInfo.originalLanguage" })}
+                {intl.formatMessage({
+                  id: "uploadPage.bookInfo.originalLanguage",
+                })}
               </label>
-              <input
+
+              <select
                 value={manga.originalLanguage}
                 onChange={(e) =>
                   updateManga("originalLanguage", e.target.value)
                 }
                 className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-              />
+              >
+                {LANGUAGE_OPTIONS.map((language) => (
+                  <option
+                    key={language.value}
+                    value={language.value}
+                    className="bg-white dark:bg-gray-900"
+                  >
+                    {language.label}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Format */}
             <div>
-              <label className="block text-sm font-medium mb-2">{intl.formatMessage({ id: "uploadPage.bookInfo.format" })}</label>
-              <input
+              <label className="block text-sm font-medium mb-2">
+                {intl.formatMessage({
+                  id: "uploadPage.bookInfo.format",
+                })}
+              </label>
+
+              <select
                 value={manga.format}
                 onChange={(e) => updateManga("format", e.target.value)}
                 className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-              />
+              >
+                {FORMAT_OPTIONS.map((format) => (
+                  <option
+                    key={format.value}
+                    value={format.value}
+                    className="bg-white dark:bg-gray-900"
+                  >
+                    {format.label}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Status */}
             <div>
-              <label className="block text-sm font-medium mb-2">{intl.formatMessage({ id: "uploadPage.bookInfo.status" })}</label>
+              <label className="block text-sm font-medium mb-2">
+                {intl.formatMessage({
+                  id: "uploadPage.bookInfo.status",
+                })}
+              </label>
+
               <input
                 value={manga.status}
                 onChange={(e) => updateManga("status", e.target.value)}
+                placeholder="Ongoing / Completed"
                 className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
               />
             </div>
@@ -327,7 +380,9 @@ export default function UploadMangaChapters() {
               rows={5}
               value={manga.description}
               onChange={(e) => updateManga("description", e.target.value)}
-              placeholder={intl.formatMessage({ id: "uploadPage.bookInfo.descriptionPlaceholder" })}
+              placeholder={intl.formatMessage({
+                id: "uploadPage.bookInfo.descriptionPlaceholder",
+              })}
               className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
             />
           </div>
@@ -370,7 +425,7 @@ export default function UploadMangaChapters() {
 
             <div className="flex flex-col sm:flex-row gap-6 justify-between items-center">
               <label className="cursor-pointer">
-                <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-800 transition min-w-[320px] ">
+                <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-800 transition min-w-[320px]">
                   <input
                     type="file"
                     accept="image/*"
@@ -380,17 +435,26 @@ export default function UploadMangaChapters() {
                   />
 
                   <span className="text-blue-600 font-medium block mb-2">
-                    {intl.formatMessage({ id: "uploadPage.bookInfo.chooseCover" })}
+                    {intl.formatMessage({
+                      id: "uploadPage.bookInfo.chooseCover",
+                    })}
                   </span>
 
-                  <p className="text-sm text-gray-500">{intl.formatMessage({ id: "uploadPage.bookInfo.recommendedSize" })}</p>
+                  <p className="text-sm text-gray-500">
+                    {intl.formatMessage({
+                      id: "uploadPage.bookInfo.recommendedSize",
+                    })}
+                  </p>
                 </div>
               </label>
+
               {manga.cover && (
                 <div className="w-48 h-72 rounded-lg overflow-hidden border dark:border-gray-700 shadow">
                   <img
                     src={URL.createObjectURL(manga.cover)}
-                    alt={intl.formatMessage({ id: "uploadPage.bookInfo.coverImage" })}
+                    alt={intl.formatMessage({
+                      id: "uploadPage.bookInfo.coverImage",
+                    })}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -398,15 +462,21 @@ export default function UploadMangaChapters() {
             </div>
           </div>
         </div>
-        {/* Nút hành động */}
+
+        {/* Action */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between mt-10">
-          <div></div>
+          <div />
 
           <button
             onClick={handlePublish}
-            className="px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+            disabled={createComicMutation.isPending}
+            className="px-10 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-medium transition"
           >
-            {intl.formatMessage({ id: "uploadPage.action.publish" })}
+            {createComicMutation.isPending
+              ? "Publishing..."
+              : intl.formatMessage({
+                  id: "uploadPage.action.publish",
+                })}
           </button>
         </div>
       </div>

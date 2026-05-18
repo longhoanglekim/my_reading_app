@@ -4,7 +4,7 @@ import {
   CreateChapterResponse,
   UploadPageResponse,
 } from "./type";
-
+import qs from "qs";
 /**
  * Create a new chapter
  * POST /comics/{comicId}/chapters
@@ -45,34 +45,37 @@ export const uploadChapterPages = async (
   chapterId: number,
   files: File[],
   startPageNumber: number = 1,
-  targetLangs: string[] = ["vi","en"]
+  targetLangs: string[] = ["vi", "en"]
 ): Promise<UploadPageResponse[]> => {
   try {
     const formData = new FormData();
 
-    // Add all files to FormData
     files.forEach((file) => {
       formData.append("files", file);
     });
 
     const params = new URLSearchParams();
-    params.append("startPageNumber", String(startPageNumber));
-    targetLangs.forEach((lang) => params.append("targetLangs", lang));
 
+    params.append("startPageNumber", String(startPageNumber));
+
+    targetLangs.forEach((lang) => {
+      params.append("targetLangs", lang);
+    });
+    console.log("📤 Uploading pages with params:", {
+      startPageNumber,
+      targetLangs: targetLangs.join(", "),
+    });
     const res = await HttpRequest.post<UploadPageResponse[]>(
-      `/chapters/${chapterId}/pages`,
-      formData,
-      {
-        params,
-      }
+      `/chapters/${chapterId}/pages?${params.toString()}`,
+      formData
     );
+
     return res.data;
   } catch (error) {
     console.error("Error uploading pages:", error);
     throw error;
   }
 };
-
 /**
  * Upload chapter with pages in one operation
  * Calls createChapter first, then uploadChapterPages
