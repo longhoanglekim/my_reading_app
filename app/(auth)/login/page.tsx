@@ -8,6 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useIntl } from "react-intl";
 import { useRouter } from "next/navigation";
 import { useLogin, useOAuthProviders } from "./queryHook/queryHook";
+import { ButtonVariant } from "@/app/const/style";
 
 export default function LoginPage() {
   const intl = useIntl();
@@ -115,6 +116,7 @@ export default function LoginPage() {
         {providers?.map((provider) => (
           <CButton
             key={provider.provider}
+            type="button"
             variant="outline"
             className="w-full justify-center gap-3 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
             onClick={() => {

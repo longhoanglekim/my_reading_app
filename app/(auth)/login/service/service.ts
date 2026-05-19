@@ -43,7 +43,7 @@ type OAuthProvidersResponse = {
 
 export const getOAuthProviders = async (): Promise<OAuthProvider[]> => {
     const response = await HttpRequest.get("/oauth2/providers")
-
+    console.log("OAuth providers response:", response.data)
     return response.data.data
 }
 
