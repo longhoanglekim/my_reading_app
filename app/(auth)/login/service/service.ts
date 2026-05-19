@@ -29,3 +29,21 @@ export const login = async (
 
     }
 }
+
+
+export type OAuthProvider = {
+    provider: string
+    displayName: string
+    authorizationUrl: string
+}
+
+type OAuthProvidersResponse = {
+    data: OAuthProvider[]
+}
+
+export const getOAuthProviders = async (): Promise<OAuthProvider[]> => {
+    const response = await HttpRequest.get("/oauth2/providers")
+
+    return response.data.data
+}
+

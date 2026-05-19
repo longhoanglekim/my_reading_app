@@ -1,7 +1,7 @@
 // hooks/useLogin.ts
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { login } from '../service/service'
+import { getOAuthProviders, login } from '../service/service'
 import { useNotification } from '@/app/components/providers/NotificationProvider'
 import { useUserStore } from '@/app/store/userStore'
 
@@ -54,5 +54,12 @@ export const useLogin = () => {
                 message: error.message || 'Email hoặc mật khẩu không đúng',
             })
         },
+    })
+}
+
+export const useOAuthProviders = () => {
+    return useQuery({
+        queryKey: ["oauth-providers"],
+        queryFn: getOAuthProviders,
     })
 }
