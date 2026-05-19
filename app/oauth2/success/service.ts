@@ -15,5 +15,5 @@ export const getMe = async (): Promise<MeResponse> => {
     }
   );
 
-  return response.data.data;
+  return response.data;
 };
