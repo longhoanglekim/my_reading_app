@@ -8,6 +8,8 @@ import {
     getComicOverview,
     getComicOverviewGroupByGenre,
     makeComicRating,
+    upsertLibrary,
+    removeFromLibrary,
 } from "../service/service";
 import { useNotification } from "@/app/components/providers/NotificationProvider";
 
@@ -132,3 +134,63 @@ export const useGetBookOverviewGroupByGenreQuery = () => {
         },
     });
 }
+
+export const useUpsertLibraryMutation = (comicId?: number) => {
+    const { showNotification } = useNotification();
+
+    return useMutation({
+        mutationKey: ["upsert-library", comicId],
+        mutationFn: async ({ comicId, listType }: { comicId: number; listType: string }) => {
+            try {
+                const response = await upsertLibrary(comicId, listType);
+                showNotification({
+                    type: 'success',
+                    title: 'Cập nhật tủ sách thành công',
+                    message: 'Truyện đã được lưu vào tủ sách.',
+                });
+                return response;
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Cập nhật tủ sách thất bại. Vui lòng thử lại.';
+                showNotification({
+                    type: 'error',
+                    title: 'Cập nhật tủ sách thất bại',
+                    message,
+                });
+                throw error;
+            }
+        },
+    });
+};
+
+export const useRemoveFromLibraryMutation = (comicId?: number) => {
+    const { showNotification } = useNotification();
+
+    return useMutation({
+        mutationKey: ["remove-from-library", comicId],
+        mutationFn: async (id: number) => {
+            try {
+                const response = await removeFromLibrary(id);
+                showNotification({
+                    type: 'success',
+                    title: 'Xóa khỏi tủ sách thành công',
+                    message: 'Truyện đã được xóa khỏi tủ sách.',
+                });
+                return response;
+            } catch (error: unknown) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Xóa khỏi tủ sách thất bại. Vui lòng thử lại.';
+                showNotification({
+                    type: 'error',
+                    title: 'Xóa khỏi tủ sách thất bại',
+                    message,
+                });
+                throw error;
+            }
+        },
+    });
+};

@@ -7,6 +7,8 @@ import { useIntl } from "react-intl";
 import {
   useComicOverviewQuery,
   useMakeComicRatingMutation,
+  useUpsertLibraryMutation,
+  useRemoveFromLibraryMutation,
 } from "../queryHook/queryHook";
 
 export default function BookDetailPage() {
@@ -21,10 +23,18 @@ export default function BookDetailPage() {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [ratingValue, setRatingValue] = useState(5);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [libraryType, setLibraryType] = useState<string>("");
   const { data, isLoading, isError } = useComicOverviewQuery(
     hasValidBookId ? bookId : undefined,
   );
   const { mutate: makeRating } = useMakeComicRatingMutation(
+    hasValidBookId ? bookId : undefined,
+  );
+
+  const { mutate: upsertLibrary } = useUpsertLibraryMutation(
+    hasValidBookId ? bookId : undefined,
+  );
+  const { mutate: removeFromLibrary } = useRemoveFromLibraryMutation(
     hasValidBookId ? bookId : undefined,
   );
 
@@ -105,13 +115,46 @@ export default function BookDetailPage() {
               {intl.formatMessage({ id: "common.chapter" })}
             </p>
 
-            <button
-              onClick={() => router.push(`/books/${bookId}/chapter/1`)}
-              disabled={bookData?.chapters?.length === 0}
-              className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {intl.formatMessage({ id: "common.readFromStart" })}
-            </button>
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                onClick={() => router.push(`/books/${bookId}/chapter/1`)}
+                disabled={bookData?.chapters?.length === 0}
+                className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {intl.formatMessage({ id: "common.readFromStart" })}
+              </button>
+
+              <div className="flex items-center gap-2 border dark:border-gray-700 rounded-lg p-1 bg-gray-50 dark:bg-gray-800">
+                <select
+                  value={libraryType}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setLibraryType(val);
+                    if (val) {
+                      upsertLibrary({ comicId: bookId, listType: val });
+                    }
+                  }}
+                  className="bg-transparent px-3 py-2 text-sm font-medium outline-none text-gray-700 dark:text-gray-300"
+                >
+                  <option value="">✨ {intl.formatMessage({ id: "library.selectStatus", defaultMessage: "Thêm vào tủ sách" })}</option>
+                  <option value="FAVORITE">❤️ {intl.formatMessage({ id: "library.favorite", defaultMessage: "Yêu thích" })}</option>
+                  <option value="READ_LATER">⏳ {intl.formatMessage({ id: "library.readLater", defaultMessage: "Đọc sau" })}</option>
+                  <option value="READING">📖 {intl.formatMessage({ id: "library.reading", defaultMessage: "Đang đọc" })}</option>
+                </select>
+                
+                {libraryType && (
+                  <button
+                    onClick={() => {
+                      removeFromLibrary(bookId);
+                      setLibraryType("");
+                    }}
+                    className="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition"
+                  >
+                    {intl.formatMessage({ id: "library.remove", defaultMessage: "Xóa" })}
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         <div>

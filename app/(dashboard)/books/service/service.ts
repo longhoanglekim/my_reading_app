@@ -113,3 +113,28 @@ export const createComic = async (
         throw error;
     }
 };
+
+export const upsertLibrary = async (comicId: number, listType: string) => {
+    try {
+        const res = await HttpRequest.post("/user-libraries", {
+            comicId,
+            listType,
+        });
+
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+export const removeFromLibrary = async (comicId: number) => {
+    try {
+        const res = await HttpRequest.delete(`/user-libraries/comics/${comicId}`);
+
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
