@@ -138,3 +138,13 @@ export const removeFromLibrary = async (comicId: number) => {
         throw error;
     }
 };
+
+export const getReadingHistory = async (comicId: number) => {
+    try {
+        const res = await HttpRequest.get(`/reading-histories/comics/${comicId}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

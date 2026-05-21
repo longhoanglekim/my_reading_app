@@ -156,7 +156,14 @@
     "noChapters": "No chapters yet",
     "submitting": "Submitting...",
     "updating": "Updating...",
-    "deleteConfirm": "Are you sure you want to delete this {item}? This action cannot be undone."
+    "deleteConfirm": "Are you sure you want to delete this {item}? This action cannot be undone.",
+    "continueReading": "Continue Reading {chapter}"
+  },  
+  "library": {
+    "selectStatus": "Add to library",
+    "favorite": "Favorite",
+    "readLater": "Read later",
+    "reading": "Reading"
   },
   "topbar": {
     "title": "Dashboard",

@@ -156,7 +156,14 @@
     "noChapters": "Chưa có chương nào",
     "submitting": "Đang gửi...",
     "updating": "Đang cập nhật...",
-    "deleteConfirm": "Bạn có chắc muốn xóa {item} không? Hành động này không thể hoàn tác."
+    "deleteConfirm": "Bạn có chắc muốn xóa {item} không? Hành động này không thể hoàn tác.",
+    "continueReading": "Đọc tiếp Chương {chapter}"
+  },
+  "library": {
+    "selectStatus": "Thêm vào tủ sách",
+    "favorite": "Yêu thích",
+    "readLater": "Đọc sau",
+    "reading": "Đang đọc"
   },
   "topbar": {
     "title": "Bảng điều khiển",

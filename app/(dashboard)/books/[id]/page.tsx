@@ -9,6 +9,7 @@ import {
   useMakeComicRatingMutation,
   useUpsertLibraryMutation,
   useRemoveFromLibraryMutation,
+  useReadingHistoryQuery,
 } from "../queryHook/queryHook";
 
 export default function BookDetailPage() {
@@ -35,6 +36,9 @@ export default function BookDetailPage() {
     hasValidBookId ? bookId : undefined,
   );
   const { mutate: removeFromLibrary } = useRemoveFromLibraryMutation(
+    hasValidBookId ? bookId : undefined,
+  );
+  const { data: historyData } = useReadingHistoryQuery(
     hasValidBookId ? bookId : undefined,
   );
 
@@ -116,13 +120,25 @@ export default function BookDetailPage() {
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <button
-                onClick={() => router.push(`/books/${bookId}/chapter/1`)}
-                disabled={bookData?.chapters?.length === 0}
-                className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {intl.formatMessage({ id: "common.readFromStart" })}
-              </button>
+              {historyData?.chapterNumber ? (
+                <button
+                  onClick={() => router.push(`/books/${bookId}/chapter/${historyData.chapterNumber}`)}
+                  className="w-fit px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition"
+                >
+                  {intl.formatMessage(
+                    { id: "common.continueReading", defaultMessage: "Đọc tiếp Chương {chapter}" },
+                    { chapter: historyData.chapterNumber }
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => router.push(`/books/${bookId}/chapter/1`)}
+                  disabled={bookData?.chapters?.length === 0}
+                  className="w-fit px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {intl.formatMessage({ id: "common.readFromStart" })}
+                </button>
+              )}
 
               <div className="flex items-center gap-2 border dark:border-gray-700 rounded-lg p-1 bg-gray-50 dark:bg-gray-800">
                 <select

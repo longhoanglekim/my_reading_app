@@ -10,6 +10,7 @@ import {
     makeComicRating,
     upsertLibrary,
     removeFromLibrary,
+    getReadingHistory,
 } from "../service/service";
 import { useNotification } from "@/app/components/providers/NotificationProvider";
 
@@ -192,5 +193,17 @@ export const useRemoveFromLibraryMutation = (comicId?: number) => {
                 throw error;
             }
         },
+    });
+};
+
+export const useReadingHistoryQuery = (comicId?: number) => {
+    return useQuery({
+        queryKey: ["reading-history", comicId],
+        queryFn: () => {
+            if (!comicId) return null;
+            return getReadingHistory(comicId);
+        },
+        enabled: !!comicId,
+        retry: false,
     });
 };
