@@ -262,11 +262,14 @@
     "searchPlaceholder": "Search user...",
     "noUsers": "No users found",
     "table": {
+      "id": "ID",
       "name": "Name",
       "email": "Email",
       "role": "Role",
       "status": "Status",
-      "actions": "Actions"
+      "dailyAiUsage": "Daily AI Usage",
+      "actions": "Actions",
+      "changeRole": "Change Role"
     },
     "roleUser": "User",
     "roleAdmin": "Admin",

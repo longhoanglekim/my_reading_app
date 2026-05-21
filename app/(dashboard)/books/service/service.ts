@@ -98,22 +98,6 @@ export const makeComicRating = async (
     }
 };
 
-export const createComic = async (
-    body: CreateComicBody
-) => {
-    try {
-        const res = await HttpRequest.post(
-            "/api/comics",
-            body
-        );
-
-        return res.data;
-    } catch (error) {
-        console.log(error);
-        throw error;
-    }
-};
-
 export const upsertLibrary = async (comicId: number, listType: string) => {
     try {
         const res = await HttpRequest.post("/user-libraries", {

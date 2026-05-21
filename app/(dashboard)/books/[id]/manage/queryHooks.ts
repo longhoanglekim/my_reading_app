@@ -1,5 +1,5 @@
 import { useNotification } from "@/app/components/providers/NotificationProvider";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getComicChapterInfo, getComicOverviewInfo } from "./service";
 
 
@@ -81,4 +81,36 @@ export const useComicOverviewQuery = (comicId: number) => {
 
     enabled,
   });
+};
+
+import { deleteComic, deleteChapterPages, deleteSinglePage } from './service';
+
+export const useDeleteComic = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (comicId: number) => deleteComic(comicId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['comics'] });
+        },
+    });
+};
+
+export const useDeleteChapterPages = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (chapterId: number) => deleteChapterPages(chapterId),
+        onSuccess: (_, chapterId) => {
+            queryClient.invalidateQueries({ queryKey: ['chapterPages', chapterId] });
+        },
+    });
+};
+
+export const useDeleteSinglePage = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (pageId: number) => deleteSinglePage(pageId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['chapterPages'] });
+        },
+    });
 };

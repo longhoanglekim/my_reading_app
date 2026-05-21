@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRecentBooks, GetBookSummaryListParams, getFavoriteBooks, getUserLibraryByType, GetUserLibraryByTypeParams, getBooksByQuery, fakeFetchSuggestions, getSuggestions } from './service';
+import { getRecentBooks, GetBookSummaryListParams, getFavoriteBooks, getUserLibraryByType, GetUserLibraryByTypeParams, getBooksByQuery, getSuggestions } from './service';
+import { getAdminDashboardSummary } from './service';
 export function useRecentBooks(params: GetBookSummaryListParams) {
     return useQuery({
         queryKey: ['recentBooks', params],
@@ -39,4 +40,11 @@ export const useComicSuggestions = (keyword: string) => {
     queryFn: () => getSuggestions(keyword),
     enabled: keyword.trim().length > 0,
   });
+};
+
+export const useAdminDashboardSummary = () => {
+    return useQuery({
+        queryKey: ['adminDashboardSummary'],
+        queryFn: getAdminDashboardSummary,
+    });
 };

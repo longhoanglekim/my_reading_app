@@ -41,7 +41,6 @@ export default function BookDetailPage() {
   const { data: historyData } = useReadingHistoryQuery(
     hasValidBookId ? bookId : undefined,
   );
-  console.log(historyData)
 
   if (!hasValidBookId || isLoading) {
     return (

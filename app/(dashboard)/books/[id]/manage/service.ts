@@ -41,3 +41,30 @@ Promise<ApiResponse<PaginationResponse<ChapterOverview>>> => {
         throw error;
     }
 };
+
+export const deleteComic = async (comicId: number): Promise<void> => {
+    try {
+        await HttpRequest.delete(`/comics/${comicId}`);
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+export const deleteChapterPages = async (chapterId: number): Promise<void> => {
+    try {
+        await HttpRequest.delete(`/chapters/${chapterId}/pages`);
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+export const deleteSinglePage = async (pageId: number): Promise<void> => {
+    try {
+        await HttpRequest.delete(`/chapters/pages/${pageId}`);
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

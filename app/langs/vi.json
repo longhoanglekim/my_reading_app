@@ -262,11 +262,14 @@
     "searchPlaceholder": "Tìm kiếm người dùng...",
     "noUsers": "Không tìm thấy người dùng",
     "table": {
+      "id": "ID",
       "name": "Họ tên",
       "email": "Email",
       "role": "Vai trò",
       "status": "Trạng thái",
-      "actions": "Thao tác"
+      "actions": "Thao tác",
+      "dailyAiUsage": "Lượt dùng AI/Ngày",
+      "changeRole": "Thay đổi vai trò"
     },
     "roleUser": "Người dùng",
     "roleAdmin": "Quản trị viên",

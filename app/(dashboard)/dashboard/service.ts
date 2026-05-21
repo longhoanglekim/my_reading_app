@@ -186,24 +186,6 @@ export const getBooksByQuery = async (
     }
 }
 
-
-
-export const createComic = async (
-    body: CreateComicBody
-) => {
-    try {
-        const res = await HttpRequest.post(
-            "/api/comics",
-            body
-        );
-
-        return res.data;
-    } catch (error) {
-        console.log(error);
-        throw error;
-    }
-};
-
 export const getSuggestions = async (
   keyword: string
 ): Promise<ComicSuggestion[]> => {
@@ -216,5 +198,15 @@ export const getSuggestions = async (
     } catch (e) {
         console.log(e);
         throw e;
+    }
+};
+
+export const getAdminDashboardSummary = async (): Promise<any> => {
+    try {
+        const res = await HttpRequest.get("/admin/dashboard/summary");
+        return res.data.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
     }
 };
