@@ -20,6 +20,7 @@ import {
   useChapterPages,
   usePageDetail,
   useComicDetail,
+  useSyncReadingHistoryMutation,
 } from "./queryHook/queryHook";
 
 export default function ComicChapterPage() {
@@ -121,8 +122,20 @@ export default function ComicChapterPage() {
     useChapterComments(chapterId);
   const postCommentMutation = usePostChapterComment(chapterId);
   const chapterComments = commentsData?.data?.content || [];
+  const { mutate: syncHistory } = useSyncReadingHistoryMutation();
 
   // ==================== EFFECTS & HANDLERS (giữ nguyên) ====================
+  useEffect(() => {
+    if (bookId && chapterId && currentPage) {
+      syncHistory({
+        comicId: parseInt(bookId, 10),
+        chapterId: parseInt(chapterId, 10),
+        lastPageRead: currentPage,
+        clientUpdatedAt: new Date().toISOString(),
+      });
+    }
+  }, [bookId, chapterId, currentPage, syncHistory]);
+
   const updateImageScale = useCallback(() => {
     const img = imageRef.current;
     if (!img) return;

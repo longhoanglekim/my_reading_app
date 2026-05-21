@@ -85,3 +85,23 @@ export const getChapterPages = async (
     throw error;
   }
 };
+
+export const syncReadingHistory = async (
+  comicId: number,
+  chapterId: number,
+  lastPageRead: number,
+  clientUpdatedAt: string
+) => {
+  try {
+    const res = await HttpRequest.put("/reading-histories", {
+      comicId,
+      chapterId,
+      lastPageRead,
+      clientUpdatedAt,
+    });
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

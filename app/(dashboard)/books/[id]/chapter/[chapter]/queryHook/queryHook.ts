@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getChapterComments, getChapterOverview, getChapterPages, getComicDetail, getPageDetail, postChapterComment } from '../service/service'
+import { getChapterComments, getChapterOverview, getChapterPages, getComicDetail, getPageDetail, postChapterComment, syncReadingHistory } from '../service/service'
 import { ChapterComment } from '../type'
 export const useChapterOverview = (comicId: string, chapterNumber: number) => {
     return useQuery({
@@ -54,5 +54,21 @@ export const useComicDetail = (comicId?: number) => {
     queryKey: ["comicDetail", comicId],
     queryFn: () => getComicDetail(comicId!),
     enabled: !!comicId,
+  });
+};
+
+export const useSyncReadingHistoryMutation = () => {
+  return useMutation({
+    mutationFn: ({
+      comicId,
+      chapterId,
+      lastPageRead,
+      clientUpdatedAt,
+    }: {
+      comicId: number;
+      chapterId: number;
+      lastPageRead: number;
+      clientUpdatedAt: string;
+    }) => syncReadingHistory(comicId, chapterId, lastPageRead, clientUpdatedAt),
   });
 };

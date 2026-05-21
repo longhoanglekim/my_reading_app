@@ -17,7 +17,7 @@ export default function BookDetailPage() {
   const routeBookId = Array.isArray(params.id) ? params.id[0] : params.id;
   const bookId = routeBookId ? Number(routeBookId) : undefined;
   const hasValidBookId =
-    typeof bookId === "number" && !Number.isNaN(bookId) && bookId > 0;
+    typeof bookId === "number" && !Number.isNaN(bookId) && bookId > 0; 
 
   const router = useRouter();
   const intl = useIntl();
@@ -41,6 +41,7 @@ export default function BookDetailPage() {
   const { data: historyData } = useReadingHistoryQuery(
     hasValidBookId ? bookId : undefined,
   );
+  console.log(historyData)
 
   if (!hasValidBookId || isLoading) {
     return (
