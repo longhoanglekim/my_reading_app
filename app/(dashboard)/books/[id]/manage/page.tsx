@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
 import { useComicChaptersQuery, useComicOverviewQuery } from "./queryHooks";
+import { useDeleteComicMutation, useDeleteChapterPagesMutation } from "./queryHooks";
 
 interface BookChapter {
   id: string;

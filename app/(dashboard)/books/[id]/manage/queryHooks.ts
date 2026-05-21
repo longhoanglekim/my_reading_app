@@ -1,6 +1,6 @@
 import { useNotification } from "@/app/components/providers/NotificationProvider";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getComicChapterInfo, getComicOverviewInfo } from "./service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getComicChapterInfo, getComicOverviewInfo, deleteComic, deleteChapterPages, deleteSinglePage } from "./service";
 
 
 
@@ -83,34 +83,86 @@ export const useComicOverviewQuery = (comicId: number) => {
   });
 };
 
-import { deleteComic, deleteChapterPages, deleteSinglePage } from './service';
+export const useDeleteComicMutation = () => {
+  const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
 
-export const useDeleteComic = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (comicId: number) => deleteComic(comicId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['comics'] });
-        },
-    });
+  return useMutation({
+    mutationFn: async (comicId: number) => {
+      const response = await deleteComic(comicId);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comics"] });
+      showNotification({
+        type: "success",
+        title: "Xóa truyện thành công",
+        message: "Truyện đã được xóa khỏi hệ thống.",
+      });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Xóa truyện thất bại.";
+      showNotification({
+        type: "error",
+        title: "Xóa truyện thất bại",
+        message,
+      });
+    },
+  });
 };
 
-export const useDeleteChapterPages = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (chapterId: number) => deleteChapterPages(chapterId),
-        onSuccess: (_, chapterId) => {
-            queryClient.invalidateQueries({ queryKey: ['chapterPages', chapterId] });
-        },
-    });
+export const useDeleteChapterPagesMutation = (comicId: number) => {
+  const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (chapterId: number) => {
+      const response = await deleteChapterPages(chapterId);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comic-chapters", comicId] });
+      showNotification({
+        type: "success",
+        title: "Xóa toàn bộ trang thành công",
+        message: "Toàn bộ các trang của chương đã được dọn dẹp.",
+      });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Xóa các trang thất bại.";
+      showNotification({
+        type: "error",
+        title: "Xóa các trang thất bại",
+        message,
+      });
+    },
+  });
 };
 
-export const useDeleteSinglePage = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (pageId: number) => deleteSinglePage(pageId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['chapterPages'] });
-        },
-    });
+export const useDeleteSinglePageMutation = (comicId: number) => {
+  const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (pageId: number) => {
+      const response = await deleteSinglePage(pageId);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comic-chapters", comicId] });
+      showNotification({
+        type: "success",
+        title: "Xóa trang thành công",
+        message: "Trang truyện đã được xóa.",
+      });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Xóa trang thất bại.";
+      showNotification({
+        type: "error",
+        title: "Xóa trang thất bại",
+        message,
+      });
+    },
+  });
 };
