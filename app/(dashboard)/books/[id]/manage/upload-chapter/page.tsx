@@ -170,7 +170,7 @@ export default function UploadChapterPage() {
 
         <div className="flex gap-4">
           <button
-            onClick={() => router.push(`/dashboard/books/${mangaId}/manage`)}
+            onClick={() => router.push(`/books/${mangaId}/manage`)}
             className="flex-1 py-4 border rounded-2xl hover:bg-gray-100 disabled:opacity-50"
             disabled={isUploading}
           >

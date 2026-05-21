@@ -76,6 +76,7 @@ export interface Bubble {
   box: number[];
   original_text: string;
   chunks: BubbleChunk[];
+  full_translation?: string;
 }
 
 export interface PageDetailResponse {

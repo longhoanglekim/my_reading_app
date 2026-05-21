@@ -67,8 +67,9 @@ export default function ComicChapterPage() {
       );
     }
 
-    if (chapterPagesResponse.data && Array.isArray(chapterPagesResponse.data)) {
-      return [...chapterPagesResponse.data].sort(
+    const responseAsAny = chapterPagesResponse as any;
+    if (responseAsAny.data && Array.isArray(responseAsAny.data)) {
+      return [...responseAsAny.data].sort(
         (a, b) => a.pageNumber - b.pageNumber,
       );
     }

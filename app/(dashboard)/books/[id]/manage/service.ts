@@ -71,3 +71,23 @@ export const deleteSinglePage = async (pageId: number): Promise<ApiResponse<void
         throw error;
     }
 };
+
+export const updateComic = async (comicId: number, data: FormData): Promise<ApiResponse<ComicOverview>> => {
+    try {
+        const res = await HttpRequest.put<ApiResponse<ComicOverview>>(`/comics/${comicId}`, data);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+export const deleteChapter = async (chapterId: number): Promise<ApiResponse<void>> => {
+    try {
+        const res = await HttpRequest.delete<ApiResponse<void>>(`/chapters/${chapterId}`);
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChapterPage } from "../../../chapter/[chapter]/type";
+import { getChapterPages } from "../../../chapter/[chapter]/service/service";
+import { deleteChapter, deleteSinglePage } from "../../service";
+import { uploadChapterPages } from "../../upload-chapter/service";
+import { useComicChaptersQuery } from "../../queryHooks";
+
 interface ChapterData {
   chapterNumber: number;
   title: string;
@@ -35,44 +41,47 @@ export default function EditChapterPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Mock fetch
-  useEffect(() => {
-    setChapterData({
-      chapterNumber: 5,
-      title: "Bí Mật Của Sa Mạc",
-    });
+  const queryClient = useQueryClient();
 
-    setPages([
-      {
-        page_id: "p1",
-        chapter_id: chapterId,
-        page_number: 1,
-        image_url: "https://picsum.photos/id/1015/800/1200",
-      },
-      {
-        page_id: "p2",
-        chapter_id: chapterId,
-        page_number: 2,
-        image_url: "https://picsum.photos/id/1016/800/1200",
-      },
-      {
-        page_id: "p3",
-        chapter_id: chapterId,
-        page_number: 3,
-        image_url: "https://picsum.photos/id/133/800/1200",
-      },
-    ]);
-  }, [chapterId]);
+  const { data: chaptersData } = useComicChaptersQuery(Number(mangaId));
+  const currentChapter = chaptersData?.content?.find((c) => String(c.id) === String(chapterId));
+
+  const { data: fetchedPages } = useQuery({
+    queryKey: ["chapter-pages", Number(chapterId)],
+    queryFn: () => getChapterPages(Number(chapterId)),
+    enabled: !!chapterId,
+  });
+
+  useEffect(() => {
+    if (currentChapter) {
+      setChapterData({
+        chapterNumber: currentChapter.chapterNumber,
+        title: currentChapter.title || "",
+      });
+    }
+  }, [currentChapter]);
+
+  useEffect(() => {
+    if (fetchedPages) {
+      setPages(fetchedPages);
+    }
+  }, [fetchedPages]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
-    setNewFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+    setNewFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
   };
 
-  const removeExistingPage = (pageId: string) => {
+  const removeExistingPage = async (pageId: number) => {
     if (confirm(intl.formatMessage({ id: "editChapter.deletePageConfirm" }))) {
-      setPages((prev) => prev.filter((p) => p.page_id !== pageId));
+      try {
+        await deleteSinglePage(pageId);
+        queryClient.invalidateQueries({ queryKey: ["chapter-pages", Number(chapterId)] });
+        queryClient.invalidateQueries({ queryKey: ["comic-chapters", Number(mangaId)] });
+      } catch (error) {
+        console.error("Failed to delete page:", error);
+      }
     }
   };
 
@@ -80,26 +89,44 @@ export default function EditChapterPage() {
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleDeleteChapter = () => {
+  const handleDeleteChapter = async () => {
     if (confirm(intl.formatMessage({ id: "editChapter.deleteChapterConfirm" }))) {
       setIsDeleting(true);
 
-      setTimeout(() => {
+      try {
+        await deleteChapter(Number(chapterId));
+        queryClient.invalidateQueries({ queryKey: ["comic-chapters", Number(mangaId)] });
         alert(intl.formatMessage({ id: "editChapter.deleteSuccess" }));
-        router.push(`/dashboard/manga/${mangaId}/edit`);
-      }, 600);
+        router.push(`/books/${mangaId}/manage`);
+      } catch (error) {
+        console.error("Failed to delete chapter:", error);
+        alert("Xóa chương thất bại!");
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
   const handleSave = async () => {
+    if (newFiles.length === 0) {
+      router.push(`/books/${mangaId}/manage`);
+      return;
+    }
+
     setIsSaving(true);
 
     try {
-      // TODO: call update API
+      const maxPageNum = pages.length > 0 ? Math.max(...pages.map((p) => p.pageNumber)) : 0;
+      await uploadChapterPages(Number(chapterId), newFiles, maxPageNum + 1);
 
-      setTimeout(() => {
-        alert(intl.formatMessage({ id: "editChapter.saveSuccess" }));
-      }, 500);
+      queryClient.invalidateQueries({ queryKey: ["chapter-pages", Number(chapterId)] });
+      queryClient.invalidateQueries({ queryKey: ["comic-chapters", Number(mangaId)] });
+
+      alert(intl.formatMessage({ id: "editChapter.saveSuccess" }));
+      router.push(`/books/${mangaId}/manage`);
+    } catch (error) {
+      console.error("Failed to upload new pages:", error);
+      alert("Đăng tải trang mới thất bại!");
     } finally {
       setIsSaving(false);
     }
@@ -131,7 +158,8 @@ export default function EditChapterPage() {
                   chapterNumber: Number(e.target.value),
                 }))
               }
-              className="border rounded-2xl px-5 py-4"
+              className="border rounded-2xl px-5 py-4 bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
+              disabled
             />
 
             <input
@@ -143,7 +171,8 @@ export default function EditChapterPage() {
                   title: e.target.value,
                 }))
               }
-              className="border rounded-2xl px-5 py-4"
+              className="border rounded-2xl px-5 py-4 bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
+              disabled
             />
           </div>
         </div>
@@ -159,22 +188,22 @@ export default function EditChapterPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {pages.map((page) => (
-              <div key={page.page_id} className="relative group">
+              <div key={page.id} className="relative group">
                 <img
-                  src={page.image_url}
-                  alt={`Page ${page.page_number}`}
+                  src={page.imageUrl}
+                  alt={`Page ${page.pageNumber}`}
                   className="rounded-2xl aspect-[3/4] object-cover"
                 />
 
                 <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
                   {intl.formatMessage(
                     { id: "editChapter.pageLabel" },
-                    { number: page.page_number }
+                    { number: page.pageNumber }
                   )}
                 </div>
 
                 <button
-                  onClick={() => removeExistingPage(page.page_id)}
+                  onClick={() => removeExistingPage(page.id)}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 opacity-0 group-hover:opacity-100 transition"
                 >
                   ✕
@@ -243,7 +272,7 @@ export default function EditChapterPage() {
           </button>
 
           <button
-            onClick={() => router.push(`/dashboard/manga/${mangaId}/edit`)}
+            onClick={() => router.push(`/books/${mangaId}/manage`)}
             className="flex-1 py-4 border rounded-2xl"
           >
             {intl.formatMessage({ id: "common.cancel" })}

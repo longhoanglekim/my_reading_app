@@ -1,6 +1,5 @@
 import HttpRequest from "../../../../../../config/auth";
 import { CommentsResponse, ChapterComment, ChapterOverview, PageDetailResponse, ChapterPage, ComicDetail, ComicDetailResponse } from '../type'
-const appLocale = localStorage.getItem('app_locale') ;
 export const getChapterOverview = async (comicId : string, chapterNumber: number) : Promise<ChapterOverview> => {
     try {
         const res = await HttpRequest.get(`/comics/${comicId}/chapter/${chapterNumber}`);
@@ -63,10 +62,11 @@ export const getComicDetail = async (
 export const getPageDetail = async (
   pageId: number
 ): Promise<PageDetailResponse> => {
+  const appLocale = typeof window !== 'undefined' ? localStorage.getItem('app_locale') : 'vi';
   const res = await HttpRequest.get<{
     status: string;
     data: PageDetailResponse;
-  }>(`/pages/${pageId}?lang=${appLocale}`);
+  }>(`/pages/${pageId}?lang=${appLocale || 'vi'}`);
 
   return res.data.data;
 };

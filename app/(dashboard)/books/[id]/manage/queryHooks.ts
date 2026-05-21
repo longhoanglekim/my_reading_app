@@ -1,6 +1,6 @@
 import { useNotification } from "@/app/components/providers/NotificationProvider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getComicChapterInfo, getComicOverviewInfo, deleteComic, deleteChapterPages, deleteSinglePage } from "./service";
+import { getComicChapterInfo, getComicOverviewInfo, deleteComic, deleteChapterPages, deleteSinglePage, updateComic, deleteChapter } from "./service";
 
 
 
@@ -161,6 +161,63 @@ export const useDeleteSinglePageMutation = (comicId: number) => {
       showNotification({
         type: "error",
         title: "Xóa trang thất bại",
+        message,
+      });
+    },
+  });
+};
+
+export const useUpdateComicMutation = (comicId: number) => {
+  const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: FormData) => {
+      const response = await updateComic(comicId, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comic-overview-info", comicId] });
+      queryClient.invalidateQueries({ queryKey: ["comics"] });
+      showNotification({
+        type: "success",
+        title: "Cập nhật thành công",
+        message: "Thông tin truyện đã được cập nhật.",
+      });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Cập nhật truyện thất bại.";
+      showNotification({
+        type: "error",
+        title: "Cập nhật thất bại",
+        message,
+      });
+    },
+  });
+};
+
+export const useDeleteChapterMutation = (comicId: number) => {
+  const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (chapterId: number) => {
+      const response = await deleteChapter(chapterId);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comic-chapters", comicId] });
+      showNotification({
+        type: "success",
+        title: "Xóa chương thành công",
+        message: "Chương đã được xóa khỏi hệ thống.",
+      });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Xóa chương thất bại.";
+      showNotification({
+        type: "error",
+        title: "Xóa chương thất bại",
         message,
       });
     },

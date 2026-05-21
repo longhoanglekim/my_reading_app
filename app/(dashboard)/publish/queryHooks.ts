@@ -14,12 +14,13 @@ export const useGenresQuery = (
         queryFn: () => {
             try {
                 return getBookGenre();
-            } catch (error) {
+            } catch (error: unknown) {
+                 const message = error instanceof Error ? error.message : 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.';
                  showNotification({
-                type: 'error',
-                title: 'Đăng ký thất bại',
-                message: error.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
-            })
+                    type: 'error',
+                    title: 'Đăng ký thất bại',
+                    message,
+                 });
             }
         },
 
@@ -39,11 +40,12 @@ export const useCreateComicMutation = () => {
                     message: 'Truyện đã được tạo thành công.',
                 });
                 return response;
-            } catch (error) {
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : 'Đăng truyện thất bại. Vui lòng kiểm tra lại thông tin.';
                 showNotification({
                     type: 'error',
                     title: 'Đăng truyện thất bại',
-                    message: error.message || 'Đăng truyện thất bại. Vui lòng kiểm tra lại thông tin.',
+                    message,
                 });
                 throw error;
             }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
-import { useComicChaptersQuery, useComicOverviewQuery } from "./queryHooks";
+import { useComicChaptersQuery, useComicOverviewQuery, useUpdateComicMutation, useDeleteChapterMutation } from "./queryHooks";
 import { useDeleteComicMutation, useDeleteChapterPagesMutation } from "./queryHooks";
 
 interface BookChapter {
@@ -32,6 +32,10 @@ export default function EditMangaPage() {
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+
+  const updateComicMutation = useUpdateComicMutation(Number(comicId));
+  const deleteChapterMutation = useDeleteChapterMutation(Number(comicId));
 
   const {
     data: comicData,
@@ -87,20 +91,29 @@ export default function EditMangaPage() {
 
       console.log("Saving manga:", formData);
 
-      // TODO:
-      // await updateComic()
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("author", formData.author);
+      data.append("description", formData.description);
+      data.append("originalLanguage", comicData?.originalLanguage || "vi");
+      data.append("format", comicData?.format || "comic");
+      if (comicData?.status) {
+        data.append("status", comicData.status);
+      }
+      if (coverFile) {
+        data.append("coverImage", coverFile);
+      }
 
-      setTimeout(() => {
-        alert(intl.formatMessage({ id: "manageBook.saveSuccess" }));
-        setIsSaving(false);
-      }, 700);
+      await updateComicMutation.mutateAsync(data);
+      setCoverFile(null);
+      setIsSaving(false);
     } catch (error) {
       console.error(error);
       setIsSaving(false);
     }
   };
 
-  const handleDeleteChapter = (chapterId: string) => {
+  const handleDeleteChapter = async (chapterId: string) => {
     const targetChapter = chapters.find((c) => c.id === chapterId);
 
     if (!targetChapter) return;
@@ -114,7 +127,11 @@ export default function EditMangaPage() {
 
     if (!confirmed) return;
 
-    setChapters((prev) => prev.filter((chapter) => chapter.id !== chapterId));
+    try {
+      await deleteChapterMutation.mutateAsync(Number(chapterId));
+    } catch (error) {
+      console.error("Failed to delete chapter:", error);
+    }
   };
 
   // ==================== LOADING ====================
@@ -192,6 +209,7 @@ export default function EditMangaPage() {
 
                     if (!file) return;
 
+                    setCoverFile(file);
                     setFormData({
                       ...formData,
                       cover: URL.createObjectURL(file),
