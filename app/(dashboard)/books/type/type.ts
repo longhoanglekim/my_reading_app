@@ -39,5 +39,5 @@ export interface ComicOverviewResponse {
     
 export interface ComicOverviewGroupByGenre {
     genre: string;
-    comics: ComicSummary[];
+    books: ComicSummary[];
 }
