@@ -95,10 +95,7 @@ export default function Sidebar() {
                                     href="/admin-overview"
                                     label={intl.formatMessage({ id: "sidebar.overview" })}
                                 />
-                                <SidebarItem
-                                    href="/admin-books"
-                                    label={intl.formatMessage({ id: "sidebar.books" })}
-                                />
+                                {/* maybe add categories management*/}
                                 <SidebarItem
                                     href="/admin/user-management"
                                     label={intl.formatMessage({ id: "sidebar.userManagement" })}
