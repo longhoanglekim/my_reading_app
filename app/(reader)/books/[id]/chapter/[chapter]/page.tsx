@@ -128,6 +128,7 @@ export default function ComicChapterPage() {
   const handleSetReaderMode = (mode: "webtoon" | "manga-pagination") => {
     localStorage.setItem("reader_mode", mode);
     window.dispatchEvent(new Event("reader-mode-change"));
+    setMenuVisible(true);
   };
 
   const [selectedBubble, setSelectedBubble] = useState<Bubble | null>(null);
@@ -182,47 +183,83 @@ export default function ComicChapterPage() {
     }
   };
 
-  // ==================== AUTO-HIDE FOOTER ====================
-  const [footerVisible, setFooterVisible] = useState(true);
-  const footerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // ==================== AUTO-HIDE MENUS ====================
+  const [menuVisible, setMenuVisible] = useState(true);
+  const menuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resetFooterTimeout = useCallback(() => {
-    setFooterVisible(true);
-    if (footerTimeoutRef.current) {
-      clearTimeout(footerTimeoutRef.current);
+  const resetMenuTimeout = () => {
+    setMenuVisible(true);
+    if (menuTimeoutRef.current) {
+      clearTimeout(menuTimeoutRef.current);
     }
-    footerTimeoutRef.current = setTimeout(() => {
-      setFooterVisible(false);
+    menuTimeoutRef.current = setTimeout(() => {
+      setMenuVisible(false);
     }, 3000);
-  }, []);
+  };
 
   useEffect(() => {
-    if (readerMode === "webtoon") {
-      setFooterVisible(false);
-      return;
+    // Set the auto-hide timer without calling setState synchronously in the render/commit phase.
+    if (menuTimeoutRef.current) {
+      clearTimeout(menuTimeoutRef.current);
     }
+    menuTimeoutRef.current = setTimeout(() => {
+      setMenuVisible(false);
+    }, 3000);
 
-    resetFooterTimeout();
+    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
 
-    const handleActivity = () => {
-      resetFooterTimeout();
+    const handleActivity = (e: Event) => {
+      if (e.type === "scroll") {
+        if (readerMode === "webtoon") {
+          const currentScrollY = window.scrollY;
+          const scrollDifference = currentScrollY - lastScrollY;
+          if (Math.abs(scrollDifference) > 10) {
+            if (scrollDifference > 0 && currentScrollY > 100) {
+              setMenuVisible(false);
+              if (menuTimeoutRef.current) {
+                clearTimeout(menuTimeoutRef.current);
+              }
+            } else if (scrollDifference < 0) {
+              resetMenuTimeout();
+            }
+            lastScrollY = currentScrollY;
+          }
+        } else {
+          resetMenuTimeout();
+        }
+        return;
+      }
+
+      if (e.type === "mousemove") {
+        const mouseEvent = e as MouseEvent;
+        const clientY = mouseEvent.clientY;
+        const windowHeight = window.innerHeight;
+        // Edge hover: show menus if cursor is near top/bottom edges (top 10% or bottom 10%)
+        if (clientY < windowHeight * 0.1 || clientY > windowHeight * 0.9) {
+          resetMenuTimeout();
+        }
+        return;
+      }
+
+      // touchstart, keydown, etc.
+      resetMenuTimeout();
     };
 
     window.addEventListener("mousemove", handleActivity);
-    window.addEventListener("scroll", handleActivity);
+    window.addEventListener("scroll", handleActivity, { passive: true });
     window.addEventListener("touchstart", handleActivity);
     window.addEventListener("keydown", handleActivity);
 
     return () => {
-      if (footerTimeoutRef.current) {
-        clearTimeout(footerTimeoutRef.current);
+      if (menuTimeoutRef.current) {
+        clearTimeout(menuTimeoutRef.current);
       }
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("scroll", handleActivity);
       window.removeEventListener("touchstart", handleActivity);
       window.removeEventListener("keydown", handleActivity);
     };
-  }, [readerMode, resetFooterTimeout]);
+  }, [readerMode]);
 
   // Hide scrollbar on html/body in horizontal mode
   useEffect(() => {
@@ -241,6 +278,7 @@ export default function ComicChapterPage() {
 
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flipContainerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScrollRef = useRef(false);
   const currentPageRef = useRef(currentPage);
   useEffect(() => {
     currentPageRef.current = currentPage;
@@ -443,13 +481,53 @@ export default function ComicChapterPage() {
 
   // Manga Flip scroll snap observer
   const handleFlipScroll = () => {
-    resetFooterTimeout();
+    resetMenuTimeout();
     const container = flipContainerRef.current;
     if (!container) return;
     const index = Math.round(container.scrollLeft / container.clientWidth);
     const pageNum = index + 1;
+
+    if (isProgrammaticScrollRef.current) {
+      if (pageNum === currentPage) {
+        isProgrammaticScrollRef.current = false;
+      }
+      return;
+    }
+
     if (pageNum >= 1 && pageNum <= totalPages && pageNum !== currentPage) {
       setCurrentPage(pageNum);
+    }
+  };
+
+  // Viewport tap/click zone gesture analyzer
+  const handleViewportClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest(
+        "button, input, textarea, select, a, [role='button'], [data-chunk-word], [data-bubble-wrapper]"
+      )
+    ) {
+      return;
+    }
+
+    const clickX = e.clientX;
+    const width = window.innerWidth;
+
+    const leftZone = width * 0.25;  // 25% Left boundary
+    const rightZone = width * 0.75; // 75% Right boundary
+
+    if (readerMode === "manga-pagination") {
+      if (clickX < leftZone) {
+        handlePrevPage();
+      } else if (clickX > rightZone) {
+        handleNextPage();
+      } else {
+        // Center Zone: Toggle Menu Visibility
+        setMenuVisible((prev) => !prev);
+      }
+    } else {
+      // In Webtoon mode: Center tap/click toggles menu
+      setMenuVisible((prev) => !prev);
     }
   };
 
@@ -460,6 +538,7 @@ export default function ComicChapterPage() {
     if (!container) return;
     const expectedScrollLeft = (currentPage - 1) * container.clientWidth;
     if (Math.abs(container.scrollLeft - expectedScrollLeft) > 5) {
+      isProgrammaticScrollRef.current = true;
       container.scrollTo({ left: expectedScrollLeft, behavior: "smooth" });
     }
   }, [currentPage, readerMode]);
@@ -470,51 +549,56 @@ export default function ComicChapterPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
       {/* HEADER */}
-      <div className="w-full max-w-5xl mx-auto px-4 py-6">
-        <div className="relative flex items-center justify-between">
-          <button
-            onClick={() => router.push(`/books/${bookId}`)}
-            className="px-5 py-2 border rounded-lg hover:bg-gray-100 z-10 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-          >
-            {intl.formatMessage({ id: "dashboard.book.info" })}
-          </button>
+      <header className={`fixed top-0 left-0 right-0 bg-white/70 backdrop-blur-md dark:bg-gray-950/70 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm z-50 transition-all duration-300 transform ${menuVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
+        <div className="w-full max-w-5xl mx-auto px-4 py-4">
+          <div className="relative flex items-center justify-between">
+            <button
+              onClick={() => router.push(`/books/${bookId}`)}
+              className="px-5 py-2 border rounded-lg hover:bg-gray-100 z-10 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+            >
+              {intl.formatMessage({ id: "dashboard.book.info" })}
+            </button>
 
-          <div className="absolute left-1/2 -translate-x-1/2 text-center hidden md:block">
-            <h1 className="text-2xl font-bold">
+            <div className="absolute left-1/2 -translate-x-1/2 text-center hidden md:block">
+              <h1 className="text-2xl font-bold">
+                {comicDetailData?.title || "Tên book test"}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                {chapterTitle} • {intl.formatMessage({ id: "common.pageCapital" })} {currentPage} / {totalPages || "?"}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-white transition-colors flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                {intl.formatMessage({ id: "topbar.settings" })}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Info view */}
+          <div className="text-center mt-4 md:hidden">
+            <h1 className="text-xl font-bold">
               {comicDetailData?.title || "Tên book test"}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               {chapterTitle} • {intl.formatMessage({ id: "common.pageCapital" })} {currentPage} / {totalPages || "?"}
             </p>
           </div>
-
-          <div className="flex items-center gap-3 z-10">
-            <button
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-white transition-colors flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-              {intl.formatMessage({ id: "topbar.settings" })}
-            </button>
-          </div>
         </div>
-
-        {/* Mobile Info view */}
-        <div className="text-center mt-4 md:hidden">
-          <h1 className="text-xl font-bold">
-            {comicDetailData?.title || "Tên book test"}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {chapterTitle} • {intl.formatMessage({ id: "common.pageCapital" })} {currentPage} / {totalPages || "?"}
-          </p>
-        </div>
-      </div>
+      </header>
 
       {/* IMAGE + BUBBLES */}
-      <div className="flex-1 flex justify-center px-4 pb-24">
+      <div
+        className="flex-1 flex justify-center px-4 pt-24 md:pt-28 pb-24"
+        onClick={handleViewportClick}
+      >
         <div className="relative w-full max-w-[820px] mx-auto flex justify-center">
           {isChapterLoading ? (
             <div className="flex items-center justify-center h-[600px] w-full bg-gray-100 dark:bg-gray-900 rounded-xl">
@@ -605,7 +689,7 @@ export default function ComicChapterPage() {
       </div>
 
       {/* COMMENTS */}
-      <div className={`w-full max-w-5xl mx-auto px-4 ${readerMode === "webtoon" ? "pb-8" : "pb-32"}`}>
+      <div className="w-full max-w-5xl mx-auto px-4 pb-32">
         <div className="bg-white rounded-3xl border shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
@@ -695,51 +779,49 @@ export default function ComicChapterPage() {
       </div>
 
       {/* FOOTER */}
-      {readerMode !== "webtoon" && (
-        <footer className={`fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md dark:bg-gray-900/70 border-t border-gray-200/50 dark:border-gray-800/50 shadow-lg z-45 transition-all duration-300 ${footerVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
-          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <button
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
-            >
-              {intl.formatMessage({ id: "common.prev" })}
-            </button>
+      <footer className={`fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md dark:bg-gray-900/70 border-t border-gray-200/50 dark:border-gray-800/50 shadow-lg z-45 transition-all duration-300 ${menuVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+          <button
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
+          >
+            {intl.formatMessage({ id: "common.prev" })}
+          </button>
 
-            <div className="flex-1 max-w-md mx-8 flex items-center gap-4">
-              <span className="text-sm font-medium min-w-[3ch] text-right text-gray-600 dark:text-gray-400">
-                {currentPage}
-              </span>
-              <input
-                type="range"
-                min={1}
-                max={totalPages || 1}
-                value={currentPage}
-                onChange={(e) => {
-                  const pageNum = Number(e.target.value);
-                  if (readerMode === "webtoon") {
-                    scrollToPage(pageNum);
-                  } else {
-                    setCurrentPage(pageNum);
-                  }
-                }}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none hover:accent-blue-500 transition-all"
-              />
-              <span className="text-sm font-medium min-w-[3ch] text-gray-600 dark:text-gray-400">
-                {totalPages || "?"}
-              </span>
-            </div>
-
-            <button
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
-            >
-              {intl.formatMessage({ id: "common.next" })}
-            </button>
+          <div className="flex-1 max-w-md mx-8 flex items-center gap-4">
+            <span className="text-sm font-medium min-w-[3ch] text-right text-gray-600 dark:text-gray-400">
+              {currentPage}
+            </span>
+            <input
+              type="range"
+              min={1}
+              max={totalPages || 1}
+              value={currentPage}
+              onChange={(e) => {
+                const pageNum = Number(e.target.value);
+                if (readerMode === "webtoon") {
+                  scrollToPage(pageNum);
+                } else {
+                  setCurrentPage(pageNum);
+                }
+              }}
+              className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none hover:accent-blue-500 transition-all"
+            />
+            <span className="text-sm font-medium min-w-[3ch] text-gray-600 dark:text-gray-400">
+              {totalPages || "?"}
+            </span>
           </div>
-        </footer>
-      )}
+
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
+          >
+            {intl.formatMessage({ id: "common.next" })}
+          </button>
+        </div>
+      </footer>
 
       {/* POPUP CHI TIẾT BUBBLE */}
       {selectedBubble && (
@@ -1001,6 +1083,7 @@ function ReaderPage({
         return (
           <div
             key={bubble.id}
+            data-bubble-wrapper="true"
             className="absolute flex items-center justify-center text-center transition-all duration-200 cursor-pointer rounded gap-1 border border-transparent hover:border-yellow-300 hover:bg-white/70"
             style={getBubbleStyle(bubble, finalFontSize, padding)}
             onClick={() => handleBubbleClick(bubble)}
