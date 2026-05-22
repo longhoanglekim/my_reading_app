@@ -29,6 +29,11 @@ const FORMAT_OPTIONS = [
   { value: "manga", label: "Manga" },
 ];
 
+const STATUS_OPTIONS = [
+  {value: "Ongoing", label: "Ongoing"},
+  {value: "Completed", label: "Ongoing"}
+]
+
 export default function UploadMangaChapters() {
   const intl = useIntl();
   const router = useRouter();
@@ -41,7 +46,7 @@ export default function UploadMangaChapters() {
     title: "",
     author: "",
     description: "",
-    originalLanguage: "vi",
+    originalLanguage: "ja",
     format: "manga",
     status: "",
     genreIds: [],
@@ -271,13 +276,21 @@ export default function UploadMangaChapters() {
                   id: "uploadPage.bookInfo.status",
                 })}
               </label>
-
-              <input
-                value={manga.status}
-                onChange={(e) => updateManga("status", e.target.value)}
-                placeholder="Ongoing / Completed"
+              <select
+                value={manga.format}
+                onChange={(e) => updateManga("format", e.target.value)}
                 className="w-full p-3 rounded-lg border dark:border-gray-700 bg-transparent outline-none focus:border-blue-500"
-              />
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <option
+                    key={status.value}
+                    value={status.value}
+                    className="bg-white dark:bg-gray-900"
+                  >
+                    {status.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
