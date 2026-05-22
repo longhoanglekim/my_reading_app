@@ -9,11 +9,12 @@ import {
   useRef,
   useCallback,
   FormEvent,
+  useSyncExternalStore,
 } from "react";
-import { useIntl } from "react-intl";
+import { useIntl, IntlShape } from "react-intl";
 import { useQueries } from "@tanstack/react-query";
 import { getPageDetail } from "./service/service";
-import { Book, Bubble, BubbleChunk, SelectionTranslation, ChapterComment, ChapterPage, PageDetailResponse } from "./type";
+import { Bubble, BubbleChunk, SelectionTranslation, ChapterComment, ChapterPage, PageDetailResponse } from "./type";
 
 import {
   useChapterComments,
@@ -23,6 +24,27 @@ import {
   useComicDetail,
   useSyncReadingHistoryMutation,
 } from "./queryHook/queryHook";
+
+const subscribeReaderMode = (callback: () => void) => {
+  if (typeof window === "undefined") return () => { };
+  window.addEventListener("storage", callback);
+  window.addEventListener("reader-mode-change", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("reader-mode-change", callback);
+  };
+};
+
+const getReaderModeSnapshot = () => {
+  if (typeof window === "undefined") return "manga-pagination";
+  const saved = localStorage.getItem("reader_mode");
+  if (saved === "webtoon" || saved === "manga-pagination" || saved === "manga-flip") {
+    return saved as "webtoon" | "manga-pagination" | "manga-flip";
+  }
+  return "manga-pagination";
+};
+
+const getServerReaderModeSnapshot = () => "manga-pagination";
 
 export default function ComicChapterPage() {
   const params = useParams();
@@ -43,8 +65,6 @@ export default function ComicChapterPage() {
 
   const {
     data: comicDetailData,
-    isLoading: comicDetailLoading,
-    isError: comicDetailError,
   } = useComicDetail(bookId ? parseInt(bookId) : undefined);
 
   const { data: chapterOverviewData, isLoading: chapterOverviewLoading } =
@@ -90,20 +110,16 @@ export default function ComicChapterPage() {
   });
 
   // ==================== STATE & DATA ====================
-  const [readerMode, setReaderMode] = useState<"webtoon" | "manga-pagination" | "manga-flip">("manga-pagination");
+  const readerMode = useSyncExternalStore(
+    subscribeReaderMode,
+    getReaderModeSnapshot,
+    getServerReaderModeSnapshot
+  );
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Load readerMode from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("reader_mode");
-    if (saved === "webtoon" || saved === "manga-pagination" || saved === "manga-flip") {
-      setReaderMode(saved as any);
-    }
-  }, []);
-
   const handleSetReaderMode = (mode: "webtoon" | "manga-pagination" | "manga-flip") => {
-    setReaderMode(mode);
     localStorage.setItem("reader_mode", mode);
+    window.dispatchEvent(new Event("reader-mode-change"));
   };
 
   const [selectedBubble, setSelectedBubble] = useState<Bubble | null>(null);
@@ -121,6 +137,10 @@ export default function ComicChapterPage() {
 
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flipContainerRef = useRef<HTMLDivElement>(null);
+  const currentPageRef = useRef(currentPage);
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
 
   const chapterTitle = chapterOverviewData?.title ?? `Chương ${chapterNumber}`;
 
@@ -204,7 +224,7 @@ export default function ComicChapterPage() {
               ? bestChunks
                 .map(
                   (c: BubbleChunk) =>
-                    `${c.word} (${c.romaji}): ${c.meaning || c.type}`,
+                    `${c.word} (${c.romanization}): ${c.meaning || c.type}`,
                 )
                 .join("\n")
               : bestBubble.original_text;
@@ -268,7 +288,7 @@ export default function ComicChapterPage() {
   // Scroll to active page when readerMode changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-page-index="${currentPage - 1}"]`);
+      const el = document.querySelector(`[data-page-index="${currentPageRef.current - 1}"]`);
       if (el) {
         el.scrollIntoView({ behavior: "instant", block: "start" });
       }
@@ -406,7 +426,6 @@ export default function ComicChapterPage() {
                       setActiveWord={setActiveWord}
                       hoveredWord={hoveredWord}
                       setHoveredWord={setHoveredWord}
-                      selectedBubble={selectedBubble}
                       setSelectedBubble={setSelectedBubble}
                       intl={intl}
                     />
@@ -437,7 +456,6 @@ export default function ComicChapterPage() {
                       setActiveWord={setActiveWord}
                       hoveredWord={hoveredWord}
                       setHoveredWord={setHoveredWord}
-                      selectedBubble={selectedBubble}
                       setSelectedBubble={setSelectedBubble}
                       intl={intl}
                     />
@@ -457,7 +475,6 @@ export default function ComicChapterPage() {
                   setActiveWord={setActiveWord}
                   hoveredWord={hoveredWord}
                   setHoveredWord={setHoveredWord}
-                  selectedBubble={selectedBubble}
                   setSelectedBubble={setSelectedBubble}
                   intl={intl}
                 />
@@ -530,14 +547,14 @@ export default function ComicChapterPage() {
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 ring-2 ring-white dark:ring-gray-900 shadow-sm overflow-hidden">
-                    {comment.avatarUrl ? (
-                      <img src={comment.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white font-bold">
-                        {comment.fullName?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
+                      {comment.avatarUrl ? (
+                        <img src={comment.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                          {comment.fullName?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <p className="font-semibold">{comment.fullName}</p>
                       <p className="text-xs text-gray-500">
@@ -586,7 +603,7 @@ export default function ComicChapterPage() {
       {selectedBubble && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl border dark:border-gray-800">
-            <div className="p-5 border-b dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-850">
+            <div className="p-5 border-b dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
               <h3 className="font-bold text-lg text-black dark:text-white">{intl.formatMessage({ id: "popups.dialogueInfo.title" })}</h3>
               <button
                 onClick={() => setSelectedBubble(null)}
@@ -619,7 +636,7 @@ export default function ComicChapterPage() {
                       <div className="flex items-baseline gap-3">
                         <span className="font-bold text-black dark:text-white text-xl">{chunk.word}</span>
                         <span className="font-mono text-gray-500 dark:text-gray-400">
-                          {chunk.romaji}
+                          {chunk.romanization}
                         </span>
                       </div>
                       <p className="text-gray-700 dark:text-gray-300 mt-1">{chunk.meaning}</p>
@@ -669,25 +686,24 @@ export default function ComicChapterPage() {
                   <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
                     {intl.formatMessage({ id: "readerSettings.layoutMode" })}
                   </h4>
-                  <div className="flex flex-col gap-2">
-                    {[
+                  {(
+                    [
                       { mode: "webtoon", labelId: "readerSettings.webtoon" },
                       { mode: "manga-pagination", labelId: "readerSettings.mangaPagination" },
                       { mode: "manga-flip", labelId: "readerSettings.mangaFlip" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.mode}
-                        onClick={() => handleSetReaderMode(opt.mode as any)}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 border text-sm font-medium ${
-                          readerMode === opt.mode
-                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-md"
-                            : "bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800"
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.mode}
+                      onClick={() => handleSetReaderMode(opt.mode)}
+                      className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 border text-sm font-medium ${readerMode === opt.mode
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-md"
+                        : "bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800"
                         }`}
-                      >
-                        {intl.formatMessage({ id: opt.labelId })}
-                      </button>
-                    ))}
-                  </div>
+                    >
+                      {intl.formatMessage({ id: opt.labelId })}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -712,9 +728,8 @@ interface ReaderPageProps {
   setActiveWord: (val: { bubbleId: number; chunkIndex: number } | null) => void;
   hoveredWord: { bubbleId: number; chunkIndex: number } | null;
   setHoveredWord: (val: { bubbleId: number; chunkIndex: number } | null) => void;
-  selectedBubble: Bubble | null;
   setSelectedBubble: (val: Bubble | null) => void;
-  intl: any;
+  intl: IntlShape;
 }
 
 function ReaderPage({
@@ -726,7 +741,6 @@ function ReaderPage({
   setActiveWord,
   hoveredWord,
   setHoveredWord,
-  selectedBubble,
   setSelectedBubble,
   intl,
 }: ReaderPageProps) {
@@ -748,24 +762,28 @@ function ReaderPage({
   }, [pageDetail, updateImageScale]);
 
   const currentImage = pageDetail?.images?.inpaintedUrl || pageDetail?.images?.originalUrl || page.imageUrl;
-  const currentBubbles = pageDetail?.bubbles || [];
 
   const sortedBubbles = useMemo(() => {
-    return [...currentBubbles].sort((a, b) => {
+    const bubbles = pageDetail?.bubbles || [];
+    return [...bubbles].sort((a, b) => {
       const [ax, ay] = a.box;
       const [bx, by] = b.box;
       if (Math.abs(ax - bx) > 50) return bx - ax;
       return ay - by;
     });
-  }, [currentBubbles]);
+  }, [pageDetail?.bubbles]);
 
-  const getBubbleStyle = (bubble: Bubble) => {
+  // Calculate dynamic font size and style for speech bubble
+  const getBubbleStyle = (bubble: Bubble, finalFontSize: number, padding: number) => {
     const [x, y, w, h] = bubble.box;
     return {
       left: `${Math.round(x * imageScale)}px`,
       top: `${Math.round(y * imageScale)}px`,
       width: `${Math.round(w * imageScale)}px`,
       height: `${Math.round(h * imageScale)}px`,
+      fontSize: `${finalFontSize}px`,
+      padding: `${padding}px`,
+      lineHeight: "1.2",
     };
   };
 
@@ -809,80 +827,110 @@ function ReaderPage({
         onLoad={updateImageScale}
       />
 
-      {sortedBubbles.map((bubble) => (
-        <div
-          key={bubble.id}
-          className="absolute flex items-center justify-center text-center p-3 transition-all duration-200 cursor-pointer rounded gap-1 border border-transparent hover:border-yellow-300 hover:bg-white/70"
-          style={getBubbleStyle(bubble)}
-          onClick={() => handleBubbleClick(bubble)}
-        >
+      {sortedBubbles.map((bubble) => {
+        const [,, w, h] = bubble.box;
+        const charCount = bubble.original_text?.length || 1;
+        const charAreaRatio = isJapanese ? 1.0 : 0.55;
+        const fillFactor = isJapanese ? 0.65 : 0.5;
+
+        // Base font size in original image space
+        const area = w * h;
+        const baseFontSize = Math.sqrt((area * fillFactor) / (charCount * charAreaRatio));
+
+        // Scale to screen viewport
+        let fontSize = baseFontSize * imageScale;
+
+        // Constraint checks to fit container dimensions
+        const dispW = w * imageScale;
+        const dispH = h * imageScale;
+
+        if (isJapanese) {
+          const maxByWidth = Math.max(10, dispW * 0.85);
+          const maxByHeight = Math.max(10, dispH / Math.min(charCount, 4));
+          fontSize = Math.min(fontSize, maxByWidth, maxByHeight);
+        } else {
+          const maxByHeight = Math.max(10, dispH * 0.85);
+          const maxByWidth = Math.max(10, dispW / Math.min(charCount, 5));
+          fontSize = Math.min(fontSize, maxByHeight, maxByWidth);
+        }
+
+        const finalFontSize = Math.max(9, Math.min(22, fontSize));
+        const padding = Math.max(2, Math.min(10, Math.round(8 * imageScale)));
+
+        return (
           <div
-            className={
-              isJapanese
-                ? "max-w-full"
-                : "w-full flex flex-wrap gap-1 justify-center"
-            }
-            style={
-              isJapanese
-                ? {
+            key={bubble.id}
+            className="absolute flex items-center justify-center text-center transition-all duration-200 cursor-pointer rounded gap-1 border border-transparent hover:border-yellow-300 hover:bg-white/70"
+            style={getBubbleStyle(bubble, finalFontSize, padding)}
+            onClick={() => handleBubbleClick(bubble)}
+          >
+            <div
+              className={
+                isJapanese
+                  ? "max-w-full"
+                  : "w-full flex flex-wrap gap-1 justify-center"
+              }
+              style={
+                isJapanese
+                  ? {
                     writingMode: "vertical-rl",
                     textOrientation: "mixed",
                     textAlign: "center",
                     maxHeight: "100%",
                     wordBreak: "break-word",
                   }
-                : {
+                  : {
                     textAlign: "center",
                     wordBreak: "break-word",
                   }
-            }
-          >
-            {bubble.chunks.map((chunk: BubbleChunk, idx: number) => {
-              const isActive =
-                (hoveredWord?.bubbleId === bubble.id &&
-                  hoveredWord?.chunkIndex === idx) ||
-                (activeWord?.bubbleId === bubble.id &&
-                  activeWord?.chunkIndex === idx);
+              }
+            >
+              {bubble.chunks.map((chunk: BubbleChunk, idx: number) => {
+                const isActive =
+                  (hoveredWord?.bubbleId === bubble.id &&
+                    hoveredWord?.chunkIndex === idx) ||
+                  (activeWord?.bubbleId === bubble.id &&
+                    activeWord?.chunkIndex === idx);
 
-              return (
-                <span
-                  key={idx}
-                  data-chunk-word
-                  className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${
-                    isJapanese ? "inline-block leading-tight" : "inline"
-                  }`}
-                  onMouseEnter={() => handleChunkHover(bubble.id, idx)}
-                  onMouseLeave={handleChunkLeave}
-                >
-                  {chunk.word}
+                return (
+                  <span
+                    key={idx}
+                    data-chunk-word
+                    className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${isJapanese ? "inline-block leading-tight" : "inline"
+                      }`}
+                    onMouseEnter={() => handleChunkHover(bubble.id, idx)}
+                    onMouseLeave={handleChunkLeave}
+                  >
+                    {chunk.word}
 
-                  {isActive && (
-                    <div
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-[9999] pointer-events-none border"
-                      style={{ writingMode: "horizontal-tb" }}
-                    >
-                      <div className="text-black dark:text-black flex items-baseline gap-2 mb-1">
-                        <span className="text-black dark:text-black font-bold text-lg">
-                          {chunk.word}
-                        </span>
-                        <span className="text-black dark:text-black text-xs">
-                          {chunk.romaji}
-                        </span>
+                    {isActive && (
+                      <div
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-[9999] pointer-events-none border"
+                        style={{ writingMode: "horizontal-tb", fontSize: "13px", lineHeight: "1.4" }}
+                      >
+                        <div className="text-black dark:text-black flex items-baseline gap-2 mb-1">
+                          <span className="text-black dark:text-black font-bold text-lg">
+                            {chunk.word}
+                          </span>
+                          <span className="text-black dark:text-black text-xs">
+                            {chunk.romanization}
+                          </span>
+                        </div>
+                        <p className="text-black dark:text-black text-sm mb-2">
+                          {chunk.meaning || chunk.type}
+                        </p>
+                        <p className="text-black dark:text-black text-[11px]">
+                          {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
+                        </p>
                       </div>
-                      <p className="text-black dark:text-black text-sm mb-2">
-                        {chunk.meaning || chunk.type}
-                      </p>
-                      <p className="text-black dark:text-black text-[11px]">
-                        {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
-                      </p>
-                    </div>
-                  )}
-                </span>
-              );
-            })}
+                    )}
+                  </span>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

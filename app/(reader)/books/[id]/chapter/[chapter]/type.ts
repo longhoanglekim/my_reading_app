@@ -66,7 +66,7 @@ export interface PageImages {
 export interface BubbleChunk {
   chunk_id: string;
   word: string;
-  romaji: string;
+  romanization: string;
   type: string;
   meaning: string;
 }
