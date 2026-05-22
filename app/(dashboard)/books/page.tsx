@@ -24,8 +24,6 @@ export default function BooksPage() {
   // ==================== FETCH DATA (giữ nguyên) ====================
   const {
     data: searchData,
-    isLoading: searchLoading,
-    isError: searchError,
   } = useBooksByQuery({
     keyword: searchQuery,
     page: page - 1,
@@ -54,8 +52,6 @@ export default function BooksPage() {
   });
 
   const fetchData = isSearchMode ? searchData : userLibraryData;
-  const isLoading = isSearchMode ? searchLoading : userLibraryLoading;
-  const isError = isSearchMode ? searchError : userLibraryError;
 
   let totalPage = null;
   if (fetchData) {
@@ -75,8 +71,6 @@ export default function BooksPage() {
   // ==================== FAKE DATA CHO TRƯỜNG HỢP TYPE RỖNG ====================
   const {
     data: comicDataByGenre,
-    isLoading: comicDataByGenreLoading,
-    isError: comicDataByGenreError,
   } = useGetBookOverviewGroupByGenreQuery();
 
   // ==================== LOADING & ERROR (giữ nguyên) ====================

@@ -5,12 +5,6 @@ import { useIntl } from "react-intl";
 import { useGenresQuery, useCreateComicMutation } from "./queryHooks";
 import { useRouter } from "next/navigation";
 
-interface Chapter {
-  chapterNumber: number;
-  title: string;
-  files: File[];
-}
-
 interface CreateComicData {
   title: string;
   author: string;
@@ -53,15 +47,6 @@ export default function UploadMangaChapters() {
     genreIds: [],
     cover: null,
   });
-
-  const [chapters, setChapters] = useState<Chapter[]>([
-    {
-      chapterNumber: 1,
-      title: "",
-      files: [],
-    },
-  ]);
-
   // ─────────────────────────────
   // Manga Info
   // ─────────────────────────────
@@ -90,78 +75,6 @@ export default function UploadMangaChapters() {
     }));
   };
 
-  // ─────────────────────────────
-  // Chapter Functions
-  // ─────────────────────────────
-  const addNewChapter = () => {
-    setChapters((prev) => [
-      ...prev,
-      {
-        chapterNumber: prev.length + 1,
-        title: "",
-        files: [],
-      },
-    ]);
-  };
-
-  const updateChapterTitle = (chapterNumber: number, title: string) => {
-    setChapters((prev) =>
-      prev.map((chapter) =>
-        chapter.chapterNumber === chapterNumber
-          ? {
-              ...chapter,
-              title,
-            }
-          : chapter,
-      ),
-    );
-  };
-
-  const addFilesToChapter = (chapterNumber: number, newFiles: File[]) => {
-    setChapters((prev) =>
-      prev.map((chapter) =>
-        chapter.chapterNumber === chapterNumber
-          ? {
-              ...chapter,
-              files: [...chapter.files, ...newFiles],
-            }
-          : chapter,
-      ),
-    );
-  };
-
-  const removeFileFromChapter = (chapterNumber: number, fileIndex: number) => {
-    setChapters((prev) =>
-      prev.map((chapter) =>
-        chapter.chapterNumber === chapterNumber
-          ? {
-              ...chapter,
-              files: chapter.files.filter((_, i) => i !== fileIndex),
-            }
-          : chapter,
-      ),
-    );
-  };
-
-  const removeChapter = (chapterNumber: number) => {
-    if (chapters.length === 1) {
-      alert(
-        intl.formatMessage({
-          id: "uploadPage.validation.minChapters",
-        }),
-      );
-      return;
-    }
-
-    const updated = chapters
-      .filter((chapter) => chapter.chapterNumber !== chapterNumber)
-      .map((chapter, index) => ({
-        ...chapter,
-        chapterNumber: index + 1,
-      }));
-
-    setChapters(updated);
-  };
 
   // ─────────────────────────────
   // Submit

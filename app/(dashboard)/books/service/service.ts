@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
 import HttpRequest from "../../../config/auth";
-import { ComicOverview, ComicOverviewGroupByGenre, ComicOverviewResponse, ComicSummary } from "../type/type";
+import { ComicOverviewGroupByGenre, ComicOverviewResponse, ComicSummary } from "../type/type";
 
 /* =========================
    TYPES

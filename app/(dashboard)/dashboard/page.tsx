@@ -30,7 +30,6 @@ export default function Dashboard() {
   const {
     data: readLaterBooksData,
     isLoading: readLaterLoading,
-    isError: readLaterError,
   } = useUserLibraryByType({
     ...params,
     listType: "READ_LATER",

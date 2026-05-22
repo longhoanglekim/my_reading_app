@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
 import { useComicSuggestions } from "./dashboard/queryHooks";
 import { ComicSuggestion } from "./dashboard/type";
-import { set } from "react-hook-form";
 
 export default function UserLayout({
   children,

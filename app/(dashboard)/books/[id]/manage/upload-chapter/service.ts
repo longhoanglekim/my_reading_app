@@ -4,7 +4,6 @@ import {
   CreateChapterResponse,
   UploadPageResponse,
 } from "./type";
-import qs from "qs";
 /**
  * Create a new chapter
  * POST /comics/{comicId}/chapters

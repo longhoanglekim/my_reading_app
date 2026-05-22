@@ -1,4 +1,3 @@
-import { Star, StarHalf } from "lucide-react";
 
 const BookRating = ({ rating }: { rating: number }) => {
   // Logic chọn màu theo khoảng điểm
