@@ -5,20 +5,21 @@ import { useUserStore } from "@/app/store/userStore";
 import { useIntl } from "react-intl";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { 
-  Users, 
-  BookOpen, 
-  Layers, 
-  FileText, 
-  Star, 
-  History, 
-  RefreshCw, 
-  UserCheck, 
+import {
+  Users,
+  BookOpen,
+  Layers,
+  FileText,
+  Star,
+  History,
+  RefreshCw,
+  UserCheck,
   UserX,
   ShieldAlert,
   ChevronRight
 } from "lucide-react";
 import { useNotification } from "@/app/components/providers/NotificationProvider";
+import { AxiosError } from "axios";
 
 export default function AdminOverview() {
   const intl = useIntl();
@@ -55,7 +56,7 @@ export default function AdminOverview() {
         });
         refetch();
       },
-      onError: (error: any) => {
+      onError: (error: AxiosError) => {
         showNotification({
           type: "error",
           title: "Reindex thất bại",
@@ -92,8 +93,8 @@ export default function AdminOverview() {
     return (
       <div className="text-center py-10 text-red-500 font-medium flex flex-col items-center gap-4">
         <span>Đã xảy ra lỗi khi lấy số liệu thống kê từ hệ thống.</span>
-        <button 
-          onClick={() => refetch()} 
+        <button
+          onClick={() => refetch()}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm text-sm"
         >
           Thử lại
@@ -171,7 +172,7 @@ export default function AdminOverview() {
             Xem số liệu thống kê hệ thống thực tế và thực hiện các tác vụ quản trị.
           </p>
         </div>
-        
+
         {/* REINDEX ACTIONS */}
         <div className="flex items-center gap-3">
           <button

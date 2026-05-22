@@ -11,7 +11,7 @@ import {
   FormEvent,
 } from "react";
 import { useIntl } from "react-intl";
-import { Book, Bubble, SelectionTranslation, ChapterComment } from "./type";
+import { Book, Bubble, BubbleChunk, SelectionTranslation, ChapterComment, ChapterPage } from "./type";
 
 import {
   useChapterComments,
@@ -67,9 +67,9 @@ export default function ComicChapterPage() {
       );
     }
 
-    const responseAsAny = chapterPagesResponse as any;
-    if (responseAsAny.data && Array.isArray(responseAsAny.data)) {
-      return [...responseAsAny.data].sort(
+    const responseAsObj = chapterPagesResponse as { data?: ChapterPage[] };
+    if (responseAsObj.data && Array.isArray(responseAsObj.data)) {
+      return [...responseAsObj.data].sort(
         (a, b) => a.pageNumber - b.pageNumber,
       );
     }
@@ -116,7 +116,10 @@ export default function ComicChapterPage() {
 
   const currentBubbles: Bubble[] = pageDetail?.bubbles || [];
 
-  const isJapanese = true;
+  const isJapanese = useMemo(() => {
+    const lang = comicDetailData?.originalLanguage?.toLowerCase() || "";
+    return lang === "japanese" || lang === "ja" || lang === "jp";
+  }, [comicDetailData]);
 
   // Comments
   const { data: commentsData, isLoading: commentsLoading } =
@@ -177,11 +180,11 @@ export default function ComicChapterPage() {
         if (!selectedText) return;
 
         let bestBubble: Bubble | null = null;
-        let bestChunks: any[] = [];
+        let bestChunks: BubbleChunk[] = [];
 
         for (const bubble of currentBubbles) {
           const matched = bubble.chunks.filter(
-            (chunk: any) =>
+            (chunk: BubbleChunk) =>
               selectedText.includes(chunk.word) ||
               chunk.word.includes(selectedText),
           );
@@ -196,7 +199,7 @@ export default function ComicChapterPage() {
             bestChunks.length > 0
               ? bestChunks
                 .map(
-                  (c: any) =>
+                  (c: BubbleChunk) =>
                     `${c.word} (${c.romaji}): ${c.meaning || c.type}`,
                 )
                 .join("\n")
@@ -343,7 +346,7 @@ export default function ComicChapterPage() {
                         }
                     }
                   >
-                    {bubble.chunks.map((chunk: any, idx: number) => {
+                    {bubble.chunks.map((chunk: BubbleChunk, idx: number) => {
                       const isActive =
                         (hoveredWord?.bubbleId === bubble.id &&
                           hoveredWord?.chunkIndex === idx) ||
@@ -540,7 +543,7 @@ export default function ComicChapterPage() {
               <div>
                 <p className="text-sm text-gray-500 mb-3">{intl.formatMessage({ id: "popups.dialogueInfo.vocabAnalysis" })}</p>
                 <div className="space-y-5">
-                  {selectedBubble.chunks.map((chunk: any, idx: number) => (
+                  {selectedBubble.chunks.map((chunk: BubbleChunk, idx: number) => (
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex items-baseline gap-3">
                         <span className="font-bold text-xl">{chunk.word}</span>

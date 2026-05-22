@@ -30,6 +30,7 @@ export interface ComicOverview {
     description: string;
     totalRatings : number;
     averageRating: number;
+    libraryType?: string;
     chapters: ChapterSummary[];
 }
 export interface ComicOverviewResponse {

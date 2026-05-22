@@ -9,7 +9,12 @@ import en from "@/app/langs/en.json";
 import vi from "@/app/langs/vi.json";
 import { NotificationProvider } from "./NotificationProvider";
 
-export const LocaleContext = createContext<any>(null);
+export interface LocaleContextType {
+  locale: "en" | "vi";
+  setLocale: (newLocale: "en" | "vi") => void;
+}
+
+export const LocaleContext = createContext<LocaleContextType | null>(null);
 
 interface NestedMessages {
   [key: string]: string | NestedMessages;

@@ -2,6 +2,7 @@
 
 import HttpRequest from "@/app/config/auth";
 import { ComicSuggestion, ComicSummary, UserLibrarySummary } from "./type";
+import { AdminDashboardSummary } from "../admin/user-management/type";
 import {
     BookOpen,
     Users,
@@ -201,7 +202,7 @@ export const getSuggestions = async (
     }
 };
 
-export const getAdminDashboardSummary = async (): Promise<any> => {
+export const getAdminDashboardSummary = async (): Promise<AdminDashboardSummary> => {
     try {
         const res = await HttpRequest.get("/admin/dashboard/summary");
         return res.data.data;

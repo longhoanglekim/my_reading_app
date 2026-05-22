@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
 import {
@@ -17,7 +17,7 @@ export default function BookDetailPage() {
   const routeBookId = Array.isArray(params.id) ? params.id[0] : params.id;
   const bookId = routeBookId ? Number(routeBookId) : undefined;
   const hasValidBookId =
-    typeof bookId === "number" && !Number.isNaN(bookId) && bookId > 0; 
+    typeof bookId === "number" && !Number.isNaN(bookId) && bookId > 0;
 
   const router = useRouter();
   const intl = useIntl();
@@ -41,6 +41,15 @@ export default function BookDetailPage() {
   const { data: historyData } = useReadingHistoryQuery(
     hasValidBookId ? bookId : undefined,
   );
+
+  useEffect(() => {
+    const serverLibraryType = data?.bookOverviewData?.libraryType;
+    if (serverLibraryType) {
+      setLibraryType(serverLibraryType);
+    } else {
+      setLibraryType("");
+    }
+  }, [data]);
 
   if (!hasValidBookId || isLoading) {
     return (
@@ -157,7 +166,7 @@ export default function BookDetailPage() {
                   <option value="READ_LATER">⏳ {intl.formatMessage({ id: "library.readLater", defaultMessage: "Đọc sau" })}</option>
                   <option value="READING">📖 {intl.formatMessage({ id: "library.reading", defaultMessage: "Đang đọc" })}</option>
                 </select>
-                
+
                 {libraryType && (
                   <button
                     onClick={() => {
@@ -306,11 +315,11 @@ export default function BookDetailPage() {
               >
                 {isSubmittingReview
                   ? intl.formatMessage({
-                      id: "common.submitting",
-                    })
+                    id: "common.submitting",
+                  })
                   : intl.formatMessage({
-                      id: "dashboard.book.submitReview",
-                    })}
+                    id: "dashboard.book.submitReview",
+                  })}
               </button>
             </div>
           </div>

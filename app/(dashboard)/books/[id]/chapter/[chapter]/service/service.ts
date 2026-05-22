@@ -75,7 +75,7 @@ export const getChapterPages = async (
   chapterId: number
 ): Promise<ChapterPage[]> => {
   try {
-    const res = await HttpRequest.get<any>(
+    const res = await HttpRequest.get<ChapterPage[] | { data: ChapterPage[] }>(
       `/chapters/${chapterId}/pages`
     );
 

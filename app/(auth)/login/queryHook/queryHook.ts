@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { getOAuthProviders, login } from '../service/service'
 import { useNotification } from '@/app/components/providers/NotificationProvider'
 import { useUserStore } from '@/app/store/userStore'
+import { AxiosError } from 'axios'
 
 type LoginResponse = {
     token: string
@@ -27,16 +28,16 @@ export const useLogin = () => {
         onSuccess: (data: LoginResponse) => {
             // Lưu token
             console.log("Login successful, received data:", data);
-            userStore.setTokens(data.token, "") 
+            userStore.setTokens(data.token, "")
             // Lưu thông tin user vào store
             userStore.setUser({
-                id: data.user.id.toString(),          
-                fullname: data.user.fullName,        
+                id: data.user.id.toString(),
+                fullname: data.user.fullName,
                 email: data.user.email,
-                avatar: "",                           
+                avatar: "",
                 role: data.user.role,
             })
-           
+
 
             showNotification({
                 type: 'success',
@@ -47,7 +48,7 @@ export const useLogin = () => {
             router.push('/dashboard')
         },
 
-        onError: (error: any) => {
+        onError: (error: AxiosError) => {
             showNotification({
                 type: 'error',
                 title: 'Đăng nhập thất bại',

@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import { register, registerOtp, verifyEmailOtp, resendEmailOtp, RegisterResponse, MessageResponse } from '../service/service'
 import { useNotification } from '@/app/components/providers/NotificationProvider'
 import { useUserStore } from '@/app/store/userStore'
+import { AxiosError } from 'axios'
 
 export const useRegister = () => {
     const { showNotification } = useNotification()
@@ -42,11 +43,11 @@ export const useRegister = () => {
             router.push('/dashboard')
         },
 
-        onError: (error: any) => {
+        onError: (error: AxiosError) => {
             showNotification({
                 type: 'error',
                 title: 'Đăng ký thất bại',
-                message: error.response?.data?.message || error.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
+                message: (error.response?.data as any)?.message || error.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.',
             })
         },
     })
@@ -74,11 +75,11 @@ export const useRegisterOtp = () => {
             })
         },
 
-        onError: (error: any) => {
+        onError: (error: AxiosError) => {
             showNotification({
                 type: 'error',
                 title: 'Yêu cầu OTP thất bại',
-                message: error.response?.data?.message || error.message || 'Có lỗi xảy ra khi gửi mã OTP.',
+                message: (error.response?.data as any)?.message || error.message || 'Có lỗi xảy ra khi gửi mã OTP.',
             })
         },
     })
@@ -120,11 +121,11 @@ export const useVerifyEmailOtp = () => {
             router.push('/dashboard')
         },
 
-        onError: (error: any) => {
+        onError: (error: AxiosError) => {
             showNotification({
                 type: 'error',
                 title: 'Xác thực thất bại',
-                message: error.response?.data?.message || error.message || 'Mã OTP không chính xác hoặc đã hết hạn.',
+                message: error.message || 'Mã OTP không chính xác hoặc đã hết hạn.',
             })
         },
     })
@@ -144,11 +145,11 @@ export const useResendEmailOtp = () => {
             })
         },
 
-        onError: (error: any) => {
+        onError: (error: AxiosError) => {
             showNotification({
                 type: 'error',
                 title: 'Gửi lại OTP thất bại',
-                message: error.response?.data?.message || error.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại sau.',
+                message: error.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại sau.',
             })
         },
     })

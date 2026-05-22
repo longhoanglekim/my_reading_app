@@ -62,17 +62,8 @@ export default function EditChapterPage() {
   }, [currentChapter]);
 
   useEffect(() => {
-    if (!fetchedPages) return;
-
-    if (Array.isArray(fetchedPages)) {
+    if (fetchedPages) {
       setPages(fetchedPages);
-    } else {
-      const responseAsAny = fetchedPages as any;
-      if (responseAsAny.data && Array.isArray(responseAsAny.data)) {
-        setPages(responseAsAny.data);
-      } else {
-        setPages([]);
-      }
     }
   }, [fetchedPages]);
 

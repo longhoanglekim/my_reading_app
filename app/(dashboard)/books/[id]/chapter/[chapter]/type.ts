@@ -1,19 +1,19 @@
 
 export type Book = {
-    id: string
-    title: string
-    author: string
-    cover: string
-    description: string
+  id: string
+  title: string
+  author: string
+  cover: string
+  description: string
 }
 
 export type BookChapter = {
-    id: string
-    book_id: string
-    chapterNumber: number
-    title: string
-    total_pages: number
-    hasNextChapter: boolean
+  id: string
+  book_id: string
+  chapterNumber: number
+  title: string
+  total_pages: number
+  hasNextChapter: boolean
 }
 
 
@@ -27,36 +27,36 @@ export interface ChapterPage {
 }
 
 export type ChapterOverview = {
-    id: string
-    chapterNumber: number
-    title: string;
+  id: string
+  chapterNumber: number
+  title: string;
 }
 export type SelectionTranslation = {
-    text: string
-    translation: string
-    chunks: BubbleChunk[]
+  text: string
+  translation: string
+  chunks: BubbleChunk[]
 }
 
 export type ChapterComment = {
-    id: number
-    userId: number
-    fullName: string
-    avatarUrl: string
-    content: string
-    parentId: number | null
-    createdAt: string
-    replies: string[]
+  id: number
+  userId: number
+  fullName: string
+  avatarUrl: string
+  content: string
+  parentId: number | null
+  createdAt: string
+  replies: string[]
 }
 
 export type CommentsResponse = {
-    data: {
-        content: ChapterComment[]
-        pageNo: number
-        pageSize: number
-        totalElements: number
-        totalPages: number
-        last: boolean
-    }
+  data: {
+    content: ChapterComment[]
+    pageNo: number
+    pageSize: number
+    totalElements: number
+    totalPages: number
+    last: boolean
+  }
 }
 export interface PageImages {
   originalUrl: string;
@@ -66,7 +66,7 @@ export interface PageImages {
 export interface BubbleChunk {
   chunk_id: string;
   word: string;
-  romanization: string;
+  romaji: string;
   type: string;
   meaning: string;
 }
