@@ -282,7 +282,7 @@ export default function ComicChapterPage() {
         <div className="relative flex items-center">
           <button
             onClick={() => router.push(`/books/${bookId}`)}
-            className="px-5 py-2 border rounded-lg hover:bg-gray-100 z-10"
+            className="px-5 py-2 border rounded-lg hover:bg-gray-100 z-10 dark:hover:text-black"
           >
             {intl.formatMessage({ id: "dashboard.book.info" })}
           </button>
@@ -357,7 +357,7 @@ export default function ComicChapterPage() {
                         <span
                           key={idx}
                           data-chunk-word
-                          className={`relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${isJapanese ? "inline-block leading-tight" : "inline"
+                          className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors text-sm select-none ${isJapanese ? "inline-block leading-tight" : "inline"
                             }`}
                           onMouseEnter={() => handleChunkHover(bubble.id, idx)}
                           onMouseLeave={handleChunkLeave}
@@ -369,18 +369,18 @@ export default function ComicChapterPage() {
                               className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-50 pointer-events-none border"
                               style={{ writingMode: "horizontal-tb" }}
                             >
-                              <div className="flex items-baseline gap-2 mb-1">
-                                <span className="font-bold text-lg">
+                              <div className="text-black dark:text-black flex items-baseline gap-2 mb-1">
+                                <span className="text-black dark:text-black font-bold text-lg">
                                   {chunk.word}
                                 </span>
-                                <span className="text-xs text-gray-500">
+                                <span className="text-black dark:text-black text-xs">
                                   {chunk.romaji}
                                 </span>
                               </div>
-                              <p className="text-sm text-gray-700 mb-2">
+                              <p className="text-black dark:text-black text-sm mb-2">
                                 {chunk.meaning || chunk.type}
                               </p>
-                              <p className="text-[11px] text-gray-400">
+                              <p className="text-black dark:text-black text-[11px]">
                                 {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
                               </p>
                             </div>
@@ -516,10 +516,10 @@ export default function ComicChapterPage() {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl">
             <div className="p-5 border-b flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg">{intl.formatMessage({ id: "popups.dialogueInfo.title" })}</h3>
+              <h3 className="font-bold text-lg text-black dark:text-black">{intl.formatMessage({ id: "popups.dialogueInfo.title" })}</h3>
               <button
                 onClick={() => setSelectedBubble(null)}
-                className="text-3xl text-gray-400 hover:text-gray-600"
+                className="text-3xl text-black dark:text-black hover:text-gray-600"
               >
                 ×
               </button>
@@ -527,32 +527,32 @@ export default function ComicChapterPage() {
 
             <div className="p-6 space-y-6 overflow-auto max-h-[65vh]">
               <div>
-                <p className="text-sm text-gray-500 mb-1">{intl.formatMessage({ id: "popups.dialogueInfo.originalText" })}</p>
-                <p className="font-mono bg-gray-100 p-4 rounded-xl text-lg break-all">
+                <p className="text-sm text-black dark:text-black mb-1">{intl.formatMessage({ id: "popups.dialogueInfo.originalText" })}</p>
+                <p className="font-mono bg-gray-100 p-4 rounded-xl text-lg break-all text-black dark:text-black">
                   {selectedBubble.original_text}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 mb-1">{intl.formatMessage({ id: "popups.dialogueInfo.translatedText" })}</p>
-                <p className="text-lg leading-relaxed bg-blue-50 p-4 rounded-xl">
+                <p className="text-sm text-black dark:text-black mb-1">{intl.formatMessage({ id: "popups.dialogueInfo.translatedText" })}</p>
+                <p className="text-lg leading-relaxed bg-blue-50 p-4 rounded-xl text-black dark:text-black">
                   {selectedBubble.full_translation || intl.formatMessage({ id: "common.updating" })}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 mb-3">{intl.formatMessage({ id: "popups.dialogueInfo.vocabAnalysis" })}</p>
+                <p className="text-sm text-black dark:text-black mb-3">{intl.formatMessage({ id: "popups.dialogueInfo.vocabAnalysis" })}</p>
                 <div className="space-y-5">
                   {selectedBubble.chunks.map((chunk: BubbleChunk, idx: number) => (
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex items-baseline gap-3">
-                        <span className="font-bold text-xl">{chunk.word}</span>
-                        <span className="font-mono text-gray-500">
+                        <span className="font-bold text-black dark:text-black text-xl">{chunk.word}</span>
+                        <span className="font-mono text-black dark:text-black">
                           {chunk.romaji}
                         </span>
                       </div>
-                      <p className="text-gray-700 mt-1">{chunk.meaning}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-black dark:text-black mt-1">{chunk.meaning}</p>
+                      <p className="text-black dark:text-black text-xs">
                         {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
                       </p>
                     </div>
@@ -564,7 +564,7 @@ export default function ComicChapterPage() {
             <div className="p-4 border-t text-center">
               <button
                 onClick={() => setSelectedBubble(null)}
-                className="px-10 py-3 bg-gray-800 text-white rounded-xl hover:bg-black"
+                className="px-10 py-3 bg-gray-800 text-black bg-white rounded-xl hover:text-white hover:bg-black"
               >
                 {intl.formatMessage({ id: "common.close" })}
               </button>
