@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
 import {
@@ -23,15 +23,15 @@ export default function BookDetailPage() {
   const intl = useIntl();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [ratingValue, setRatingValue] = useState(5);
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [libraryType, setLibraryType] = useState<string>("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);  
   const { data, isLoading, isError } = useComicOverviewQuery(
     hasValidBookId ? bookId : undefined,
   );
+  const [selectedLibraryType, setSelectedLibraryType] = useState<string | null>(null);
+  const libraryType = selectedLibraryType !== null ? selectedLibraryType : (data?.bookOverviewData?.libraryType || "");
   const { mutate: makeRating } = useMakeComicRatingMutation(
     hasValidBookId ? bookId : undefined,
   );
-
   const { mutate: upsertLibrary } = useUpsertLibraryMutation(
     hasValidBookId ? bookId : undefined,
   );
@@ -42,14 +42,7 @@ export default function BookDetailPage() {
     hasValidBookId ? bookId : undefined,
   );
 
-  useEffect(() => {
-    const serverLibraryType = data?.bookOverviewData?.libraryType;
-    if (serverLibraryType) {
-      setLibraryType(serverLibraryType);
-    } else {
-      setLibraryType("");
-    }
-  }, [data]);
+  // Library status is derived directly from query data to avoid useEffect sync loop.
 
   if (!hasValidBookId || isLoading) {
     return (
@@ -154,9 +147,15 @@ export default function BookDetailPage() {
                   value={libraryType}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setLibraryType(val);
+                    setSelectedLibraryType(val);
                     if (val) {
-                      upsertLibrary({ comicId: bookId, listType: val });
+                      upsertLibrary(
+                        { comicId: bookId, listType: val },
+                        {
+                          onSuccess: () => setSelectedLibraryType(null),
+                          onError: () => setSelectedLibraryType(null),
+                        }
+                      );
                     }
                   }}
                   className="bg-transparent px-3 py-2 text-sm font-medium outline-none text-gray-700 dark:text-gray-300 dark:bg-gray-800"
@@ -170,8 +169,11 @@ export default function BookDetailPage() {
                 {libraryType && (
                   <button
                     onClick={() => {
-                      removeFromLibrary(bookId);
-                      setLibraryType("");
+                      removeFromLibrary(bookId, {
+                        onSuccess: () => setSelectedLibraryType(null),
+                        onError: () => setSelectedLibraryType(null),
+                      });
+                      setSelectedLibraryType("");
                     }}
                     className="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition"
                   >
