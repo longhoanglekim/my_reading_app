@@ -23,6 +23,7 @@ import {
   useChapterPages,
   useComicDetail,
   useSyncReadingHistoryMutation,
+  useComicOverviewQuery,
 } from "./queryHook/queryHook";
 
 const subscribeReaderMode = (callback: () => void) => {
@@ -38,8 +39,11 @@ const subscribeReaderMode = (callback: () => void) => {
 const getReaderModeSnapshot = () => {
   if (typeof window === "undefined") return "manga-pagination";
   const saved = localStorage.getItem("reader_mode");
-  if (saved === "webtoon" || saved === "manga-pagination" || saved === "manga-flip") {
-    return saved as "webtoon" | "manga-pagination" | "manga-flip";
+  if (saved === "webtoon" || saved === "manga-pagination") {
+    return saved as "webtoon" | "manga-pagination";
+  }
+  if (saved === "manga-flip") {
+    return "manga-pagination";
   }
   return "manga-pagination";
 };
@@ -66,6 +70,10 @@ export default function ComicChapterPage() {
   const {
     data: comicDetailData,
   } = useComicDetail(bookId ? parseInt(bookId) : undefined);
+
+  const { data: comicOverviewData } = useComicOverviewQuery(
+    bookId ? parseInt(bookId, 10) : undefined
+  );
 
   const { data: chapterOverviewData, isLoading: chapterOverviewLoading } =
     useChapterOverview(bookId, chapterNumber);
@@ -117,7 +125,7 @@ export default function ComicChapterPage() {
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const handleSetReaderMode = (mode: "webtoon" | "manga-pagination" | "manga-flip") => {
+  const handleSetReaderMode = (mode: "webtoon" | "manga-pagination") => {
     localStorage.setItem("reader_mode", mode);
     window.dispatchEvent(new Event("reader-mode-change"));
   };
@@ -134,6 +142,102 @@ export default function ComicChapterPage() {
   const [textSelection, setTextSelection] =
     useState<SelectionTranslation | null>(null);
   const [commentText, setCommentText] = useState("");
+
+  // ------------ DANH SÁCH CHAPTERS ĐỂ NAVIGATION ====================
+  const chapterList = useMemo(() => {
+    if (!comicOverviewData?.bookOverviewData?.chapters) return [];
+    return [...comicOverviewData.bookOverviewData.chapters].sort(
+      (a, b) => a.chapterNumber - b.chapterNumber
+    );
+  }, [comicOverviewData]);
+
+  const currentChapterIndex = useMemo(() => {
+    if (isNaN(chapterNumber) || chapterList.length === 0) return -1;
+    return chapterList.findIndex((ch) => ch.chapterNumber === chapterNumber);
+  }, [chapterList, chapterNumber]);
+
+  const prevChapter = useMemo(() => {
+    if (currentChapterIndex > 0) {
+      return chapterList[currentChapterIndex - 1];
+    }
+    return null;
+  }, [chapterList, currentChapterIndex]);
+
+  const nextChapter = useMemo(() => {
+    if (currentChapterIndex !== -1 && currentChapterIndex < chapterList.length - 1) {
+      return chapterList[currentChapterIndex + 1];
+    }
+    return null;
+  }, [chapterList, currentChapterIndex]);
+
+  const handlePrevChapter = () => {
+    if (prevChapter) {
+      router.push(`/books/${bookId}/chapter/${prevChapter.chapterNumber}`);
+    }
+  };
+
+  const handleNextChapter = () => {
+    if (nextChapter) {
+      router.push(`/books/${bookId}/chapter/${nextChapter.chapterNumber}`);
+    }
+  };
+
+  // ==================== AUTO-HIDE FOOTER ====================
+  const [footerVisible, setFooterVisible] = useState(true);
+  const footerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetFooterTimeout = useCallback(() => {
+    setFooterVisible(true);
+    if (footerTimeoutRef.current) {
+      clearTimeout(footerTimeoutRef.current);
+    }
+    footerTimeoutRef.current = setTimeout(() => {
+      setFooterVisible(false);
+    }, 3000);
+  }, []);
+
+  useEffect(() => {
+    if (readerMode === "webtoon") {
+      setFooterVisible(false);
+      return;
+    }
+
+    resetFooterTimeout();
+
+    const handleActivity = () => {
+      resetFooterTimeout();
+    };
+
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("scroll", handleActivity);
+    window.addEventListener("touchstart", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+
+    return () => {
+      if (footerTimeoutRef.current) {
+        clearTimeout(footerTimeoutRef.current);
+      }
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("scroll", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+    };
+  }, [readerMode, resetFooterTimeout]);
+
+  // Hide scrollbar on html/body in horizontal mode
+  useEffect(() => {
+    if (readerMode === "manga-pagination") {
+      document.documentElement.classList.add("scrollbar-none");
+      document.body.classList.add("scrollbar-none");
+    } else {
+      document.documentElement.classList.remove("scrollbar-none");
+      document.body.classList.remove("scrollbar-none");
+    }
+    return () => {
+      document.documentElement.classList.remove("scrollbar-none");
+      document.body.classList.remove("scrollbar-none");
+    };
+  }, [readerMode]);
 
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flipContainerRef = useRef<HTMLDivElement>(null);
@@ -266,7 +370,7 @@ export default function ComicChapterPage() {
   const handlePrevPage = () => {
     if (currentPage > 1) {
       const nextP = currentPage - 1;
-      if (readerMode === "webtoon" || readerMode === "manga-flip") {
+      if (readerMode === "webtoon") {
         scrollToPage(nextP);
       } else {
         setCurrentPage(nextP);
@@ -277,7 +381,7 @@ export default function ComicChapterPage() {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       const nextP = currentPage + 1;
-      if (readerMode === "webtoon" || readerMode === "manga-flip") {
+      if (readerMode === "webtoon") {
         scrollToPage(nextP);
       } else {
         setCurrentPage(nextP);
@@ -288,9 +392,16 @@ export default function ComicChapterPage() {
   // Scroll to active page when readerMode changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-page-index="${currentPageRef.current - 1}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior: "instant", block: "start" });
+      if (readerMode === "webtoon") {
+        const el = document.querySelector(`[data-page-index="${currentPageRef.current - 1}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: "instant", block: "start" });
+        }
+      } else {
+        const container = flipContainerRef.current;
+        if (container) {
+          container.scrollLeft = (currentPageRef.current - 1) * container.clientWidth;
+        }
       }
     }, 50);
     return () => clearTimeout(timer);
@@ -332,6 +443,7 @@ export default function ComicChapterPage() {
 
   // Manga Flip scroll snap observer
   const handleFlipScroll = () => {
+    resetFooterTimeout();
     const container = flipContainerRef.current;
     if (!container) return;
     const index = Math.round(container.scrollLeft / container.clientWidth);
@@ -343,7 +455,7 @@ export default function ComicChapterPage() {
 
   // Horizontal scroll alignment when currentPage changes externally
   useEffect(() => {
-    if (readerMode !== "manga-flip") return;
+    if (readerMode !== "manga-pagination") return;
     const container = flipContainerRef.current;
     if (!container) return;
     const expectedScrollLeft = (currentPage - 1) * container.clientWidth;
@@ -433,7 +545,7 @@ export default function ComicChapterPage() {
                 );
               })}
             </div>
-          ) : readerMode === "manga-flip" ? (
+          ) : (
             <div
               ref={flipContainerRef}
               className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth w-full max-w-[820px] mx-auto scrollbar-none"
@@ -463,29 +575,37 @@ export default function ComicChapterPage() {
                 );
               })}
             </div>
-          ) : (
-            pages.length > 0 && (
-              <div data-page-index={currentPage - 1} className="w-full">
-                <ReaderPage
-                  page={pages[currentPage - 1]}
-                  pageDetail={pageQueries[currentPage - 1]?.data}
-                  isLoading={pageQueries[currentPage - 1]?.isLoading}
-                  isJapanese={isJapanese}
-                  activeWord={activeWord}
-                  setActiveWord={setActiveWord}
-                  hoveredWord={hoveredWord}
-                  setHoveredWord={setHoveredWord}
-                  setSelectedBubble={setSelectedBubble}
-                  intl={intl}
-                />
-              </div>
-            )
           )}
         </div>
       </div>
 
+      {/* CHAPTER NAVIGATION */}
+      <div className="w-full max-w-5xl mx-auto px-4 mb-6 flex justify-center gap-4">
+        <button
+          onClick={handlePrevChapter}
+          disabled={!prevChapter}
+          className="px-6 py-3 border border-gray-200 dark:border-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:hover:bg-transparent text-sm font-semibold transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          {intl.formatMessage({ id: "chapterPage.prevChapter" })}
+        </button>
+
+        <button
+          onClick={handleNextChapter}
+          disabled={!nextChapter}
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:hover:bg-blue-600 text-white rounded-2xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+        >
+          {intl.formatMessage({ id: "chapterPage.nextChapter" })}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+
       {/* COMMENTS */}
-      <div className="w-full max-w-5xl mx-auto px-4 pb-8">
+      <div className={`w-full max-w-5xl mx-auto px-4 ${readerMode === "webtoon" ? "pb-8" : "pb-32"}`}>
         <div className="bg-white rounded-3xl border shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
@@ -575,29 +695,51 @@ export default function ComicChapterPage() {
       </div>
 
       {/* FOOTER */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:border-gray-800 shadow-lg dark:bg-gray-900 z-45">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
-          >
-            {intl.formatMessage({ id: "common.prev" })}
-          </button>
+      {readerMode !== "webtoon" && (
+        <footer className={`fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md dark:bg-gray-900/70 border-t border-gray-200/50 dark:border-gray-800/50 shadow-lg z-45 transition-all duration-300 ${footerVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
+          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
+            >
+              {intl.formatMessage({ id: "common.prev" })}
+            </button>
 
-          <span className="font-medium text-lg">
-            {currentPage} / {totalPages || "?"}
-          </span>
+            <div className="flex-1 max-w-md mx-8 flex items-center gap-4">
+              <span className="text-sm font-medium min-w-[3ch] text-right text-gray-600 dark:text-gray-400">
+                {currentPage}
+              </span>
+              <input
+                type="range"
+                min={1}
+                max={totalPages || 1}
+                value={currentPage}
+                onChange={(e) => {
+                  const pageNum = Number(e.target.value);
+                  if (readerMode === "webtoon") {
+                    scrollToPage(pageNum);
+                  } else {
+                    setCurrentPage(pageNum);
+                  }
+                }}
+                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none hover:accent-blue-500 transition-all"
+              />
+              <span className="text-sm font-medium min-w-[3ch] text-gray-600 dark:text-gray-400">
+                {totalPages || "?"}
+              </span>
+            </div>
 
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
-          >
-            {intl.formatMessage({ id: "common.next" })}
-          </button>
-        </div>
-      </footer>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 rounded-lg font-medium transition-colors"
+            >
+              {intl.formatMessage({ id: "common.next" })}
+            </button>
+          </div>
+        </footer>
+      )}
 
       {/* POPUP CHI TIẾT BUBBLE */}
       {selectedBubble && (
@@ -689,8 +831,7 @@ export default function ComicChapterPage() {
                   {(
                     [
                       { mode: "webtoon", labelId: "readerSettings.webtoon" },
-                      { mode: "manga-pagination", labelId: "readerSettings.mangaPagination" },
-                      { mode: "manga-flip", labelId: "readerSettings.mangaFlip" },
+                      { mode: "manga-pagination", labelId: "readerSettings.manga" },
                     ] as const
                   ).map((opt) => (
                     <button

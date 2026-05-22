@@ -184,7 +184,9 @@
     "commentReplies": "{count} replies",
     "selectedTextTitle": "Selected text",
     "editComic": "Edit Comic",
-    "noImageFound": "Page image not found"
+    "noImageFound": "Page image not found",
+    "prevChapter": "Previous Chapter",
+    "nextChapter": "Next Chapter"
   },
   "popups": {
     "deleteChapter": {
@@ -339,6 +341,7 @@
     "layoutMode": "Layout Mode",
     "webtoon": "Webtoon (Continuous Vertical)",
     "mangaPagination": "Manga (Pagination)",
-    "mangaFlip": "Manga (Horizontal Flip)"
+    "mangaFlip": "Manga (Horizontal Flip)",
+    "manga": "Manga (Horizontal Pagination)"
   }
 }

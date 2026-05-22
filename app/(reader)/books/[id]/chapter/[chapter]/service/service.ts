@@ -1,5 +1,5 @@
 import HttpRequest from "../../../../../../config/auth";
-import { CommentsResponse, ChapterComment, ChapterOverview, PageDetailResponse, ChapterPage, ComicDetail, ComicDetailResponse } from '../type'
+import { CommentsResponse, ChapterComment, ChapterOverview, PageDetailResponse, ChapterPage, ComicDetail, ComicDetailResponse, ComicOverviewResponse } from '../type'
 export const getChapterOverview = async (comicId : string, chapterNumber: number) : Promise<ChapterOverview> => {
     try {
         const res = await HttpRequest.get(`/comics/${comicId}/chapter/${chapterNumber}`);
@@ -110,4 +110,13 @@ export const syncReadingHistory = async (
     console.log(error);
     throw error;
   }
+};
+
+export const getComicOverview = async (
+  comicId: number
+): Promise<ComicOverviewResponse> => {
+  const res = await HttpRequest.get<ComicOverviewResponse>(
+    `/comics/${comicId}/book-overview`
+  );
+  return res.data;
 };

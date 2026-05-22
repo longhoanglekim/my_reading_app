@@ -184,7 +184,9 @@
     "commentReplies": "{count} phản hồi",
     "selectedTextTitle": "Đã chọn nội dung",
     "editComic": "Chỉnh sửa truyện",
-    "noImageFound": "Không tìm thấy hình ảnh trang"
+    "noImageFound": "Không tìm thấy hình ảnh trang",
+    "prevChapter": "Chương trước",
+    "nextChapter": "Chương sau"
   },
   "popups": {
     "deleteChapter": {
@@ -339,6 +341,7 @@
     "layoutMode": "Chế độ đọc",
     "webtoon": "Webtoon (Cuộn dọc)",
     "mangaPagination": "Manga (Phân trang)",
-    "mangaFlip": "Manga (Cuộn ngang)"
+    "mangaFlip": "Manga (Cuộn ngang)",
+    "manga": "Manga (Cuộn ngang & Phân trang)"
   }
 }

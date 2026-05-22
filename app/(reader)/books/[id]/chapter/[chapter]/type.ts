@@ -106,3 +106,27 @@ export interface ComicDetail {
 export interface ComicDetailResponse {
   data: ComicDetail;
 }
+
+export interface ChapterSummary {
+  id: number;
+  chapterNumber: number;
+  title: string;
+  createdAt: string;
+}
+
+export interface ComicOverview {
+  id: number;
+  title: string;
+  author: string;
+  coverImageUrl: string;
+  description: string;
+  totalRatings: number;
+  averageRating: number;
+  libraryType?: string;
+  chapters: ChapterSummary[];
+}
+
+export interface ComicOverviewResponse {
+  bookOverviewData: ComicOverview;
+  message: string;
+}
