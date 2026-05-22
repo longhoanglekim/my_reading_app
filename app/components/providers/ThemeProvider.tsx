@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@teispace/next-themes";
 import { IntlProvider } from "react-intl";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createContext, useState, useEffect, useMemo } from "react";
