@@ -8,3 +8,12 @@
 @tailwind utilities;
 
 /* Nếu dùng Tailwind v4 với @theme hoặc custom colors, thêm ở đây */
+
+/* Hide scrollbar utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

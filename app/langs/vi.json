@@ -333,5 +333,12 @@
     "manageComicsTitle": "Quản lý truyện & chương",
     "manageComicsDesc": "Thêm truyện mới, đăng chương, sửa xóa.",
     "footerNote": "Mọi hành động quản trị hệ thống sẽ được ghi lại trong nhật ký bảo mật."
+  },
+  "readerSettings": {
+    "title": "Cài đặt trình đọc",
+    "layoutMode": "Chế độ đọc",
+    "webtoon": "Webtoon (Cuộn dọc)",
+    "mangaPagination": "Manga (Phân trang)",
+    "mangaFlip": "Manga (Cuộn ngang)"
   }
 }

@@ -333,5 +333,12 @@
     "manageComicsTitle": "Manage Books & Chapters",
     "manageComicsDesc": "Add new books, publish chapters, edit or delete.",
     "footerNote": "All system administration actions will be logged in the security logs."
+  },
+  "readerSettings": {
+    "title": "Reader Settings",
+    "layoutMode": "Layout Mode",
+    "webtoon": "Webtoon (Continuous Vertical)",
+    "mangaPagination": "Manga (Pagination)",
+    "mangaFlip": "Manga (Horizontal Flip)"
   }
 }
