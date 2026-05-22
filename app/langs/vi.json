@@ -223,6 +223,8 @@
     "totalPagesCount": "{count} trang",
     "editPages": "Chỉnh sửa trang",
     "deleteButton": "Xóa",
+    "deleteComicButton": "Xóa truyện",
+    "deleteComicConfirm": "Bạn có chắc chắn muốn xóa truyện này không? Tất cả các chương và trang liên quan cũng sẽ bị xóa vĩnh viễn.",
     "noChapters": "Chưa có chương nào"
   },
   "editChapter": {

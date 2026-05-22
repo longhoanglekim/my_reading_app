@@ -1,15 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BookOpen, Users, Calendar, Settings } from "lucide-react";
 import { useUserLibraryByType } from "./queryHooks";
 import { GetBookSummaryListParams } from "./service";
 import { useIntl } from "react-intl";
+import { useUserStore } from "@/app/store/userStore";
 
 export default function Dashboard() {
   const params = { page: 0, size: 3 } as GetBookSummaryListParams;
   const router = useRouter();
   const intl = useIntl();
+  const user = useUserStore().user;
   const {
     data: recentBooksData,
     isLoading: recentLoading,
@@ -42,44 +43,6 @@ export default function Dashboard() {
   if (recentError || favoriteError) {
     return <div className="text-center py-10">{intl.formatMessage({ id: "common.error" })}</div>;
   }
-  // Dữ liệu giả lập stats
-  const stats = [
-    {
-      title: intl.formatMessage({ id: "dashboard.stats.read" }),
-      value: "1,234",
-      change: "+12.5%",
-      icon: BookOpen,
-      color:
-        "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300",
-      hover: "hover:bg-amber-200 dark:hover:bg-amber-900/50",
-    },
-    {
-      title: intl.formatMessage({ id: "dashboard.stats.activeUsers" }),
-      value: "567",
-      change: "+8.3%",
-      icon: Users,
-      color: "bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300",
-      hover: "hover:bg-blue-200 dark:hover:bg-blue-900/50",
-    },
-    {
-      title: intl.formatMessage({ id: "dashboard.stats.upcomingEvents" }),
-      value: "12",
-      change: "+4.2%",
-      icon: Calendar,
-      color:
-        "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300",
-      hover: "hover:bg-green-200 dark:hover:bg-green-900/50",
-    },
-    {
-      title: intl.formatMessage({ id: "dashboard.stats.pendingSettings" }),
-      value: "5",
-      change: "0%",
-      icon: Settings,
-      color:
-        "bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300",
-      hover: "hover:bg-purple-200 dark:hover:bg-purple-900/50",
-    },
-  ];
   const titleMap: Record<string, string> = {
     recent: intl.formatMessage({ id: "dashboard.recentBooks" }),
     favorite: intl.formatMessage({ id: "dashboard.favoriteBooks" }),
@@ -98,28 +61,6 @@ export default function Dashboard() {
     <div className="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-0 py-8">
-        {/* Stats grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className={`
-                rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-800
-                ${stat.color} ${stat.hover}
-                transition-all duration-200 cursor-pointer
-              `}
-              onClick={() => router.push("/dashboard/stats")} // Ví dụ chuyển trang
-            >
-              <div className="flex items-center justify-between mb-4">
-                <stat.icon className="w-8 h-8 opacity-80" />
-                <span className="text-sm font-medium">{stat.change}</span>
-              </div>
-              <h3 className="text-lg font-semibold mb-1">{stat.title}</h3>
-              <p className="text-3xl font-bold">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Recent books */}
         <section className="mb-10">
           <div className="flex items-center justify-between mb-6">

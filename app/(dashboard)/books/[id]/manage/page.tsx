@@ -1,12 +1,10 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIntl } from "react-intl";
-import { useComicChaptersQuery, useComicOverviewQuery, useUpdateComicMutation, useDeleteChapterMutation } from "./queryHooks";
-import { useDeleteComicMutation, useDeleteChapterPagesMutation } from "./queryHooks";
+import { useComicChaptersQuery, useComicOverviewQuery, useUpdateComicMutation, useDeleteChapterMutation, useDeleteComicMutation } from "./queryHooks";
 
 interface BookChapter {
   id: string;
@@ -36,6 +34,7 @@ export default function EditMangaPage() {
 
   const updateComicMutation = useUpdateComicMutation(Number(comicId));
   const deleteChapterMutation = useDeleteChapterMutation(Number(comicId));
+  const deleteComicMutation = useDeleteComicMutation();
 
   const {
     data: comicData,
@@ -45,8 +44,6 @@ export default function EditMangaPage() {
 
   const {
     data: chapterResponse,
-    isLoading: isChaptersLoading,
-    isError: isChaptersError,
   } = useComicChaptersQuery(Number(comicId));
 
   const isLoading = isOverviewLoading;
@@ -131,6 +128,21 @@ export default function EditMangaPage() {
       await deleteChapterMutation.mutateAsync(Number(chapterId));
     } catch (error) {
       console.error("Failed to delete chapter:", error);
+    }
+  };
+
+  const handleDeleteComic = async () => {
+    const confirmed = confirm(
+      intl.formatMessage({ id: "manageBook.deleteComicConfirm" })
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteComicMutation.mutateAsync(Number(comicId));
+      router.push("/books");
+    } catch (error) {
+      console.error("Failed to delete comic:", error);
     }
   };
 
@@ -287,17 +299,28 @@ export default function EditMangaPage() {
           </div>
         </div>
 
-        {/* SAVE BUTTON */}
+        {/* SAVE & DELETE BUTTONS */}
+        <div className="flex justify-between items-center mt-8 gap-4">
+          <button
+            onClick={handleSaveManga}
+            disabled={isSaving}
+            className="px-10 py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 disabled:opacity-70 transition"
+          >
+            {isSaving
+              ? intl.formatMessage({ id: "manageBook.saving" })
+              : intl.formatMessage({ id: "manageBook.saveButton" })}
+          </button>
 
-        <button
-          onClick={handleSaveManga}
-          disabled={isSaving}
-          className="mt-8 px-10 py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 disabled:opacity-70"
-        >
-          {isSaving
-            ? intl.formatMessage({ id: "manageBook.saving" })
-            : intl.formatMessage({ id: "manageBook.saveButton" })}
-        </button>
+          <button
+            onClick={handleDeleteComic}
+            disabled={deleteComicMutation.isPending}
+            className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl disabled:opacity-70 transition"
+          >
+            {deleteComicMutation.isPending
+              ? intl.formatMessage({ id: "common.loading" })
+              : intl.formatMessage({ id: "manageBook.deleteComicButton" })}
+          </button>
+        </div>
       </div>
 
       {/* ==================== CHAPTER LIST ==================== */}

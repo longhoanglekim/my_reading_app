@@ -290,17 +290,17 @@ export default function BookDetailPage() {
                 type="button"
                 disabled={isSubmittingReview}
                 onClick={() => {
-                  makeRating(ratingValue);
                   setIsSubmittingReview(true);
-                  console.log("Review submitted:", {
-                    bookId,
-                    rating: ratingValue,
+                  makeRating(ratingValue, {
+                    onSuccess: () => {
+                      setIsSubmittingReview(false);
+                      setIsReviewModalOpen(false);
+                      setRatingValue(5);
+                    },
+                    onError: () => {
+                      setIsSubmittingReview(false);
+                    }
                   });
-                  setTimeout(() => {
-                    setIsSubmittingReview(false);
-                    setIsReviewModalOpen(false);
-                    setRatingValue(5);
-                  }, 300);
                 }}
                 className="inline-flex justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >

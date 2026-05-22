@@ -15,10 +15,17 @@ export interface AdminTopComic {
   title: string;
   coverImageUrl: string;
   averageRating: number;
+  totalRatings: number;
 }
 
 export interface AdminDashboardSummary {
-  totalUsers: number;
   totalComics: number;
+  totalChapters: number;
+  totalPages: number;
+  totalUsers: number;
+  activeUsers: number;
+  lockedUsers: number;
+  totalRatings: number;
+  totalReadingHistories: number;
   topComics: AdminTopComic[];
 }

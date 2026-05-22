@@ -43,7 +43,7 @@ HttpRequest.interceptors.response.use(
             const refreshToken = userStorage?.state?.refreshToken;
 
             if (!refreshToken) {
-                localStorage.removeItem("userStorage");
+                localStorage.removeItem("user-storage");
                 return Promise.reject(error);
             }
 
@@ -61,7 +61,7 @@ HttpRequest.interceptors.response.use(
                 userStorage.state.accessToken = newAccessToken;
 
                 localStorage.setItem(
-                    "userStorage",
+                    "user-storage",
                     JSON.stringify(userStorage)
                 );
 
@@ -70,7 +70,7 @@ HttpRequest.interceptors.response.use(
 
                 return HttpRequest(originalRequest);
             } catch (refreshError) {
-                localStorage.removeItem("userStorage");
+                localStorage.removeItem("user-storage");
                 return Promise.reject(refreshError);
             }
         }

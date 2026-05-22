@@ -223,6 +223,8 @@
     "totalPagesCount": "{count} pages",
     "editPages": "Edit Pages",
     "deleteButton": "Delete",
+    "deleteComicButton": "Delete Comic",
+    "deleteComicConfirm": "Are you sure you want to delete this comic? All related chapters and pages will also be permanently deleted.",
     "noChapters": "No chapters yet"
   },
   "editChapter": {

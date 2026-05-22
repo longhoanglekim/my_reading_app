@@ -15,7 +15,7 @@ export default function Topbar() {
   const user = userStore.user;
   const [isOpen, setIsOpen] = useState(false);
   const logout = () => {
-    userStore.logout();
+    router.push("/logout");
   }
   const intl = useIntl();
   const router = useRouter();
