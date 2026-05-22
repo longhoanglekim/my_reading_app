@@ -1,6 +1,6 @@
 // hooks/queries/useComicQueries.ts
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
     getBookSummaryList,
@@ -138,61 +138,71 @@ export const useGetBookOverviewGroupByGenreQuery = () => {
 
 export const useUpsertLibraryMutation = (comicId?: number) => {
     const { showNotification } = useNotification();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationKey: ["upsert-library", comicId],
         mutationFn: async ({ comicId, listType }: { comicId: number; listType: string }) => {
-            try {
-                const response = await upsertLibrary(comicId, listType);
-                showNotification({
-                    type: 'success',
-                    title: 'Cập nhật tủ sách thành công',
-                    message: 'Truyện đã được lưu vào tủ sách.',
-                });
-                return response;
-            } catch (error: unknown) {
-                const message =
-                    error instanceof Error
-                        ? error.message
-                        : 'Cập nhật tủ sách thất bại. Vui lòng thử lại.';
-                showNotification({
-                    type: 'error',
-                    title: 'Cập nhật tủ sách thất bại',
-                    message,
-                });
-                throw error;
-            }
+            const response = await upsertLibrary(comicId, listType);
+            return response;
         },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["userLibraryByType"] });
+            queryClient.invalidateQueries({ queryKey: ["comic-overview", comicId] });
+            queryClient.invalidateQueries({ queryKey: ["recentBooks"] });
+            queryClient.invalidateQueries({ queryKey: ["favoriteBooks"] });
+            showNotification({
+                type: 'success',
+                title: 'Cập nhật tủ sách thành công',
+                message: 'Truyện đã được lưu vào tủ sách.',
+            });
+        },
+        onError: (error: unknown) => {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Cập nhật tủ sách thất bại. Vui lòng thử lại.';
+            showNotification({
+                type: 'error',
+                title: 'Cập nhật tủ sách thất bại',
+                message,
+            });
+        }
     });
 };
 
 export const useRemoveFromLibraryMutation = (comicId?: number) => {
     const { showNotification } = useNotification();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationKey: ["remove-from-library", comicId],
         mutationFn: async (id: number) => {
-            try {
-                const response = await removeFromLibrary(id);
-                showNotification({
-                    type: 'success',
-                    title: 'Xóa khỏi tủ sách thành công',
-                    message: 'Truyện đã được xóa khỏi tủ sách.',
-                });
-                return response;
-            } catch (error: unknown) {
-                const message =
-                    error instanceof Error
-                        ? error.message
-                        : 'Xóa khỏi tủ sách thất bại. Vui lòng thử lại.';
-                showNotification({
-                    type: 'error',
-                    title: 'Xóa khỏi tủ sách thất bại',
-                    message,
-                });
-                throw error;
-            }
+            const response = await removeFromLibrary(id);
+            return response;
         },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["userLibraryByType"] });
+            queryClient.invalidateQueries({ queryKey: ["comic-overview", comicId] });
+            queryClient.invalidateQueries({ queryKey: ["recentBooks"] });
+            queryClient.invalidateQueries({ queryKey: ["favoriteBooks"] });
+            showNotification({
+                type: 'success',
+                title: 'Xóa khỏi tủ sách thành công',
+                message: 'Truyện đã được xóa khỏi tủ sách.',
+            });
+        },
+        onError: (error: unknown) => {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Xóa khỏi tủ sách thất bại. Vui lòng thử lại.';
+            showNotification({
+                type: 'error',
+                title: 'Xóa khỏi tủ sách thất bại',
+                message,
+            });
+        }
     });
 };
 

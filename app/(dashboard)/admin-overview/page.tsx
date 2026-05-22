@@ -227,7 +227,7 @@ export default function AdminOverview() {
               {intl.formatMessage({ id: "adminOverview.topRatedComics" })}
             </h2>
             <button
-              onClick={() => router.push("/admin-books")}
+              onClick={() => router.push("/books")}
               className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
             >
               {intl.formatMessage({ id: "adminOverview.manageComics" })}
@@ -286,7 +286,7 @@ export default function AdminOverview() {
               </button>
 
               <button
-                onClick={() => router.push("/admin-books")}
+                onClick={() => router.push("/books")}
                 className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/15 hover:border-purple-200 dark:hover:border-purple-900/30 text-left transition duration-200"
               >
                 <div>

@@ -94,6 +94,13 @@ export const useDeleteComicMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comics"] });
+      queryClient.invalidateQueries({ queryKey: ["book-summary-list"] });
+      queryClient.invalidateQueries({ queryKey: ["userLibraryByType"] });
+      queryClient.invalidateQueries({ queryKey: ["comic-overview-by-genre"] });
+      queryClient.invalidateQueries({ queryKey: ["booksByQuery"] });
+      queryClient.invalidateQueries({ queryKey: ["recentBooks"] });
+      queryClient.invalidateQueries({ queryKey: ["favoriteBooks"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardSummary"] });
       showNotification({
         type: "success",
         title: "Xóa truyện thành công",
@@ -178,7 +185,15 @@ export const useUpdateComicMutation = (comicId: number) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comic-overview-info", comicId] });
+      queryClient.invalidateQueries({ queryKey: ["comic-overview", comicId] });
       queryClient.invalidateQueries({ queryKey: ["comics"] });
+      queryClient.invalidateQueries({ queryKey: ["book-summary-list"] });
+      queryClient.invalidateQueries({ queryKey: ["userLibraryByType"] });
+      queryClient.invalidateQueries({ queryKey: ["comic-overview-by-genre"] });
+      queryClient.invalidateQueries({ queryKey: ["booksByQuery"] });
+      queryClient.invalidateQueries({ queryKey: ["recentBooks"] });
+      queryClient.invalidateQueries({ queryKey: ["favoriteBooks"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardSummary"] });
       showNotification({
         type: "success",
         title: "Cập nhật thành công",
