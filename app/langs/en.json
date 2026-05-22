@@ -294,5 +294,44 @@
   "themeToggle": {
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode"
+  },
+  "adminOverview": {
+    "notification": {
+      "accessDeniedTitle": "Access Denied",
+      "accessDeniedMessage": "You do not have permission to access the admin page.",
+      "reindexSuccessTitle": "Reindex Successful",
+      "reindexSuccessMessage": "Successfully reindexed all books into Elasticsearch.",
+      "reindexErrorTitle": "Reindex Failed",
+      "reindexErrorMessage": "An error occurred while reindexing."
+    },
+    "loadingUser": "Loading user information...",
+    "noAccessTitle": "Access Denied",
+    "noAccessDesc": "This page is for Administrators only.",
+    "loadingStats": "Loading statistics data...",
+    "errorFetchStats": "An error occurred while fetching system statistics.",
+    "retry": "Try Again",
+    "title": "Admin Overview",
+    "subtitle": "View system real-time statistics and perform administrative tasks.",
+    "reindexing": "Reindexing...",
+    "reindexButton": "Reindex Elasticsearch",
+    "stats": {
+      "totalComics": "Total Books",
+      "totalChapters": "Total Chapters",
+      "totalPages": "Total Pages",
+      "totalHistories": "Total Reading Histories",
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "lockedUsers": "Locked Users",
+      "totalRatings": "Total Ratings"
+    },
+    "topRatedComics": "Top Rated Books",
+    "manageComics": "Manage Books",
+    "noTopComics": "No top-rated books data available.",
+    "quickLinks": "Quick Links",
+    "manageUsersTitle": "User Management",
+    "manageUsersDesc": "Lock/unlock accounts, assign Admin roles.",
+    "manageComicsTitle": "Manage Books & Chapters",
+    "manageComicsDesc": "Add new books, publish chapters, edit or delete.",
+    "footerNote": "All system administration actions will be logged in the security logs."
   }
 }

@@ -83,14 +83,6 @@ export default function Sidebar() {
                             href="/books"
                             label={intl.formatMessage({ id: "sidebar.books" })}
                         />
-                        <SidebarItem
-                            href="/dashboard/events"
-                            label={intl.formatMessage({ id: "sidebar.events" })}
-                        />
-                        <SidebarItem
-                            href="/dashboard/settings"
-                            label={intl.formatMessage({ id: "sidebar.settings" })}
-                        />
                     </nav>
                     {user?.role === 'ADMIN' && (
                         <>

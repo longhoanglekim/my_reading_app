@@ -4,7 +4,9 @@ import { useContext } from "react";
 import { LocaleContext } from "@/app/components/providers/ThemeProvider";
 
 export default function LanguageToggle() {
-    const { locale, setLocale } = useContext(LocaleContext);
+    const context = useContext(LocaleContext);
+    if (!context) return null;
+    const { locale, setLocale } = context;
 
     const toggleLanguage = () => {
         setLocale(locale === "vi" ? "en" : "vi");

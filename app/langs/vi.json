@@ -294,5 +294,44 @@
   "themeToggle": {
     "switchToLight": "Chuyển sang chế độ sáng",
     "switchToDark": "Chuyển sang chế độ tối"
+  },
+  "adminOverview": {
+    "notification": {
+      "accessDeniedTitle": "Từ chối truy cập",
+      "accessDeniedMessage": "Bạn không có quyền truy cập trang quản trị.",
+      "reindexSuccessTitle": "Reindex thành công",
+      "reindexSuccessMessage": "Đã lập chỉ mục lại toàn bộ truyện vào Elasticsearch.",
+      "reindexErrorTitle": "Reindex thất bại",
+      "reindexErrorMessage": "Có lỗi xảy ra khi reindex."
+    },
+    "loadingUser": "Đang tải thông tin người dùng...",
+    "noAccessTitle": "Không có quyền truy cập",
+    "noAccessDesc": "Trang này chỉ dành cho Quản trị viên.",
+    "loadingStats": "Đang tải dữ liệu thống kê...",
+    "errorFetchStats": "Đã xảy ra lỗi khi lấy số liệu thống kê từ hệ thống.",
+    "retry": "Thử lại",
+    "title": "Admin Overview",
+    "subtitle": "Xem số liệu thống kê hệ thống thực tế và thực hiện các tác vụ quản trị.",
+    "reindexing": "Đang reindex...",
+    "reindexButton": "Reindex Elasticsearch",
+    "stats": {
+      "totalComics": "Tổng số truyện",
+      "totalChapters": "Tổng số chương",
+      "totalPages": "Tổng số trang truyện",
+      "totalHistories": "Tổng lượt lịch sử đọc",
+      "totalUsers": "Tổng số người dùng",
+      "activeUsers": "Người dùng hoạt động",
+      "lockedUsers": "Người dùng bị khóa",
+      "totalRatings": "Tổng lượt đánh giá"
+    },
+    "topRatedComics": "Truyện có đánh giá cao nhất",
+    "manageComics": "Quản lý truyện",
+    "noTopComics": "Chưa có dữ liệu truyện đánh giá cao.",
+    "quickLinks": "Liên kết nhanh",
+    "manageUsersTitle": "Quản lý người dùng",
+    "manageUsersDesc": "Khóa/Mở tài khoản, phân quyền Admin.",
+    "manageComicsTitle": "Quản lý truyện & chương",
+    "manageComicsDesc": "Thêm truyện mới, đăng chương, sửa xóa.",
+    "footerNote": "Mọi hành động quản trị hệ thống sẽ được ghi lại trong nhật ký bảo mật."
   }
 }

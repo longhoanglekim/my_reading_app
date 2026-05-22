@@ -69,17 +69,13 @@ export default function Topbar() {
                   <p className="text-xs text-gray-500">{intl.formatMessage({ id: "topbar.account" })}</p>
                   <p className="text-sm font-semibold truncate">{user?.email}</p>
                 </div>
-
-                <Link href="/profile" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                  {intl.formatMessage({ id: "topbar.profile" })}
-                </Link>
-
-                <Link href="/settings" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                  {intl.formatMessage({ id: "topbar.settings" })}
-                </Link>
-                <Link href="/publish" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                  {intl.formatMessage({ id: "topbar.publish" })}
-                </Link>
+                {
+                  user?.role === 'ADMIN' && (
+                    <Link href="/publish" className="block px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                      {intl.formatMessage({ id: "topbar.publish" })}
+                    </Link>
+                  )
+                }
                 <hr className="my-1 border-gray-100 dark:border-gray-800" />
 
                 <button

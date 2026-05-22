@@ -462,11 +462,15 @@ export default function ComicChapterPage() {
                   className="rounded-3xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <img
-                      src={comment.avatarUrl || "/default-avatar.png"}
-                      alt={comment.fullName}
-                      className="w-8 h-8 rounded-full"
-                    />
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 ring-2 ring-white dark:ring-gray-900 shadow-sm overflow-hidden">
+                    {comment.avatarUrl ? (
+                      <img src={comment.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                        {comment.fullName?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
                     <div>
                       <p className="font-semibold">{comment.fullName}</p>
                       <p className="text-xs text-gray-500">

@@ -159,7 +159,7 @@ export default function BookDetailPage() {
                       upsertLibrary({ comicId: bookId, listType: val });
                     }
                   }}
-                  className="bg-transparent px-3 py-2 text-sm font-medium outline-none text-gray-700 dark:text-gray-300"
+                  className="bg-transparent px-3 py-2 text-sm font-medium outline-none text-gray-700 dark:text-gray-300 dark:bg-gray-800"
                 >
                   <option value="">✨ {intl.formatMessage({ id: "library.selectStatus", defaultMessage: "Thêm vào tủ sách" })}</option>
                   <option value="FAVORITE">❤️ {intl.formatMessage({ id: "library.favorite", defaultMessage: "Yêu thích" })}</option>
