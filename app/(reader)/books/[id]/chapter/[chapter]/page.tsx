@@ -1026,7 +1026,7 @@ function ReaderPage({
                   }
               }
             >
-              {bubble.chunks.map((chunk: BubbleChunk, idx: number) => {
+              {bubble.chunks && bubble.chunks.map((chunk: BubbleChunk, idx: number) => {
                 const isActive =
                   (hoveredWord?.bubbleId === bubble.id &&
                     hoveredWord?.chunkIndex === idx) ||
