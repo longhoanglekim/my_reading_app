@@ -10,11 +10,13 @@ import {
   useCallback,
   FormEvent,
   useSyncExternalStore,
+  memo,
 } from "react";
 import { useIntl, IntlShape } from "react-intl";
 import { useQueries } from "@tanstack/react-query";
 import { getPageDetail } from "./service/service";
 import { Bubble, BubbleChunk, SelectionTranslation, ChapterComment, ChapterPage, PageDetailResponse } from "./type";
+import { createPortal } from "react-dom";
 
 import {
   useChapterComments,
@@ -125,21 +127,13 @@ export default function ComicChapterPage() {
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const handleSetReaderMode = (mode: "webtoon" | "manga-pagination") => {
+  const handleSetReaderMode = useCallback((mode: "webtoon" | "manga-pagination") => {
     localStorage.setItem("reader_mode", mode);
     window.dispatchEvent(new Event("reader-mode-change"));
     setMenuVisible(true);
-  };
+  }, []);
 
   const [selectedBubble, setSelectedBubble] = useState<Bubble | null>(null);
-  const [hoveredWord, setHoveredWord] = useState<{
-    bubbleId: number;
-    chunkIndex: number;
-  } | null>(null);
-  const [activeWord, setActiveWord] = useState<{
-    bubbleId: number;
-    chunkIndex: number;
-  } | null>(null);
   const [textSelection, setTextSelection] =
     useState<SelectionTranslation | null>(null);
   const [commentText, setCommentText] = useState("");
@@ -171,23 +165,23 @@ export default function ComicChapterPage() {
     return null;
   }, [chapterList, currentChapterIndex]);
 
-  const handlePrevChapter = () => {
+  const handlePrevChapter = useCallback(() => {
     if (prevChapter) {
       router.push(`/books/${bookId}/chapter/${prevChapter.chapterNumber}`);
     }
-  };
+  }, [prevChapter, router, bookId]);
 
-  const handleNextChapter = () => {
+  const handleNextChapter = useCallback(() => {
     if (nextChapter) {
       router.push(`/books/${bookId}/chapter/${nextChapter.chapterNumber}`);
     }
-  };
+  }, [nextChapter, router, bookId]);
 
   // ==================== AUTO-HIDE MENUS ====================
   const [menuVisible, setMenuVisible] = useState(true);
   const menuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resetMenuTimeout = () => {
+  const resetMenuTimeout = useCallback(() => {
     setMenuVisible(true);
     if (menuTimeoutRef.current) {
       clearTimeout(menuTimeoutRef.current);
@@ -195,7 +189,7 @@ export default function ComicChapterPage() {
     menuTimeoutRef.current = setTimeout(() => {
       setMenuVisible(false);
     }, 3000);
-  };
+  }, []);
 
   useEffect(() => {
     // Set the auto-hide timer without calling setState synchronously in the render/commit phase.
@@ -259,7 +253,7 @@ export default function ComicChapterPage() {
       window.removeEventListener("touchstart", handleActivity);
       window.removeEventListener("keydown", handleActivity);
     };
-  }, [readerMode]);
+  }, [readerMode, resetMenuTimeout]);
 
   // Hide scrollbar on html/body in horizontal mode
   useEffect(() => {
@@ -284,7 +278,8 @@ export default function ComicChapterPage() {
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
-  const chapterTitle = chapterOverviewData?.title ?? `Chương ${chapterNumber}`;
+  const chapterTitle = chapterOverviewData?.title ?? 
+    (!isNaN(chapterNumber) ? `${intl.formatMessage({ id: "common.chapterCapital" })} ${chapterNumber}` : "");
 
   const allBubbles = useMemo(() => {
     const list: Bubble[] = [];
@@ -308,27 +303,21 @@ export default function ComicChapterPage() {
   const chapterComments = commentsData?.data?.content || [];
   const { mutate: syncHistory } = useSyncReadingHistoryMutation();
 
-  // ==================== EFFECTS & HANDLERS (giữ nguyên) ====================
+  // ==================== EFFECTS & HANDLERS ====================
   useEffect(() => {
-    if (bookId && chapterId && currentPage) {
+    if (!bookId || !chapterId || !currentPage) return;
+
+    const timer = setTimeout(() => {
       syncHistory({
         comicId: parseInt(bookId, 10),
         chapterId: parseInt(chapterId, 10),
         lastPageRead: currentPage,
         clientUpdatedAt: new Date().toISOString(),
       });
-    }
-  }, [bookId, chapterId, currentPage, syncHistory]);
+    }, 2000);
 
-  useEffect(() => {
-    const handleDocumentClick = (event: MouseEvent) => {
-      if (!(event.target as Element)?.closest("[data-chunk-word]")) {
-        setActiveWord(null);
-      }
-    };
-    document.addEventListener("click", handleDocumentClick);
-    return () => document.removeEventListener("click", handleDocumentClick);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [bookId, chapterId, currentPage, syncHistory]);
 
   useEffect(() => {
     const handleTextSelection = () => {
@@ -384,7 +373,7 @@ export default function ComicChapterPage() {
     return () => document.removeEventListener("mouseup", handleTextSelection);
   }, [allBubbles]);
 
-  const handleCommentSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleCommentSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = commentText.trim();
     if (!trimmed) return;
@@ -395,17 +384,17 @@ export default function ComicChapterPage() {
         onSuccess: () => setCommentText(""),
       },
     );
-  };
+  }, [commentText, postCommentMutation]);
 
-  const scrollToPage = (pageNum: number) => {
+  const scrollToPage = useCallback((pageNum: number) => {
     setCurrentPage(pageNum);
     const el = document.querySelector(`[data-page-index="${pageNum - 1}"]`);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  };
+  }, []);
 
-  const handlePrevPage = () => {
+  const handlePrevPage = useCallback(() => {
     if (currentPage > 1) {
       const nextP = currentPage - 1;
       if (readerMode === "webtoon") {
@@ -414,9 +403,9 @@ export default function ComicChapterPage() {
         setCurrentPage(nextP);
       }
     }
-  };
+  }, [currentPage, readerMode, scrollToPage]);
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     if (currentPage < totalPages) {
       const nextP = currentPage + 1;
       if (readerMode === "webtoon") {
@@ -425,7 +414,7 @@ export default function ComicChapterPage() {
         setCurrentPage(nextP);
       }
     }
-  };
+  }, [currentPage, totalPages, readerMode, scrollToPage]);
 
   // Scroll to active page when readerMode changes
   useEffect(() => {
@@ -480,7 +469,7 @@ export default function ComicChapterPage() {
   }, [readerMode, pages, queriesLoaded]);
 
   // Manga Flip scroll snap observer
-  const handleFlipScroll = () => {
+  const handleFlipScroll = useCallback(() => {
     resetMenuTimeout();
     const container = flipContainerRef.current;
     if (!container) return;
@@ -497,10 +486,10 @@ export default function ComicChapterPage() {
     if (pageNum >= 1 && pageNum <= totalPages && pageNum !== currentPage) {
       setCurrentPage(pageNum);
     }
-  };
+  }, [currentPage, totalPages, resetMenuTimeout]);
 
   // Viewport tap/click zone gesture analyzer
-  const handleViewportClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleViewportClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (
       target.closest(
@@ -529,7 +518,7 @@ export default function ComicChapterPage() {
       // In Webtoon mode: Center tap/click toggles menu
       setMenuVisible((prev) => !prev);
     }
-  };
+  }, [readerMode, handlePrevPage, handleNextPage]);
 
   // Horizontal scroll alignment when currentPage changes externally
   useEffect(() => {
@@ -618,10 +607,6 @@ export default function ComicChapterPage() {
                       pageDetail={q?.data}
                       isLoading={q?.isLoading}
                       isJapanese={isJapanese}
-                      activeWord={activeWord}
-                      setActiveWord={setActiveWord}
-                      hoveredWord={hoveredWord}
-                      setHoveredWord={setHoveredWord}
                       setSelectedBubble={setSelectedBubble}
                       intl={intl}
                     />
@@ -648,10 +633,6 @@ export default function ComicChapterPage() {
                       pageDetail={q?.data}
                       isLoading={q?.isLoading}
                       isJapanese={isJapanese}
-                      activeWord={activeWord}
-                      setActiveWord={setActiveWord}
-                      hoveredWord={hoveredWord}
-                      setHoveredWord={setHoveredWord}
                       setSelectedBubble={setSelectedBubble}
                       intl={intl}
                     />
@@ -941,29 +922,113 @@ export default function ComicChapterPage() {
   );
 }
 
+// ==================== CHUNK WORD COMPONENT ====================
+interface ChunkWordProps {
+  chunk: BubbleChunk;
+  idx: number;
+  bubbleId: number;
+  isJapanese: boolean;
+  intl: IntlShape;
+}
+
+const ChunkWord = memo(function ChunkWord({
+  chunk,
+  idx,
+  bubbleId,
+  isJapanese,
+  intl,
+}: ChunkWordProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [hoveredRect, setHoveredRect] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    viewportTop: number;
+  } | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  return (
+    <span
+      data-chunk-word
+      className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${
+        isJapanese ? "inline-block leading-tight" : "inline"
+      }`}
+      onMouseEnter={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setHoveredRect({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height,
+          viewportTop: rect.top,
+        });
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setHoveredRect(null);
+        setIsHovered(false);
+      }}
+    >
+      {chunk.word}
+
+      {isMounted && isHovered && hoveredRect && createPortal(
+        <div
+          className="absolute w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-[9999] pointer-events-none border border-gray-200/50"
+          style={{
+            position: "absolute",
+            writingMode: "horizontal-tb",
+            fontSize: "13px",
+            lineHeight: "1.4",
+            left: `${hoveredRect.left + hoveredRect.width / 2}px`,
+            top: hoveredRect.viewportTop < 150
+              ? `${hoveredRect.top + hoveredRect.height + 12}px`
+              : `${hoveredRect.top - 12}px`,
+            transform: hoveredRect.viewportTop < 150
+              ? "translate(-50%, 0)"
+              : "translate(-50%, -100%)",
+          }}
+        >
+          <div className="text-black flex items-baseline gap-2 mb-1">
+            <span className="text-black font-bold text-lg">
+              {chunk.word}
+            </span>
+            <span className="text-black text-xs">
+              {chunk.romanization}
+            </span>
+          </div>
+          <p className="text-black text-sm mb-2">
+            {chunk.meaning || chunk.type}
+          </p>
+          <p className="text-black text-[11px]">
+            {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
+          </p>
+        </div>,
+        document.body
+      )}
+    </span>
+  );
+});
+
 // ==================== READER PAGE COMPONENT ====================
 interface ReaderPageProps {
   page: ChapterPage;
   pageDetail: PageDetailResponse | undefined;
   isLoading: boolean;
   isJapanese: boolean;
-  activeWord: { bubbleId: number; chunkIndex: number } | null;
-  setActiveWord: (val: { bubbleId: number; chunkIndex: number } | null) => void;
-  hoveredWord: { bubbleId: number; chunkIndex: number } | null;
-  setHoveredWord: (val: { bubbleId: number; chunkIndex: number } | null) => void;
   setSelectedBubble: (val: Bubble | null) => void;
   intl: IntlShape;
 }
 
-function ReaderPage({
+const ReaderPage = memo(function ReaderPage({
   page,
   pageDetail,
   isLoading,
   isJapanese,
-  activeWord,
-  setActiveWord,
-  hoveredWord,
-  setHoveredWord,
   setSelectedBubble,
   intl,
 }: ReaderPageProps) {
@@ -996,7 +1061,6 @@ function ReaderPage({
     });
   }, [pageDetail?.bubbles]);
 
-  // Calculate dynamic font size and style for speech bubble
   const getBubbleStyle = (bubble: Bubble, finalFontSize: number, padding: number) => {
     const [x, y, w, h] = bubble.box;
     return {
@@ -1010,14 +1074,7 @@ function ReaderPage({
     };
   };
 
-  const handleChunkHover = (bubbleId: number, chunkIndex: number) => {
-    setHoveredWord({ bubbleId, chunkIndex });
-  };
-
-  const handleChunkLeave = () => setHoveredWord(null);
-
   const handleBubbleClick = (bubble: Bubble) => {
-    setActiveWord(null);
     setSelectedBubble(bubble);
   };
 
@@ -1056,14 +1113,11 @@ function ReaderPage({
         const charAreaRatio = isJapanese ? 1.0 : 0.55;
         const fillFactor = isJapanese ? 0.65 : 0.5;
 
-        // Base font size in original image space
         const area = w * h;
         const baseFontSize = Math.sqrt((area * fillFactor) / (charCount * charAreaRatio));
 
-        // Scale to screen viewport
         let fontSize = baseFontSize * imageScale;
 
-        // Constraint checks to fit container dimensions
         const dispW = w * imageScale;
         const dispH = h * imageScale;
 
@@ -1109,52 +1163,30 @@ function ReaderPage({
                   }
               }
             >
-              {bubble.chunks && bubble.chunks.map((chunk: BubbleChunk, idx: number) => {
-                const isActive =
-                  (hoveredWord?.bubbleId === bubble.id &&
-                    hoveredWord?.chunkIndex === idx) ||
-                  (activeWord?.bubbleId === bubble.id &&
-                    activeWord?.chunkIndex === idx);
-
-                return (
-                  <span
-                    key={idx}
-                    data-chunk-word
-                    className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${isJapanese ? "inline-block leading-tight" : "inline"
-                      }`}
-                    onMouseEnter={() => handleChunkHover(bubble.id, idx)}
-                    onMouseLeave={handleChunkLeave}
-                  >
-                    {chunk.word}
-
-                    {isActive && (
-                      <div
-                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-[9999] pointer-events-none border"
-                        style={{ writingMode: "horizontal-tb", fontSize: "13px", lineHeight: "1.4" }}
-                      >
-                        <div className="text-black dark:text-black flex items-baseline gap-2 mb-1">
-                          <span className="text-black dark:text-black font-bold text-lg">
-                            {chunk.word}
-                          </span>
-                          <span className="text-black dark:text-black text-xs">
-                            {chunk.romanization}
-                          </span>
-                        </div>
-                        <p className="text-black dark:text-black text-sm mb-2">
-                          {chunk.meaning || chunk.type}
-                        </p>
-                        <p className="text-black dark:text-black text-[11px]">
-                          {intl.formatMessage({ id: "popups.dialogueInfo.type" })}: {chunk.type}
-                        </p>
-                      </div>
-                    )}
-                  </span>
-                );
-              })}
+              {bubble.chunks && bubble.chunks.map((chunk: BubbleChunk, idx: number) => (
+                <ChunkWord
+                  key={idx}
+                  chunk={chunk}
+                  idx={idx}
+                  bubbleId={bubble.id}
+                  isJapanese={isJapanese}
+                  intl={intl}
+                />
+              ))}
             </div>
           </div>
         );
       })}
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.page.id === nextProps.page.id &&
+    prevProps.page.pageNumber === nextProps.page.pageNumber &&
+    prevProps.page.imageUrl === nextProps.page.imageUrl &&
+    prevProps.pageDetail === nextProps.pageDetail &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.isJapanese === nextProps.isJapanese &&
+    prevProps.setSelectedBubble === nextProps.setSelectedBubble
+  );
+});
