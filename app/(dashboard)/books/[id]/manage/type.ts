@@ -29,4 +29,5 @@ export interface ChapterOverview {
     title: string;
     chapterNumber: number;
     createdAt: string;
+    totalPages?: number;
 }

@@ -77,7 +77,7 @@ export default function EditMangaPage() {
         book_id: comicId,
         chapterNumber: chapter.chapterNumber,
         title: chapter.title,
-        total_pages: 0,
+        total_pages: chapter.totalPages || 0,
         hasNextChapter: false,
       })),
     );

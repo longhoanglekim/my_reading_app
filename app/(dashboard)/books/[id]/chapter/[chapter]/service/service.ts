@@ -75,11 +75,17 @@ export const getChapterPages = async (
   chapterId: number
 ): Promise<ChapterPage[]> => {
   try {
-    const res = await HttpRequest.get<ChapterPage[]>(
+    const res = await HttpRequest.get<any>(
       `/chapters/${chapterId}/pages`
     );
 
-    return res.data;
+    if (res.data && Array.isArray(res.data)) {
+      return res.data;
+    }
+    if (res.data && res.data.data && Array.isArray(res.data.data)) {
+      return res.data.data;
+    }
+    return [];
   } catch (error) {
     console.log(error);
     throw error;
