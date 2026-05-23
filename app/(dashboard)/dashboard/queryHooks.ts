@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRecentBooks, GetBookSummaryListParams, getFavoriteBooks, getUserLibraryByType, GetUserLibraryByTypeParams, getBooksByQuery, getSuggestions } from './service';
+import { getRecentBooks, GetBookSummaryListParams, getFavoriteBooks, getUserLibraryByType, GetUserLibraryByTypeParams, getBooksByQuery, getSuggestions, getReadingHistoryList } from './service';
 import { getAdminDashboardSummary } from './service';
 export function useRecentBooks(params: GetBookSummaryListParams) {
     return useQuery({
@@ -22,6 +22,14 @@ export function useUserLibraryByType(params: GetUserLibraryByTypeParams) {
         queryFn: () => getUserLibraryByType(params),
         staleTime: 5 * 60 * 1000,
         enabled: !!params.listType && params.listType.trim() !== '' && ['READING', 'FAVORITE', 'READ_LATER'].includes(params.listType),
+    });
+}
+
+export function useReadingHistoryList(params: GetBookSummaryListParams) {
+    return useQuery({
+        queryKey: ['readingHistoryList', params],
+        queryFn: () => getReadingHistoryList(params),
+        staleTime: 5 * 60 * 1000,
     });
 }
 

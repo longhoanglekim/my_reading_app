@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getChapterComments, getChapterOverview, getChapterPages, getComicDetail, getPageDetail, postChapterComment, syncReadingHistory, getComicOverview } from '../service/service'
+import { getChapterComments, getChapterOverview, getChapterPages, getComicDetail, getPageDetail, postChapterComment, syncReadingHistory, getComicOverview, upsertLibrary } from '../service/service'
 import { ChapterComment } from '../type'
 export const useChapterOverview = (comicId: string, chapterNumber: number) => {
     return useQuery({
@@ -78,5 +78,18 @@ export const useComicOverviewQuery = (comicId?: number) => {
     queryKey: ["comic-overview", comicId],
     queryFn: () => getComicOverview(comicId!),
     enabled: !!comicId,
+  });
+};
+
+export const useUpsertLibraryMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ comicId, listType }: { comicId: number; listType: string }) =>
+      upsertLibrary(comicId, listType),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["comic-overview", variables.comicId] });
+      queryClient.invalidateQueries({ queryKey: ["userLibraryByType"] });
+      queryClient.invalidateQueries({ queryKey: ["readingHistoryList"] });
+    },
   });
 };

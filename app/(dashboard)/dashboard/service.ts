@@ -1,7 +1,7 @@
 // services/comic/comic.api.ts
 
 import HttpRequest from "@/app/config/auth";
-import { ComicSuggestion, ComicSummary, UserLibrarySummary } from "./type";
+import { ComicSuggestion, ComicSummary, UserLibrarySummary, UserReadingHistoryItemResponse } from "./type";
 import { AdminDashboardSummary } from "../admin/user-management/type";
 import {
     BookOpen,
@@ -125,6 +125,23 @@ export const getUserLibraryByType = async (
         const res = await HttpRequest.get<
             ApiResponse<PaginationResponse<UserLibrarySummary>>
         >("/user-libraries", {
+            params,
+        });
+        
+        return res.data.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+export const getReadingHistoryList = async (
+    params?: GetBookSummaryListParams
+): Promise<PaginationResponse<UserReadingHistoryItemResponse>> => {
+    try {
+        const res = await HttpRequest.get<
+            ApiResponse<PaginationResponse<UserReadingHistoryItemResponse>>
+        >("/reading-histories", {
             params,
         });
         

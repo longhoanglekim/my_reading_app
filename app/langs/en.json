@@ -186,7 +186,9 @@
     "editComic": "Edit Comic",
     "noImageFound": "Page image not found",
     "prevChapter": "Previous Chapter",
-    "nextChapter": "Next Chapter"
+    "nextChapter": "Next Chapter",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen"
   },
   "popups": {
     "deleteChapter": {
@@ -288,6 +290,8 @@
     "title": "Dashboard",
     "overview": "Overview",
     "books": "Books",
+    "explore": "Explore",
+    "library": "Library",
     "events": "Events",
     "settings": "Settings",
     "adminManagement": "Admin management",

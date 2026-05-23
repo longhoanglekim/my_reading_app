@@ -120,3 +120,16 @@ export const getComicOverview = async (
   );
   return res.data;
 };
+
+export const upsertLibrary = async (comicId: number, listType: string) => {
+  try {
+    const res = await HttpRequest.post("/user-libraries", {
+      comicId,
+      listType,
+    });
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

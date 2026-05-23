@@ -43,8 +43,6 @@ export const useUserStore = create<UserState>()(
                     accessToken: "",
                     refreshToken: ""
                 });
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
             },
 
             updateAvatar: (newAvatar) => set((state) => ({

@@ -77,11 +77,11 @@ export default function Sidebar() {
                     <nav className="flex flex-col gap-1.5 px-5">
                         <SidebarItem
                             href="/dashboard"
-                            label={intl.formatMessage({ id: "sidebar.overview" })}
+                            label={intl.formatMessage({ id: "sidebar.explore" })}
                         />
                         <SidebarItem
-                            href="/books"
-                            label={intl.formatMessage({ id: "sidebar.books" })}
+                            href="/library"
+                            label={intl.formatMessage({ id: "sidebar.library" })}
                         />
                     </nav>
                     {user?.role === 'ADMIN' && (

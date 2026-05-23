@@ -30,7 +30,7 @@ export default function UserLayout({
     params.set("type", "query");
     params.set("query", query.trim());
 
-    const newUrl = `/books?${params.toString()}`;
+    const newUrl = `/library?${params.toString()}`;
 
     router.push(newUrl, { scroll: false });
     router.refresh();

@@ -125,7 +125,7 @@ export const useVerifyEmailOtp = () => {
             showNotification({
                 type: 'error',
                 title: 'Xác thực thất bại',
-                message: error.message || 'Mã OTP không chính xác hoặc đã hết hạn.',
+                message: (error.response?.data as any)?.message || error.message || 'Mã OTP không chính xác hoặc đã hết hạn.',
             })
         },
     })
@@ -149,7 +149,7 @@ export const useResendEmailOtp = () => {
             showNotification({
                 type: 'error',
                 title: 'Gửi lại OTP thất bại',
-                message: error.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại sau.',
+                message: (error.response?.data as any)?.message || error.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại sau.',
             })
         },
     })

@@ -8,6 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useIntl } from "react-intl";
 import { useRouter } from "next/navigation";
 import { useRegisterOtp, useVerifyEmailOtp, useResendEmailOtp } from "./queryHook/queryHook";
+import { useOAuthProviders } from "../login/queryHook/queryHook";
 
 export default function SignupPage() {
     const intl = useIntl();
@@ -26,6 +27,7 @@ export default function SignupPage() {
     const { mutate: registerOtp, isPending: isRegisterPending } = useRegisterOtp();
     const { mutate: verifyOtp, isPending: isVerifyPending } = useVerifyEmailOtp();
     const { mutate: resendOtp, isPending: isResendPending } = useResendEmailOtp();
+    const { data: providers } = useOAuthProviders();
 
     const handleNavigateToLogin = () => {
         setFullName("");
@@ -204,13 +206,26 @@ export default function SignupPage() {
                     </div>
 
                     {/* Google Signup */}
-                    <CButton
-                        variant="outline"
-                        className="w-full justify-center gap-3 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <FcGoogle className="h-5 w-5" />
-                        {intl.formatMessage({ id: "auth.button.registerWithGoogle" })}
-                    </CButton>
+                    {providers?.map((provider) => (
+                        <CButton
+                            key={provider.provider}
+                            type="button"
+                            variant="outline"
+                            className="w-full justify-center gap-3 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                            onClick={() => {
+                                window.location.href = `${process.env.NEXT_PUBLIC_API_URL}${provider.authorizationUrl}`;
+                            }}
+                        >
+                            {provider.provider === "google" ? (
+                                <>
+                                    <FcGoogle className="h-5 w-5" />
+                                    {intl.formatMessage({ id: "auth.button.registerWithGoogle" })}
+                                </>
+                            ) : (
+                                `Register with ${provider.displayName}`
+                            )}
+                        </CButton>
+                    ))}
                 </CForm>
             ) : (
                 <CForm

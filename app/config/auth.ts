@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useUserStore } from "@/app/store/userStore";
 
 const HttpRequest = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -35,48 +36,13 @@ HttpRequest.interceptors.request.use((config) => {
 HttpRequest.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            const userStorage = getUserStorage();
-
-            const refreshToken = userStorage?.state?.refreshToken;
-
-            if (!refreshToken) {
-                localStorage.removeItem("user-storage");
-                return Promise.reject(error);
-            }
-
-            originalRequest._retry = true;
-
-            try {
-                const res = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
-                    { refreshToken }
-                );
-
-                const newAccessToken = res.data.accessToken;
-
-                // update localStorage
-                userStorage.state.accessToken = newAccessToken;
-
-                localStorage.setItem(
-                    "user-storage",
-                    JSON.stringify(userStorage)
-                );
-
-                // update header request cũ
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-                return HttpRequest(originalRequest);
-            } catch (refreshError) {
-                localStorage.removeItem("user-storage");
-                return Promise.reject(refreshError);
-            }
+        if (error.response?.status === 401) {
+            // Đồng bộ bộ nhớ và localStorage thông qua action logout của Zustand store
+            useUserStore.getState().logout();
         }
 
         return Promise.reject(error);
     }
 );
 
-export default HttpRequest;
+export default HttpRequest;

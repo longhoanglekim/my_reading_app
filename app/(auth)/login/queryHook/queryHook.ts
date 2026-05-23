@@ -52,7 +52,7 @@ export const useLogin = () => {
             showNotification({
                 type: 'error',
                 title: 'Đăng nhập thất bại',
-                message: error.message || 'Email hoặc mật khẩu không đúng',
+                message: (error.response?.data as any)?.message || error.message || 'Email hoặc mật khẩu không đúng',
             })
         },
     })

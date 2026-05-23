@@ -186,7 +186,9 @@
     "editComic": "Chỉnh sửa truyện",
     "noImageFound": "Không tìm thấy hình ảnh trang",
     "prevChapter": "Chương trước",
-    "nextChapter": "Chương sau"
+    "nextChapter": "Chương sau",
+    "fullscreen": "Toàn màn hình",
+    "exitFullscreen": "Thoát toàn màn hình"
   },
   "popups": {
     "deleteChapter": {
@@ -288,6 +290,8 @@
     "title": "Bảng điều khiển",
     "overview": "Tổng quan",
     "books": "Truyện",
+    "explore": "Khám phá",
+    "library": "Thư viện",
     "events": "Sự kiện",
     "settings": "Cài đặt",
     "adminManagement": "Quản trị",

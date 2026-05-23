@@ -8,7 +8,7 @@ import {
   useMemo,
   useRef,
   useCallback,
-  FormEvent,
+  SubmitEvent,
   useSyncExternalStore,
   memo,
 } from "react";
@@ -26,6 +26,7 @@ import {
   useComicDetail,
   useSyncReadingHistoryMutation,
   useComicOverviewQuery,
+  useUpsertLibraryMutation,
 } from "./queryHook/queryHook";
 
 const subscribeReaderMode = (callback: () => void) => {
@@ -86,6 +87,7 @@ export default function ComicChapterPage() {
     useChapterPages(chapterId ? parseInt(chapterId) : undefined);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // ------------ LẤY DANH SÁCH PAGES ====================
   const pages = useMemo(() => {
@@ -126,6 +128,11 @@ export default function ComicChapterPage() {
     getServerReaderModeSnapshot
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // ==================== AUTO-HIDE MENUS ====================
+  const [menuVisible, setMenuVisible] = useState(true);
+  const menuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const skipMenuPopupRef = useRef(false);
 
   const handleSetReaderMode = useCallback((mode: "webtoon" | "manga-pagination") => {
     localStorage.setItem("reader_mode", mode);
@@ -177,11 +184,10 @@ export default function ComicChapterPage() {
     }
   }, [nextChapter, router, bookId]);
 
-  // ==================== AUTO-HIDE MENUS ====================
-  const [menuVisible, setMenuVisible] = useState(true);
-  const menuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   const resetMenuTimeout = useCallback(() => {
+    if (skipMenuPopupRef.current) return;
     setMenuVisible(true);
     if (menuTimeoutRef.current) {
       clearTimeout(menuTimeoutRef.current);
@@ -235,13 +241,20 @@ export default function ComicChapterPage() {
         return;
       }
 
+      if (e.type === "keydown") {
+        const kbEvent = e as KeyboardEvent;
+        if (kbEvent.key === "ArrowLeft" || kbEvent.key === "ArrowRight") {
+          return;
+        }
+      }
+
       // touchstart, keydown, etc.
       resetMenuTimeout();
     };
 
     window.addEventListener("mousemove", handleActivity);
     window.addEventListener("scroll", handleActivity, { passive: true });
-    window.addEventListener("touchstart", handleActivity);
+    window.addEventListener("touchstart", handleActivity, { passive: true });
     window.addEventListener("keydown", handleActivity);
 
     return () => {
@@ -278,7 +291,7 @@ export default function ComicChapterPage() {
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
-  const chapterTitle = chapterOverviewData?.title ?? 
+  const chapterTitle = chapterOverviewData?.title ??
     (!isNaN(chapterNumber) ? `${intl.formatMessage({ id: "common.chapterCapital" })} ${chapterNumber}` : "");
 
   const allBubbles = useMemo(() => {
@@ -302,8 +315,22 @@ export default function ComicChapterPage() {
   const postCommentMutation = usePostChapterComment(chapterId);
   const chapterComments = commentsData?.data?.content || [];
   const { mutate: syncHistory } = useSyncReadingHistoryMutation();
+  const { mutate: upsertLibrary } = useUpsertLibraryMutation();
 
   // ==================== EFFECTS & HANDLERS ====================
+  const currentLibraryType = comicOverviewData?.bookOverviewData?.libraryType;
+
+  useEffect(() => {
+    if (!bookId || currentLibraryType === undefined) return;
+
+    if (currentLibraryType !== "FAVORITE" && currentLibraryType !== "READING") {
+      upsertLibrary({
+        comicId: parseInt(bookId, 10),
+        listType: "READING",
+      });
+    }
+  }, [bookId, currentLibraryType, upsertLibrary]);
+
   useEffect(() => {
     if (!bookId || !chapterId || !currentPage) return;
 
@@ -373,7 +400,7 @@ export default function ComicChapterPage() {
     return () => document.removeEventListener("mouseup", handleTextSelection);
   }, [allBubbles]);
 
-  const handleCommentSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
+  const handleCommentSubmit = useCallback((event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = commentText.trim();
     if (!trimmed) return;
@@ -416,7 +443,35 @@ export default function ComicChapterPage() {
     }
   }, [currentPage, totalPages, readerMode, scrollToPage]);
 
-  // Scroll to active page when readerMode changes
+  // Handle keyboard page navigation with left/right arrow keys
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        skipMenuPopupRef.current = true;
+        if (timer) clearTimeout(timer);
+
+        if (e.key === "ArrowLeft") {
+          handlePrevPage();
+        } else if (e.key === "ArrowRight") {
+          handleNextPage();
+        }
+
+        timer = setTimeout(() => {
+          skipMenuPopupRef.current = false;
+        }, 600);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (timer) clearTimeout(timer);
+    };
+  }, [handlePrevPage, handleNextPage]);
+
+  // Scroll to active page when readerMode or isFullscreen changes
   useEffect(() => {
     const timer = setTimeout(() => {
       if (readerMode === "webtoon") {
@@ -432,7 +487,7 @@ export default function ComicChapterPage() {
       }
     }, 50);
     return () => clearTimeout(timer);
-  }, [readerMode]);
+  }, [readerMode, isFullscreen]);
 
   // Webtoon scroll listener (IntersectionObserver)
   const queriesLoaded = pageQueries.every((q) => q.isSuccess);
@@ -536,7 +591,7 @@ export default function ComicChapterPage() {
 
   // ==================== RENDER ====================
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <div className={`min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 ${isFullscreen && readerMode === "manga-pagination" ? "h-screen overflow-hidden" : ""}`}>
       {/* HEADER */}
       <header className={`fixed top-0 left-0 right-0 bg-white/70 backdrop-blur-md dark:bg-gray-950/70 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm z-50 transition-all duration-300 transform ${menuVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
         <div className="w-full max-w-5xl mx-auto px-4 py-4">
@@ -558,6 +613,27 @@ export default function ComicChapterPage() {
             </div>
 
             <div className="flex items-center gap-3 z-10">
+              <button
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-white transition-colors flex items-center gap-2"
+                title={isFullscreen ? intl.formatMessage({ id: "chapterPage.exitFullscreen" }) : intl.formatMessage({ id: "chapterPage.fullscreen" })}
+              >
+                {isFullscreen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3 3m12 6V4.5M15 9h4.5M15 9l6-6m-6 12v4.5m0-4.5h4.5m-4.5 0 6 6M9 15v4.5M9 15H4.5m4.5 0-6 6" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9m5.25 11.25v-4.5m0 4.5h-4.5m4.5 0L15 15" />
+                  </svg>
+                )}
+                <span className="hidden sm:inline">
+                  {isFullscreen
+                    ? intl.formatMessage({ id: "chapterPage.exitFullscreen" })
+                    : intl.formatMessage({ id: "chapterPage.fullscreen" })}
+                </span>
+              </button>
+
               <button
                 onClick={() => setSettingsOpen(!settingsOpen)}
                 className="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-white transition-colors flex items-center gap-2"
@@ -585,10 +661,18 @@ export default function ComicChapterPage() {
 
       {/* IMAGE + BUBBLES */}
       <div
-        className="flex-1 flex justify-center px-4 pt-24 md:pt-28 pb-24"
+        className={`flex-1 flex justify-center transition-all duration-300 ${isFullscreen
+            ? "px-0 pt-0 pb-0 bg-black dark:bg-gray-950"
+            : "px-4 pt-24 md:pt-28 pb-24"
+          }`}
         onClick={handleViewportClick}
       >
-        <div className="relative w-full max-w-[820px] mx-auto flex justify-center">
+        <div className={`relative mx-auto flex justify-center transition-all duration-300 ${isFullscreen
+            ? readerMode === "webtoon"
+              ? "w-full max-w-[1200px]"
+              : "w-screen h-screen max-w-none items-center"
+            : "w-full max-w-[820px]"
+          }`}>
           {isChapterLoading ? (
             <div className="flex items-center justify-center h-[600px] w-full bg-gray-100 dark:bg-gray-900 rounded-xl">
               <div className="text-center">
@@ -609,6 +693,8 @@ export default function ComicChapterPage() {
                       isJapanese={isJapanese}
                       setSelectedBubble={setSelectedBubble}
                       intl={intl}
+                      isFullscreen={isFullscreen}
+                      readerMode={readerMode}
                     />
                   </div>
                 );
@@ -617,7 +703,8 @@ export default function ComicChapterPage() {
           ) : (
             <div
               ref={flipContainerRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth w-full max-w-[820px] mx-auto scrollbar-none"
+              className={`flex overflow-x-auto snap-x snap-mandatory scroll-smooth mx-auto scrollbar-none transition-all duration-300 ${isFullscreen ? "w-screen h-screen max-w-none" : "w-full max-w-[820px]"
+                }`}
               onScroll={handleFlipScroll}
             >
               {pages.map((page, idx) => {
@@ -626,7 +713,8 @@ export default function ComicChapterPage() {
                   <div
                     key={page.id}
                     data-page-index={idx}
-                    className="w-full flex-shrink-0 snap-start flex justify-center"
+                    className={`flex-shrink-0 snap-start flex justify-center items-center transition-all duration-300 ${isFullscreen ? "w-screen h-screen" : "w-full"
+                      }`}
                   >
                     <ReaderPage
                       page={page}
@@ -635,6 +723,8 @@ export default function ComicChapterPage() {
                       isJapanese={isJapanese}
                       setSelectedBubble={setSelectedBubble}
                       intl={intl}
+                      isFullscreen={isFullscreen}
+                      readerMode={readerMode}
                     />
                   </div>
                 );
@@ -645,119 +735,123 @@ export default function ComicChapterPage() {
       </div>
 
       {/* CHAPTER NAVIGATION */}
-      <div className="w-full max-w-5xl mx-auto px-4 mb-6 flex justify-center gap-4">
-        <button
-          onClick={handlePrevChapter}
-          disabled={!prevChapter}
-          className="px-6 py-3 border border-gray-200 dark:border-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:hover:bg-transparent text-sm font-semibold transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-300"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-          {intl.formatMessage({ id: "chapterPage.prevChapter" })}
-        </button>
+      {!isFullscreen && (
+        <div className="w-full max-w-5xl mx-auto px-4 mb-6 flex justify-center gap-4">
+          <button
+            onClick={handlePrevChapter}
+            disabled={!prevChapter}
+            className="px-6 py-3 border border-gray-200 dark:border-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:hover:bg-transparent text-sm font-semibold transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            {intl.formatMessage({ id: "chapterPage.prevChapter" })}
+          </button>
 
-        <button
-          onClick={handleNextChapter}
-          disabled={!nextChapter}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:hover:bg-blue-600 text-white rounded-2xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
-        >
-          {intl.formatMessage({ id: "chapterPage.nextChapter" })}
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </button>
-      </div>
+          <button
+            onClick={handleNextChapter}
+            disabled={!nextChapter}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:hover:bg-blue-600 text-white rounded-2xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+          >
+            {intl.formatMessage({ id: "chapterPage.nextChapter" })}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* COMMENTS */}
-      <div className="w-full max-w-5xl mx-auto px-4 pb-32">
-        <div className="bg-white rounded-3xl border shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-xl font-bold">
-                {intl.formatMessage({ id: "chapterPage.commentsTitle" })}
-              </h2>
-              <p className="text-sm text-gray-500">
-                {intl.formatMessage({ id: "common.chapterCapital" })}{" "}
-                {chapterNumber}
-              </p>
+      {!isFullscreen && (
+        <div className="w-full max-w-5xl mx-auto px-4 pb-32">
+          <div className="bg-white rounded-3xl border shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-xl font-bold">
+                  {intl.formatMessage({ id: "chapterPage.commentsTitle" })}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {intl.formatMessage({ id: "common.chapterCapital" })}{" "}
+                  {chapterNumber}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <form onSubmit={handleCommentSubmit} className="space-y-3">
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              rows={4}
-              placeholder={intl.formatMessage({
-                id: "chapterPage.commentPlaceholder",
-              })}
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:ring-blue-400/30"
-            />
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={!commentText.trim() || postCommentMutation.isPending}
-                className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
-              >
-                {postCommentMutation.isPending
-                  ? intl.formatMessage({ id: "chapterPage.sendingComment" })
-                  : intl.formatMessage({ id: "chapterPage.submitComment" })}
-              </button>
-            </div>
-          </form>
-
-          {textSelection && (
-            <div className="mt-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-600 dark:bg-yellow-950/20">
-              <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
-                {intl.formatMessage({ id: "chapterPage.selectedTextTitle" })}
-              </p>
-              <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
-                {textSelection.text}
-              </p>
-              <pre className="mt-3 whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300">
-                {textSelection.translation}
-              </pre>
-            </div>
-          )}
-
-          <div className="mt-8 space-y-4">
-            {commentsLoading ? (
-              <div className="text-center py-8">{intl.formatMessage({ id: "chapterPage.commentsLoading" })}</div>
-            ) : chapterComments.length > 0 ? (
-              chapterComments.map((comment: ChapterComment) => (
-                <div
-                  key={comment.id}
-                  className="rounded-3xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950"
+            <form onSubmit={handleCommentSubmit} className="space-y-3">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                rows={4}
+                placeholder={intl.formatMessage({
+                  id: "chapterPage.commentPlaceholder",
+                })}
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:ring-blue-400/30"
+              />
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={!commentText.trim() || postCommentMutation.isPending}
+                  className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 ring-2 ring-white dark:ring-gray-900 shadow-sm overflow-hidden">
-                      {comment.avatarUrl ? (
-                        <img src={comment.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white font-bold">
-                          {comment.fullName?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{comment.fullName}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(comment.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    {comment.content}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">{intl.formatMessage({ id: "chapterPage.noComments" })}</p>
+                  {postCommentMutation.isPending
+                    ? intl.formatMessage({ id: "chapterPage.sendingComment" })
+                    : intl.formatMessage({ id: "chapterPage.submitComment" })}
+                </button>
+              </div>
+            </form>
+
+            {textSelection && (
+              <div className="mt-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-600 dark:bg-yellow-950/20">
+                <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
+                  {intl.formatMessage({ id: "chapterPage.selectedTextTitle" })}
+                </p>
+                <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
+                  {textSelection.text}
+                </p>
+                <pre className="mt-3 whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300">
+                  {textSelection.translation}
+                </pre>
+              </div>
             )}
+
+            <div className="mt-8 space-y-4">
+              {commentsLoading ? (
+                <div className="text-center py-8">{intl.formatMessage({ id: "chapterPage.commentsLoading" })}</div>
+              ) : chapterComments.length > 0 ? (
+                chapterComments.map((comment: ChapterComment) => (
+                  <div
+                    key={comment.id}
+                    className="rounded-3xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 ring-2 ring-white dark:ring-gray-900 shadow-sm overflow-hidden">
+                        {comment.avatarUrl ? (
+                          <img src={comment.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                            {comment.fullName?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold">{comment.fullName}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(comment.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      {comment.content}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">{intl.formatMessage({ id: "chapterPage.noComments" })}</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* FOOTER */}
       <footer className={`fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md dark:bg-gray-900/70 border-t border-gray-200/50 dark:border-gray-800/50 shadow-lg z-45 transition-all duration-300 ${menuVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
@@ -836,7 +930,7 @@ export default function ComicChapterPage() {
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{intl.formatMessage({ id: "popups.dialogueInfo.vocabAnalysis" })}</p>
                 <div className="space-y-5">
-                  {selectedBubble.chunks.map((chunk: BubbleChunk, idx: number) => (
+                  {selectedBubble.chunks && selectedBubble.chunks.map((chunk: BubbleChunk, idx: number) => (
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex items-baseline gap-3">
                         <span className="font-bold text-black dark:text-white text-xl">{chunk.word}</span>
@@ -925,21 +1019,16 @@ export default function ComicChapterPage() {
 // ==================== CHUNK WORD COMPONENT ====================
 interface ChunkWordProps {
   chunk: BubbleChunk;
-  idx: number;
-  bubbleId: number;
   isJapanese: boolean;
   intl: IntlShape;
 }
 
 const ChunkWord = memo(function ChunkWord({
   chunk,
-  idx,
-  bubbleId,
   isJapanese,
   intl,
 }: ChunkWordProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const [hoveredRect, setHoveredRect] = useState<{
     top: number;
     left: number;
@@ -948,16 +1037,11 @@ const ChunkWord = memo(function ChunkWord({
     viewportTop: number;
   } | null>(null);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <span
       data-chunk-word
-      className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${
-        isJapanese ? "inline-block leading-tight" : "inline"
-      }`}
+      className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${isJapanese ? "inline-block leading-tight" : "inline"
+        }`}
       onMouseEnter={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setHoveredRect({
@@ -976,7 +1060,7 @@ const ChunkWord = memo(function ChunkWord({
     >
       {chunk.word}
 
-      {isMounted && isHovered && hoveredRect && createPortal(
+      {isHovered && hoveredRect && createPortal(
         <div
           className="absolute w-64 bg-white text-black p-3 rounded-xl shadow-2xl z-[9999] pointer-events-none border border-gray-200/50"
           style={{
@@ -1022,6 +1106,8 @@ interface ReaderPageProps {
   isJapanese: boolean;
   setSelectedBubble: (val: Bubble | null) => void;
   intl: IntlShape;
+  isFullscreen?: boolean;
+  readerMode?: string;
 }
 
 const ReaderPage = memo(function ReaderPage({
@@ -1031,6 +1117,8 @@ const ReaderPage = memo(function ReaderPage({
   isJapanese,
   setSelectedBubble,
   intl,
+  isFullscreen = false,
+  readerMode = "manga-pagination",
 }: ReaderPageProps) {
   const [imageScale, setImageScale] = useState(1);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -1044,10 +1132,20 @@ const ReaderPage = memo(function ReaderPage({
   }, []);
 
   useEffect(() => {
+    const img = imageRef.current;
+    if (!img) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateImageScale();
+    });
+    resizeObserver.observe(img);
+
     updateImageScale();
-    window.addEventListener("resize", updateImageScale);
-    return () => window.removeEventListener("resize", updateImageScale);
-  }, [pageDetail, updateImageScale]);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateImageScale, pageDetail, isFullscreen, readerMode]);
 
   const currentImage = pageDetail?.images?.inpaintedUrl || pageDetail?.images?.originalUrl || page.imageUrl;
 
@@ -1097,18 +1195,28 @@ const ReaderPage = memo(function ReaderPage({
     );
   }
 
+  const isMangaFullscreen = isFullscreen && readerMode === "manga-pagination";
+
   return (
-    <div className="relative w-full max-w-[820px] mx-auto select-text">
+    <div className={`relative mx-auto select-text flex justify-center items-center transition-all duration-300 ${isMangaFullscreen
+        ? "w-fit h-screen max-h-screen"
+        : isFullscreen && readerMode === "webtoon"
+          ? "w-full max-w-[1200px]"
+          : "w-full max-w-[820px]"
+      }`}>
       <img
         ref={imageRef}
         src={currentImage}
         alt={`Trang ${page.pageNumber}`}
-        className="w-full h-auto rounded-xl shadow-2xl block"
+        className={`shadow-2xl transition-all duration-300 ${isMangaFullscreen
+            ? "max-h-screen w-auto object-contain rounded-none"
+            : "w-full h-auto rounded-xl block"
+          }`}
         onLoad={updateImageScale}
       />
 
       {sortedBubbles.map((bubble) => {
-        const [,, w, h] = bubble.box;
+        const [, , w, h] = bubble.box;
         const charCount = bubble.original_text?.length || 1;
         const charAreaRatio = isJapanese ? 1.0 : 0.55;
         const fillFactor = isJapanese ? 0.65 : 0.5;
@@ -1167,8 +1275,6 @@ const ReaderPage = memo(function ReaderPage({
                 <ChunkWord
                   key={idx}
                   chunk={chunk}
-                  idx={idx}
-                  bubbleId={bubble.id}
                   isJapanese={isJapanese}
                   intl={intl}
                 />
@@ -1187,6 +1293,8 @@ const ReaderPage = memo(function ReaderPage({
     prevProps.pageDetail === nextProps.pageDetail &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.isJapanese === nextProps.isJapanese &&
-    prevProps.setSelectedBubble === nextProps.setSelectedBubble
+    prevProps.setSelectedBubble === nextProps.setSelectedBubble &&
+    prevProps.isFullscreen === nextProps.isFullscreen &&
+    prevProps.readerMode === nextProps.readerMode
   );
 });

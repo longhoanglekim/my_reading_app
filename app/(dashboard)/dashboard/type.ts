@@ -28,6 +28,20 @@ export interface UserLibrarySummary {
     "listType": string,
 }
 
+export interface UserReadingHistoryItemResponse {
+    comicId: number;
+    title: string;
+    author: string;
+    coverImageUrl: string;
+    originalLanguage: string;
+    status: string;
+    format: string;
+    averageRating: number;
+    chapterNumber: number;
+    lastPageRead: number;
+    updatedAt: string;
+}
+
 export interface ComicSuggestion {
   id: number;
   title: string;

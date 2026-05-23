@@ -9,10 +9,18 @@ export default function OAuth2SuccessPage() {
   const router = useRouter();
 
   const setUser = useUserStore((state) => state.setUser);
+  const setTokens = useUserStore((state) => state.setTokens);
 
   useEffect(() => {
     const init = async () => {
       try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const token = searchParams.get("token");
+
+        if (token) {
+          setTokens(token, "");
+        }
+
         const me = await getMe();
 
         setUser({
