@@ -77,6 +77,7 @@ export const useComicOverviewQuery = (comicId?: number) => {
 
 export const useMakeComicRatingMutation = (comicId?: number) => {
     const { showNotification } = useNotification();
+    const queryClient = useQueryClient();
     const enabled = typeof comicId === "number" && !Number.isNaN(comicId) && comicId > 0;
 
     return useMutation({
@@ -107,6 +108,17 @@ export const useMakeComicRatingMutation = (comicId?: number) => {
                 });
                 throw error;
             }   
+        },
+        onSuccess: () => {
+            if (comicId) {
+                queryClient.invalidateQueries({ queryKey: ["comic-overview", comicId] });
+            }
+            queryClient.invalidateQueries({ queryKey: ["comic-overview-by-genre"] });
+            queryClient.invalidateQueries({ queryKey: ["booksByQuery"] });
+            queryClient.invalidateQueries({ queryKey: ["userLibraryByType"] });
+            queryClient.invalidateQueries({ queryKey: ["recentBooks"] });
+            queryClient.invalidateQueries({ queryKey: ["favoriteBooks"] });
+            queryClient.invalidateQueries({ queryKey: ["readingHistoryList"] });
         },
     });
 }

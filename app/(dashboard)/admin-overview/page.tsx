@@ -184,8 +184,8 @@ export default function AdminOverview() {
             `}
           >
             <RefreshCw className={`w-5 h-5 ${isReindexing ? "animate-spin" : ""}`} />
-            {isReindexing 
-              ? intl.formatMessage({ id: "adminOverview.reindexing" }) 
+            {isReindexing
+              ? intl.formatMessage({ id: "adminOverview.reindexing" })
               : intl.formatMessage({ id: "adminOverview.reindexButton" })}
           </button>
         </div>
@@ -226,13 +226,6 @@ export default function AdminOverview() {
               <Star className="w-5 h-5 text-yellow-500" />
               {intl.formatMessage({ id: "adminOverview.topRatedComics" })}
             </h2>
-            <button
-              onClick={() => router.push("/books")}
-              className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-            >
-              {intl.formatMessage({ id: "adminOverview.manageComics" })}
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
 
           <div className="space-y-4">
@@ -286,12 +279,12 @@ export default function AdminOverview() {
               </button>
 
               <button
-                onClick={() => router.push("/books")}
+                onClick={() => router.push("/publish")}
                 className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/15 hover:border-purple-200 dark:hover:border-purple-900/30 text-left transition duration-200"
               >
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-gray-100">{intl.formatMessage({ id: "adminOverview.manageComicsTitle" })}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{intl.formatMessage({ id: "adminOverview.manageComicsDesc" })}</p>
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100">{intl.formatMessage({ id: "adminOverview.managePublishingTitle" })}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{intl.formatMessage({ id: "adminOverview.managePublishingDesc" })}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>

@@ -27,7 +27,7 @@ export default function Topbar() {
         dark:bg-gray-950/80 dark:backdrop-blur-md dark:border-gray-800
         text-gray-900 dark:text-gray-100
         shadow-sm dark:shadow-gray-950/40
-        transition-colors duration-200 z-1000
+        transition-colors duration-200 z-40
       "
     >
       <h1 className="font-semibold text-lg tracking-tight">
@@ -38,7 +38,7 @@ export default function Topbar() {
         <LanguageToggle />
         <ThemeToggle />
 
-        <div className="flex items-center gap-4 z-9999   ">
+        <div className="flex items-center gap-4 z-[9999]">
           {userStore.isAuthenticated ? (
             <div className="relative group">
               <button

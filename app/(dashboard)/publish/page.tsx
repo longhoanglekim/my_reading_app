@@ -17,8 +17,8 @@ interface CreateComicData {
 }
 
 const LANGUAGE_OPTIONS = [
-  { value: "vi", label: "Vietnamese" },
-  { value: "en", label: "English" },
+  // { value: "vi", label: "Vietnamese" },
+  // { value: "en", label: "English" },
   { value: "ja", label: "Japanese" },
   { value: "zh", label: "Chinese" },
   { value: "ko", label: "Korean" },
@@ -30,8 +30,8 @@ const FORMAT_OPTIONS = [
 ];
 
 const STATUS_OPTIONS = [
-  {value: "Ongoing", label: "Ongoing"},
-  {value: "Completed", label: "Ongoing"}
+  { value: "Ongoing", label: "Ongoing" },
+  { value: "Completed", label: "Ongoing" }
 ]
 
 export default function UploadMangaChapters() {
@@ -328,11 +328,10 @@ export default function UploadMangaChapters() {
                   key={genre.id}
                   type="button"
                   onClick={() => toggleGenre(genre.id)}
-                  className={`px-4 py-2 rounded-full text-sm transition ${
-                    manga.genreIds.includes(genre.id)
+                  className={`px-4 py-2 rounded-full text-sm transition ${manga.genreIds.includes(genre.id)
                       ? "bg-blue-600 text-white"
                       : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-                  }`}
+                    }`}
                 >
                   {genre.name}
                 </button>
@@ -401,8 +400,8 @@ export default function UploadMangaChapters() {
             {createComicMutation.isPending
               ? "Publishing..."
               : intl.formatMessage({
-                  id: "uploadPage.action.publish",
-                })}
+                id: "uploadPage.action.publish",
+              })}
           </button>
         </div>
       </div>

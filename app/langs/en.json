@@ -158,7 +158,7 @@
     "updating": "Updating...",
     "deleteConfirm": "Are you sure you want to delete this {item}? This action cannot be undone.",
     "continueReading": "Continue Reading {chapter}"
-  },  
+  },
   "library": {
     "selectStatus": "Add to library",
     "favorite": "Favorite",
@@ -336,8 +336,8 @@
     "quickLinks": "Quick Links",
     "manageUsersTitle": "User Management",
     "manageUsersDesc": "Lock/unlock accounts, assign Admin roles.",
-    "manageComicsTitle": "Manage Books & Chapters",
-    "manageComicsDesc": "Add new books, publish chapters, edit or delete.",
+    "managePublishingTitle": "Publish Titles",
+    "managePublishingDesc": "Add new books, publish chapters, edit or delete.",
     "footerNote": "All system administration actions will be logged in the security logs."
   },
   "readerSettings": {

@@ -51,7 +51,6 @@ export default function UserManagementPage() {
                 <th className="p-3">{intl.formatMessage({ id: "adminUser.table.email" })}</th>
                 <th className="p-3">{intl.formatMessage({ id: "adminUser.table.role" })}</th>
                 <th className="p-3">{intl.formatMessage({ id: "adminUser.table.status" })}</th>
-                <th className="p-3">{intl.formatMessage({ id: "adminUser.table.dailyAiUsage" })}</th>
                 <th className="p-3">{intl.formatMessage({ id: "adminUser.table.actions" })}</th>
               </tr>
             </thead>
@@ -63,7 +62,6 @@ export default function UserManagementPage() {
                   <td className="p-3">{user.email}</td>
                   <td className="p-3">{user.role === "ADMIN" ? intl.formatMessage({ id: "adminUser.roleAdmin" }) : intl.formatMessage({ id: "adminUser.roleUser" })}</td>
                   <td className="p-3">{user.status === "ACTIVE" ? intl.formatMessage({ id: "adminUser.statusActive" }) : intl.formatMessage({ id: "adminUser.statusBanned" })}</td>
-                  <td className="p-3">{user.dailyAiUsage}</td>
                   <td className="p-3 flex gap-2">
                     <CButton onClick={() => handleRoleChange(user.id, user.role)}>
                       {intl.formatMessage({ id: "adminUser.table.changeRole" })}

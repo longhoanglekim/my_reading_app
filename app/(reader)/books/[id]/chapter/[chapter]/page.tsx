@@ -29,6 +29,49 @@ import {
   useUpsertLibraryMutation,
 } from "./queryHook/queryHook";
 
+const calculateFittingFontSize = (
+  charCount: number,
+  availW: number,
+  availH: number,
+  isJapanese: boolean,
+  minF: number,
+  maxF: number,
+  charAreaRatio: number,
+  lineHeight: number
+): number => {
+  let low = minF;
+  let high = maxF;
+  let optimal = minF;
+
+  for (let step = 0; step < 12; step++) {
+    const mid = (low + high) / 2;
+    let fits = false;
+
+    if (isJapanese) {
+      const charsPerCol = Math.max(1, Math.floor(availH / mid));
+      const cols = Math.ceil(charCount / charsPerCol);
+      const requiredW = cols * lineHeight * mid;
+      const requiredH = Math.ceil(charCount / cols) * mid;
+      fits = requiredW <= availW && requiredH <= availH;
+    } else {
+      const charsPerRow = Math.max(1, Math.floor(availW / (mid * charAreaRatio)));
+      const rows = Math.ceil(charCount / charsPerRow);
+      const requiredW = Math.min(charCount, charsPerRow) * mid * charAreaRatio;
+      const requiredH = rows * lineHeight * mid;
+      fits = requiredW <= availW && requiredH <= availH;
+    }
+
+    if (fits) {
+      optimal = mid;
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  return optimal;
+};
+
 const subscribeReaderMode = (callback: () => void) => {
   if (typeof window === "undefined") return () => { };
   window.addEventListener("storage", callback);
@@ -662,16 +705,16 @@ export default function ComicChapterPage() {
       {/* IMAGE + BUBBLES */}
       <div
         className={`flex-1 flex justify-center transition-all duration-300 ${isFullscreen
-            ? "px-0 pt-0 pb-0 bg-black dark:bg-gray-950"
-            : "px-4 pt-24 md:pt-28 pb-24"
+          ? "px-0 pt-0 pb-0 bg-black dark:bg-gray-950"
+          : "px-4 pt-24 md:pt-28 pb-24"
           }`}
         onClick={handleViewportClick}
       >
         <div className={`relative mx-auto flex justify-center transition-all duration-300 ${isFullscreen
-            ? readerMode === "webtoon"
-              ? "w-full max-w-[1200px]"
-              : "w-screen h-screen max-w-none items-center"
-            : "w-full max-w-[820px]"
+          ? readerMode === "webtoon"
+            ? "w-full max-w-[1200px]"
+            : "w-screen h-screen max-w-none items-center"
+          : "w-full max-w-[820px]"
           }`}>
           {isChapterLoading ? (
             <div className="flex items-center justify-center h-[600px] w-full bg-gray-100 dark:bg-gray-900 rounded-xl">
@@ -1021,12 +1064,14 @@ interface ChunkWordProps {
   chunk: BubbleChunk;
   isJapanese: boolean;
   intl: IntlShape;
+  fontSize?: number;
 }
 
 const ChunkWord = memo(function ChunkWord({
   chunk,
   isJapanese,
   intl,
+  fontSize,
 }: ChunkWordProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredRect, setHoveredRect] = useState<{
@@ -1040,8 +1085,9 @@ const ChunkWord = memo(function ChunkWord({
   return (
     <span
       data-chunk-word
-      className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${isJapanese ? "inline-block leading-tight" : "inline"
+      className={`text-black dark:text-black relative hover:bg-yellow-200 hover:text-black rounded cursor-pointer transition-colors select-none ${isJapanese ? "inline leading-tight" : "inline"
         }`}
+      style={fontSize ? { fontSize: `${fontSize}px` } : undefined}
       onMouseEnter={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setHoveredRect({
@@ -1199,55 +1245,69 @@ const ReaderPage = memo(function ReaderPage({
 
   return (
     <div className={`relative mx-auto select-text flex justify-center items-center transition-all duration-300 ${isMangaFullscreen
-        ? "w-fit h-screen max-h-screen"
-        : isFullscreen && readerMode === "webtoon"
-          ? "w-full max-w-[1200px]"
-          : "w-full max-w-[820px]"
+      ? "w-fit h-screen max-h-screen"
+      : isFullscreen && readerMode === "webtoon"
+        ? "w-full max-w-[1200px]"
+        : "w-full max-w-[820px]"
       }`}>
       <img
         ref={imageRef}
         src={currentImage}
         alt={`Trang ${page.pageNumber}`}
         className={`shadow-2xl transition-all duration-300 ${isMangaFullscreen
-            ? "max-h-screen w-auto object-contain rounded-none"
-            : "w-full h-auto rounded-xl block"
+          ? "max-h-screen w-auto object-contain rounded-none"
+          : "w-full h-auto rounded-xl block"
           }`}
         onLoad={updateImageScale}
       />
 
       {sortedBubbles.map((bubble) => {
         const [, , w, h] = bubble.box;
-        const charCount = bubble.original_text?.length || 1;
-        const charAreaRatio = isJapanese ? 1.0 : 0.55;
-        const fillFactor = isJapanese ? 0.65 : 0.5;
-
-        const area = w * h;
-        const baseFontSize = Math.sqrt((area * fillFactor) / (charCount * charAreaRatio));
-
-        let fontSize = baseFontSize * imageScale;
-
         const dispW = w * imageScale;
         const dispH = h * imageScale;
-
-        if (isJapanese) {
-          const maxByWidth = Math.max(10, dispW * 0.85);
-          const maxByHeight = Math.max(10, dispH / Math.min(charCount, 4));
-          fontSize = Math.min(fontSize, maxByWidth, maxByHeight);
-        } else {
-          const maxByHeight = Math.max(10, dispH * 0.85);
-          const maxByWidth = Math.max(10, dispW / Math.min(charCount, 5));
-          fontSize = Math.min(fontSize, maxByHeight, maxByWidth);
-        }
-
-        const finalFontSize = Math.max(9, Math.min(22, fontSize));
         const padding = Math.max(2, Math.min(10, Math.round(8 * imageScale)));
+        const availW = Math.max(1, dispW - 2 * padding);
+        const availH = Math.max(1, dispH - 2 * padding);
+
+        const charAreaRatio = isJapanese ? 1.0 : 0.55;
+        const lineHeight = 1.25;
+        const minF = isJapanese ? 4.0 : 4.5; // readable minimum on 1080p screen
+        const maxF = 22.0;
+
+        // 1. Calculate baseline font size for the entire bubble text
+        const totalCharCount = bubble.original_text?.length || 1;
+        const baselineFs = calculateFittingFontSize(
+          totalCharCount,
+          availW,
+          availH,
+          isJapanese,
+          minF,
+          maxF,
+          charAreaRatio,
+          lineHeight
+        );
+
+        // 2. Calculate per-chunk font size to make sure no individual chunk overflows
+        const chunkFontSizes = (bubble.chunks || []).map((chunk: BubbleChunk) => {
+          const chunkLen = chunk.word?.length || 1;
+          return calculateFittingFontSize(
+            chunkLen,
+            availW,
+            availH,
+            isJapanese,
+            minF,
+            baselineFs, // clamp chunk font size to baselineFs
+            charAreaRatio,
+            lineHeight
+          );
+        });
 
         return (
           <div
             key={bubble.id}
             data-bubble-wrapper="true"
-            className="absolute flex items-center justify-center text-center transition-all duration-200 cursor-pointer rounded gap-1 border border-transparent hover:border-yellow-300 hover:bg-white/70"
-            style={getBubbleStyle(bubble, finalFontSize, padding)}
+            className="absolute flex items-center justify-center text-center transition-all duration-200 cursor-pointer rounded gap-1 border border-transparent hover:border-yellow-300 hover:bg-white/70 overflow-visible"
+            style={getBubbleStyle(bubble, baselineFs, padding)}
             onClick={() => handleBubbleClick(bubble)}
           >
             <div
@@ -1263,6 +1323,8 @@ const ReaderPage = memo(function ReaderPage({
                     textOrientation: "mixed",
                     textAlign: "center",
                     maxHeight: "100%",
+                    maxWidth: "100%",
+                    minWidth: "0px",
                     wordBreak: "break-word",
                   }
                   : {
@@ -1277,6 +1339,7 @@ const ReaderPage = memo(function ReaderPage({
                   chunk={chunk}
                   isJapanese={isJapanese}
                   intl={intl}
+                  fontSize={chunkFontSizes[idx]}
                 />
               ))}
             </div>

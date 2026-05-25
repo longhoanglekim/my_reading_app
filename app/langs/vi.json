@@ -336,8 +336,8 @@
     "quickLinks": "Liên kết nhanh",
     "manageUsersTitle": "Quản lý người dùng",
     "manageUsersDesc": "Khóa/Mở tài khoản, phân quyền Admin.",
-    "manageComicsTitle": "Quản lý truyện & chương",
-    "manageComicsDesc": "Thêm truyện mới, đăng chương, sửa xóa.",
+    "managePublishingTitle": "Đăng truyện",
+    "managePublishingDesc": "Thêm truyện mới, đăng chương, sửa xóa.",
     "footerNote": "Mọi hành động quản trị hệ thống sẽ được ghi lại trong nhật ký bảo mật."
   },
   "readerSettings": {
